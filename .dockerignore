@@ -1,0 +1,14 @@
+.git
+.github
+docs
+document
+cli
+scanner
+monitoring
+charts
+deploy
+web/node_modules
+web/dist
+server/target
+**/.idea
+**/*.iml

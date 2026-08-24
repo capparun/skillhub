@@ -597,3 +597,13 @@ rg "@EventListener" server/
 - **OpenSkills**: https://agents.md/ (skill package format reference)
 - **OpenClaw**: https://github.com/openclaw/openclaw (CLI compatibility)
 - **AstronClaw**: https://agent.xfyun.cn/astron-claw (cloud AI assistant integration)
+<!-- BEGIN:nextjs-agent-rules -->
+
+## Root Next.js site
+
+The repository root contains the Hunter Works SkillHub website. This Next.js
+version may include APIs and conventions newer than model training data. Before
+changing the root site, consult the relevant guide in `node_modules/next/dist/docs/`
+and follow current deprecation notices.
+
+<!-- END:nextjs-agent-rules -->

@@ -1,0 +1,137 @@
+.header {
+  position: relative;
+  z-index: 5;
+  width: min(1200px, calc(100% - 48px));
+  height: 92px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brandLogo {
+  width: 48px;
+  height: 48px;
+  border-radius: 11px;
+}
+
+.brand > span {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.brand strong {
+  font-size: 19px;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+}
+
+.brand small {
+  margin-top: 5px;
+  color: var(--teal-dark);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.15em;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  color: #46615b;
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.nav a {
+  position: relative;
+  padding: 10px 0;
+  transition: color 160ms ease;
+}
+
+.nav a::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 3px;
+  left: 0;
+  height: 2px;
+  background: var(--teal);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 160ms ease;
+}
+
+.nav a:hover,
+.activeNav {
+  color: var(--teal-dark);
+}
+
+.nav a:hover::after,
+.nav .activeNav::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.activeNav {
+  font-weight: 850;
+}
+
+.loginButton {
+  min-width: 116px;
+  height: 40px;
+  padding: 0 18px;
+  color: #fff;
+  background: var(--ink);
+  border: 0;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.loginButton:hover {
+  background: var(--teal-dark);
+}
+
+.loginLabelShort {
+  display: none;
+}
+
+@media (max-width: 850px) {
+  .nav { gap: 20px; }
+}
+
+@media (max-width: 720px) {
+  .header {
+    width: min(100% - 32px, 1200px);
+    height: 74px;
+  }
+
+  .brandLogo {
+    width: 42px;
+    height: 42px;
+  }
+
+  .nav { gap: 12px; }
+  .nav > a:first-child { display: none; }
+
+  .loginButton {
+    min-width: 76px;
+    padding: 0 16px;
+  }
+
+  .loginLabelLong { display: none; }
+  .loginLabelShort { display: inline; }
+}

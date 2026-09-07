@@ -102,6 +102,10 @@
   border-radius: 8px;
 }
 
+.modalFactsTwo {
+  grid-template-columns: repeat(2, 1fr);
+}
+
 .modalFacts > div {
   display: flex;
   flex-direction: column;
@@ -298,7 +302,8 @@
   }
 
   .modalHeader h2 { font-size: 27px; }
-  .modalFacts { grid-template-columns: 1fr; }
+  .modalFacts,
+  .modalFactsTwo { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

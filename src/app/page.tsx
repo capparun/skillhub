@@ -108,9 +108,6 @@ function DistributionPage() {
             </div>
             <div className={styles.cardBody}>
               <div className={styles.cardMeta}>
-                <span className={product.isPublic ? styles.badgeFree : styles.badgePro}>
-                  {product.isPublic ? "免费开放" : "专业版"}
-                </span>
                 <span>Hunter 官方</span>
               </div>
               <h3>{product.name}</h3>
@@ -124,7 +121,7 @@ function DistributionPage() {
                 className={styles.installButton}
                 onClick={() => setSelected(product)}
               >
-                {product.isPublic ? "免费安装" : "获取安装"}
+                安装
               </button>
             </div>
           </article>

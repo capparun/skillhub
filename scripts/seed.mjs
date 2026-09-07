@@ -17,20 +17,21 @@ function hashPassword(password) {
   return `scrypt$16384$8$1$${salt.toString('base64')}$${hash.toString('base64')}`;
 }
 
+// 现阶段两个技能均免登录公开发放(isPublic 均为 true);付费授权链路(一次性令牌、
+// 更新凭据、授权校验)保留在代码中。恢复收费时把 soho-sourcing 的 isPublic 改回 false 即可。
 const PRODUCTS = [
   {
     slug: 'hunter-align',
     name: '职位需求对齐',
     description:
-      '免费 Skill:JD 诊断、关键问题追问、人才画像、搜索方向与寻访任务书。无需登录即可安装和更新。',
+      'JD 诊断、关键问题追问、人才画像、搜索方向与寻访任务书。无需登录即可安装和更新。',
     isPublic: true,
   },
   {
     slug: 'soho-sourcing',
     name: 'SOHO 猎头人才寻访工作流',
-    description:
-      '专业版:LinkedIn 寻访、候选人匹配排序、候选人初评与寻访报告。需要有效年度授权。',
-    isPublic: false,
+    description: 'LinkedIn 寻访、候选人匹配排序、候选人初评与寻访报告。',
+    isPublic: true,
   },
 ];
 

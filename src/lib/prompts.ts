@@ -19,7 +19,7 @@ export interface PaidPromptInput {
 
 export function freeInstallPrompt(input: FreePromptInput): string {
   const { appUrl, productName, productSlug, version, sha256 } = input;
-  return `请帮我安装「${productName}」技能(猎策免费版)。
+  return `请帮我安装「${productName}」技能(猎策官方)。
 
 步骤:
 1. 检查环境:终端里 node --version 需要 20 或更高。

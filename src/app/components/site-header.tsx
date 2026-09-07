@@ -57,7 +57,7 @@ export function SiteHeader({ active, nav = "full" }: SiteHeaderProps) {
           </>
         ) : (
           <Link className={styles.loginButton} href="/login">
-            <span className={styles.loginLabelLong}>专业版登录</span>
+            <span className={styles.loginLabelLong}>登录</span>
             <span className={styles.loginLabelShort}>登录</span>
           </Link>
         )}

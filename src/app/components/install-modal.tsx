@@ -127,7 +127,6 @@ export function InstallModal({
 
   const displayFacts = facts ?? [
     { label: "运行方式", value: "本地 Agent" },
-    { label: "授权方式", value: isFree ? "免费开放" : "年度授权" },
     { label: "交付方", value: "猎策 Hunter Works" },
   ];
 
@@ -154,7 +153,7 @@ export function InstallModal({
           </div>
           <div>
             <span>
-              {isFree ? "免费开放" : "专业版"} · Hunter 官方
+              Hunter 官方
               {product.latestRelease ? ` · v${product.latestRelease.version}` : ""}
             </span>
             <h2 id="install-modal-title">{product.name}</h2>
@@ -166,7 +165,13 @@ export function InstallModal({
           真实项目和数据始终在本地执行。
         </p>
 
-        <div className={styles.modalFacts}>
+        <div
+          className={
+            displayFacts.length === 2
+              ? `${styles.modalFacts} ${styles.modalFactsTwo}`
+              : styles.modalFacts
+          }
+        >
           {displayFacts.map((fact) => (
             <div key={fact.label}>
               <small>{fact.label}</small>
@@ -207,7 +212,7 @@ export function InstallModal({
               <div className={styles.installPanel}>
                 <p>
                   {installMode === "agent"
-                    ? "复制以下 Prompt 给你的 Agent,它会检查环境并在确认后完成免费安装。"
+                    ? "复制以下 Prompt 给你的 Agent,它会检查环境并在确认后完成安装。"
                     : "适合习惯使用终端的用户。在终端粘贴执行即可完成安装。"}
                 </p>
                 <div className={styles.codePanel}>

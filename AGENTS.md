@@ -597,6 +597,39 @@ rg "@EventListener" server/
 - **OpenSkills**: https://agents.md/ (skill package format reference)
 - **OpenClaw**: https://github.com/openclaw/openclaw (CLI compatibility)
 - **AstronClaw**: https://agent.xfyun.cn/astron-claw (cloud AI assistant integration)
+
+## Distribution Site (猎策分发站, src/app)
+
+This repo also hosts an **independent Next.js 16 fullstack distribution site** at the repo ROOT (`src/app`, `src/lib`, `db/migrations`, `scripts/migrate.mjs`, `scripts/seed.mjs`). It distributes Hunter skill packages to customers (login, entitlements, one-time install tokens, signed download URLs, admin console at `/admin`). It does NOT share code with the Java backend (`server/`) or the old SPA (`web/`) — treat it as a separate application that happens to live in this repo.
+
+### Commands
+
+```bash
+npm install            # deps: pg (runtime), tsx (dev)
+npm run dev            # local dev server
+npm run build          # next build (standalone output)
+npm test               # tsx --test tests/*.test.ts
+node scripts/migrate.mjs   # apply db/migrations/*.sql (needs DATABASE_URL)
+node scripts/seed.mjs      # seed products + first admin (needs ADMIN_EMAIL / ADMIN_INITIAL_PASSWORD)
+```
+
+Required env vars: `DATABASE_URL`, `SESSION_SECRET`, `PACKAGE_STORAGE_DIR`, `PUBLIC_APP_URL` (see `.env.example`).
+
+### Deployment — READ THIS BEFORE TOUCHING ZEABUR
+
+Production: https://hunterskill.zeabur.app (Zeabur project `hunterSkillHub`, service `hunterskill`, Postgres + persistent volume at `/data/packages`).
+
+**Deploy by running `scripts/deploy-zeabur.sh`** — it assembles a clean staging dir (only the Next.js app: `src/ public/ scripts/ db/ package*.json next.config.ts tsconfig.json next-env.d.ts` + `skillhub.Dockerfile` renamed to `Dockerfile`) and uploads it with `zeabur deploy` to the existing service.
+
+Hard-won constraints (each one cost a failed deploy):
+
+1. **NEVER create the Zeabur service from the GitHub repo.** Zeabur generates the build plan once at service creation and caches it permanently. This repo contains `server/Dockerfile` (Java), which gets picked; afterwards NO repo-side change (`zbpack.json`, root `Dockerfile`, `<service>.Dockerfile`, `ZBPACK_DOCKERFILE_PATH`, `ZBPACK_IGNORE_DOCKERFILE`) can fix it — the old `skillhub` service was abandoned for exactly this reason.
+2. **`zeabur service redeploy` does not work** on this service (no Git binding); always redeploy via `scripts/deploy-zeabur.sh`.
+3. **Package uploads must not use `fs.rename`** across `/tmp` → `PACKAGE_STORAGE_DIR` — the persistent volume is a different filesystem (EXDEV). `src/lib/server/packages.ts` uses copy+unlink; do not regress this.
+4. `zbpack.json` (`ignore_dockerfile: true`) and `skillhub.Dockerfile` at the root exist only as fallbacks/decoys for any future git-based flow; the supported path is the upload script.
+
+Details: `docs/DEPLOYMENT.md`.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

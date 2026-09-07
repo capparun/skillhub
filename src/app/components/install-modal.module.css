@@ -19,8 +19,11 @@
 
 .modal {
   position: relative;
+  display: flex;
+  flex-direction: column;
   width: min(880px, 100%);
   max-height: calc(100vh - 56px);
+  /* 正常窗口下代码区收缩兜底,弹窗不滚动;极矮窗口才允许整体滚动 */
   overflow: auto;
   padding: 42px;
   color: var(--ink);
@@ -49,6 +52,7 @@
 
 .modalHeader {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 20px;
   padding-right: 54px;
@@ -84,6 +88,7 @@
 }
 
 .modalIntro {
+  flex-shrink: 0;
   margin-top: 28px;
   padding: 24px 0;
   color: var(--muted);
@@ -93,6 +98,7 @@
 }
 
 .modalFacts {
+  flex-shrink: 0;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1px;
@@ -124,10 +130,15 @@
 }
 
 .installSection {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
   margin-top: 30px;
 }
 
 .installSection > h3 {
+  flex-shrink: 0;
   margin-bottom: 13px;
   font-size: 20px;
   font-weight: 850;
@@ -135,6 +146,7 @@
 
 .tabs {
   display: grid;
+  flex-shrink: 0;
   grid-template-columns: 1fr 1fr;
   padding: 5px;
   background: var(--mist);
@@ -160,6 +172,10 @@
 
 .loginPanel,
 .installPanel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
   margin-top: 14px;
   padding: 22px;
   background: #f7fbfa;
@@ -222,6 +238,7 @@
 }
 
 .installPanel > p {
+  flex-shrink: 0;
   margin-bottom: 14px;
   color: #596f69;
   font-size: 15px;
@@ -230,7 +247,9 @@
 
 .codePanel {
   position: relative;
-  min-height: 150px;
+  display: flex;
+  flex: 1;
+  min-height: 120px;
   padding: 18px 80px 18px 18px;
   color: #dcece8;
   background: var(--ink);
@@ -238,6 +257,8 @@
 }
 
 .codePanel pre {
+  flex: 1;
+  min-height: 0;
   overflow: auto;
   white-space: pre-wrap;
   font-family: "SFMono-Regular", Consolas, monospace;
@@ -260,6 +281,7 @@
 }
 
 .compatibility {
+  flex-shrink: 0;
   margin-top: 12px;
   color: #718580;
   font-size: 14px;

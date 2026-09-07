@@ -1,0 +1,309 @@
+.modalBackdrop {
+  --teal: #20b8a6;
+  --teal-dark: #078b7d;
+  --ink: #103631;
+  --muted: #60736f;
+  --line: #d8e7e4;
+  --mist: #eaf8f5;
+  --signal: #dff56b;
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: rgba(9, 38, 34, 0.68);
+  backdrop-filter: blur(9px);
+  animation: fadeIn 180ms ease-out both;
+}
+
+.modal {
+  position: relative;
+  width: min(880px, 100%);
+  max-height: calc(100vh - 56px);
+  overflow: auto;
+  padding: 42px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 18px;
+  box-shadow: 12px 12px 0 rgba(5, 36, 31, 0.58);
+  animation: slideUp 240ms ease-out both;
+}
+
+.closeButton {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  color: #45635d;
+  background: var(--mist);
+  border: 0;
+  border-radius: 8px;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-right: 54px;
+}
+
+.modalIcon {
+  display: grid;
+  width: 82px;
+  height: 82px;
+  place-items: center;
+  overflow: hidden;
+  background: var(--teal);
+  border-radius: 12px;
+}
+
+.modalIcon img {
+  width: 100%;
+  height: 100%;
+}
+
+.modalHeader span {
+  color: var(--teal-dark);
+  font-size: 14px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+}
+
+.modalHeader h2 {
+  margin-top: 7px;
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+}
+
+.modalIntro {
+  margin-top: 28px;
+  padding: 24px 0;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.modalFacts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  overflow: hidden;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.modalFacts > div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 17px 18px;
+  background: #f4faf8;
+}
+
+.modalFacts small {
+  color: #788b87;
+  font-size: 14px;
+}
+
+.modalFacts strong {
+  font-size: 15px;
+}
+
+.installSection {
+  margin-top: 30px;
+}
+
+.installSection > h3 {
+  margin-bottom: 13px;
+  font-size: 20px;
+  font-weight: 850;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 5px;
+  background: var(--mist);
+  border-radius: 8px;
+}
+
+.tabs button {
+  height: 48px;
+  color: #667b76;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  font-size: 15px;
+  font-weight: 780;
+  cursor: pointer;
+}
+
+.tabs button.activeTab {
+  color: var(--ink);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.loginPanel,
+.installPanel {
+  margin-top: 14px;
+  padding: 22px;
+  background: #f7fbfa;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+
+.loginPanel > div {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 18px;
+}
+
+.lockIcon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  color: #fff;
+  background: var(--teal);
+  border-radius: 6px;
+}
+
+.loginPanel strong {
+  font-size: 15px;
+}
+
+.loginPanel p,
+.loginPanel > small {
+  margin-top: 3px;
+  color: #758984;
+  font-size: 14px;
+}
+
+.primaryButton {
+  display: flex;
+  width: 100%;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 14px;
+  color: #fff;
+  background: var(--ink);
+  border: 0;
+  border-radius: 7px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.primaryButton:hover {
+  background: var(--teal-dark);
+}
+
+.loginPanel > small {
+  display: block;
+  margin-top: 12px;
+  text-align: center;
+}
+
+.installPanel > p {
+  margin-bottom: 14px;
+  color: #596f69;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.codePanel {
+  position: relative;
+  min-height: 150px;
+  padding: 18px 80px 18px 18px;
+  color: #dcece8;
+  background: var(--ink);
+  border-radius: 8px;
+}
+
+.codePanel pre {
+  overflow: auto;
+  white-space: pre-wrap;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.codePanel button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  height: 32px;
+  padding: 0 12px;
+  color: var(--ink);
+  background: var(--signal);
+  border: 0;
+  border-radius: 5px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.compatibility {
+  margin-top: 12px;
+  color: #718580;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 720px) {
+  .modalBackdrop {
+    align-items: end;
+    padding: 0;
+  }
+
+  .modal {
+    max-height: 92vh;
+    padding: 26px 20px 30px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .closeButton {
+    top: 18px;
+    right: 18px;
+  }
+
+  .modalHeader { align-items: flex-start; }
+
+  .modalIcon {
+    width: 58px;
+    height: 58px;
+    border-radius: 9px;
+  }
+
+  .modalHeader h2 { font-size: 27px; }
+  .modalFacts { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal,
+  .modalBackdrop { animation: none; }
+
+  .primaryButton { transition: none; }
+}

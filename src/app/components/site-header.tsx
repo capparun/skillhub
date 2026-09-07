@@ -9,9 +9,11 @@ import styles from "./site-header.module.css";
 
 type SiteHeaderProps = {
   active?: "guide";
+  /** full:完整营销站导航(用于 /landing);minimal:仅保留新手入门与登录入口。 */
+  nav?: "full" | "minimal";
 };
 
-export function SiteHeader({ active }: SiteHeaderProps) {
+export function SiteHeader({ active, nav = "full" }: SiteHeaderProps) {
   const router = useRouter();
   const [me, setMe] = useState<SessionInfo["user"] | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -41,7 +43,7 @@ export function SiteHeader({ active }: SiteHeaderProps) {
       </Link>
 
       <nav className={styles.nav} aria-label="主导航">
-        <Link href="/#skills">猎头工作流</Link>
+        {nav === "full" && <Link href="/landing#skills">猎头工作流</Link>}
         <Link className={active === "guide" ? styles.activeNav : undefined} href="/guide" aria-current={active === "guide" ? "page" : undefined}>
           新手入门
         </Link>

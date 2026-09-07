@@ -1,6 +1,8 @@
 # Hunter SkillHub 技术架构（MVP）
 
 > **实施状态（2026-09-07）**：已按本文档落地，实际代码位于仓库根目录的 `src/app`（而非文中设想的 `hunter/skillhub` 子目录）。新增了 `GET /install.sh` 命令行安装引导脚本；本地 24h 版本检查实现在客户包的 `doctor.mjs`（csk 仓库）。部署见 `docs/DEPLOYMENT.md`。
+>
+> **页面结构（2026-09-07 更新）**：首页 `/` 为极简技能分发页（商品列表来自 `/api/products`，点开即安装弹窗）；原营销首页保留在 `/landing`，不在导航中露出。安装弹窗抽取为共享组件 `src/app/components/install-modal.tsx`。
 
 ## 1. 部署结构
 

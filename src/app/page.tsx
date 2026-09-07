@@ -1,45 +1,39 @@
 "use client";
 
 import Image from "next/image";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "./components/site-header";
+import { api, ApiError, SessionInfo } from "@/lib/client/api";
+import { freeInstallPrompt, freeCliCommand } from "@/lib/prompts";
 import styles from "./page.module.css";
 
 type SkillId = "align" | "sourcing";
 
-const freeAgentInstallPrompt = `请作为猎策 Skill 安装助手，安装免费的「职位需求对齐」Skill：
+const PRODUCT_SLUGS: Record<SkillId, string> = {
+  align: "hunter-align",
+  sourcing: "soho-sourcing",
+};
 
-1. 检查当前 Agent 是否可以访问本地终端和文件系统。
-2. 安装前说明将新增或修改的内容，并等待我确认。
-3. 确认后从以下公开地址获取官方 Skill：
-   https://skills.hunter.local/free/hunter-align
-4. 根据当前 Agent 平台选择正确的 Skills 目录，不改写 Skill 正文。
-5. 安装后运行本地诊断，确认 JD 诊断、关键追问、人才画像和寻访任务书能力可用。
-6. 不上传 JD、客户需求、对话内容或任何业务结果。`;
+interface ProductInfo {
+  slug: string;
+  name: string;
+  isPublic: boolean;
+  latestRelease: { version: string; sha256: string } | null;
+}
 
-const paidAgentInstallPrompt = `请作为 Hunter Skill 安装助手，完成以下操作：
-
-1. 检查当前是否为可访问本地终端和文件系统的 Agent 环境。
-2. 检查 Hunter、OpenCLI 和浏览器桥接的安装状态。
-3. 在执行任何安装前，先向我说明将新增或修改的组件，并等待确认。
-4. 确认后，使用以下一次性安装地址获取「SOHO 猎头寻访工作流包」：
-   https://skillhub.hunter.local/install/{ONE_TIME_TOKEN}
-5. 根据当前 Agent 平台选择正确的 Skills 目录，不复制或改写 Skill 正文。
-6. 安装完成后运行本地诊断，确认需求对齐、猎聘寻访和 LinkedIn 寻访能力可用。
-7. 不上传 JD、候选人信息、浏览器登录态或执行结果。`;
-
-const freeCliInstallCommand = `hunter-skillhub install hunter-align --verify`;
-
-const paidCliInstallCommand = `hunter-skillhub install soho-sourcing \\
-  --token {ONE_TIME_TOKEN} \\
-  --verify`;
+interface PaidInstall {
+  installPrompt: string;
+  cliCommand: string;
+  expiresAt: string;
+}
 
 const upcomingSkills = [
   {
     glyph: "评",
     eyebrow: "甄选评估",
     title: "候选人深度评估",
-    description: "从硬性门槛到推荐理由，形成可复核的候选人判断。",
+    description: "从硬性门槛到推荐理由,形成可复核的候选人判断。",
     tone: "sand",
   },
   {
@@ -53,7 +47,7 @@ const upcomingSkills = [
     glyph: "图",
     eyebrow: "项目洞察",
     title: "人才地图与复盘",
-    description: "沉淀目标公司、人才分布与项目经验，形成可复用资产。",
+    description: "沉淀目标公司、人才分布与项目经验,形成可复用资产。",
     tone: "mint",
   },
 ];
@@ -61,22 +55,86 @@ const upcomingSkills = [
 export default function Home() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [installMode, setInstallMode] = useState<"agent" | "cli">("agent");
-  const [authorized, setAuthorized] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
   const [copied, setCopied] = useState(false);
   const [selectedSkill, setSelectedSkill] = useState<SkillId>("align");
+  const [me, setMe] = useState<SessionInfo["user"] | null>(null);
+  const [products, setProducts] = useState<Record<string, ProductInfo>>({});
+  const [paidInstall, setPaidInstall] = useState<PaidInstall | null>(null);
+  const [paidError, setPaidError] = useState("");
+  const [paidLoading, setPaidLoading] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
 
   const isFreeSkill = selectedSkill === "align";
+  const product = products[PRODUCT_SLUGS[selectedSkill]];
 
-  const installText = useMemo(
-    () => {
-      if (selectedSkill === "align") {
-        return installMode === "agent" ? freeAgentInstallPrompt : freeCliInstallCommand;
-      }
-      return installMode === "agent" ? paidAgentInstallPrompt : paidCliInstallCommand;
-    },
-    [installMode, selectedSkill],
-  );
+  useEffect(() => {
+    api<SessionInfo>("/api/auth/me")
+      .then((data) => setMe(data.user))
+      .catch(() => setMe(null));
+    api<{ products: ProductInfo[] }>("/api/products")
+      .then((data) =>
+        setProducts(Object.fromEntries(data.products.map((p) => [p.slug, p]))),
+      )
+      .catch(() => undefined);
+  }, []);
+
+  // 付费弹窗:登录后自动签发一次性安装令牌
+  useEffect(() => {
+    if (!detailOpen || selectedSkill !== "sourcing" || !me) return;
+    let cancelled = false;
+    api<PaidInstall>("/api/install-tokens", {
+      method: "POST",
+      body: { productSlug: PRODUCT_SLUGS.sourcing },
+    })
+      .then((data) => {
+        if (!cancelled) setPaidInstall(data);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setPaidError(
+            err instanceof ApiError ? err.message : "获取安装令牌失败,请稍后再试",
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setPaidLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [detailOpen, selectedSkill, me]);
+
+  // 令牌有效期倒计时
+  useEffect(() => {
+    if (!paidInstall) return;
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [paidInstall]);
+
+  const tokenSecondsLeft = paidInstall
+    ? Math.max(0, Math.floor((new Date(paidInstall.expiresAt).getTime() - now) / 1000))
+    : 0;
+
+  const freeInstallText = useMemo(() => {
+    const p = products[PRODUCT_SLUGS.align];
+    if (!p?.latestRelease) return "";
+    const input = {
+      appUrl: window.location.origin,
+      productName: p.name,
+      productSlug: p.slug,
+      version: p.latestRelease.version,
+      sha256: p.latestRelease.sha256,
+    };
+    return installMode === "agent" ? freeInstallPrompt(input) : freeCliCommand(input);
+  }, [products, installMode]);
+
+  const installText = isFreeSkill
+    ? freeInstallText
+    : paidInstall
+      ? installMode === "agent"
+        ? paidInstall.installPrompt
+        : paidInstall.cliCommand
+      : "";
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -85,7 +143,6 @@ export default function Home() {
     const timer = window.setTimeout(() => {
       setSelectedSkill("sourcing");
       setDetailOpen(true);
-      setShowLogin(true);
     }, 0);
 
     return () => window.clearTimeout(timer);
@@ -107,14 +164,12 @@ export default function Home() {
   const openInstall = (skill: SkillId) => {
     setSelectedSkill(skill);
     setDetailOpen(true);
-    setShowLogin(skill === "sourcing" && !authorized);
     setCopied(false);
-  };
-
-  const handleLogin = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setAuthorized(true);
-    setShowLogin(false);
+    if (skill === "sourcing" && me) {
+      setPaidLoading(true);
+      setPaidError("");
+      setPaidInstall(null);
+    }
   };
 
   const copyInstall = async () => {
@@ -123,15 +178,11 @@ export default function Home() {
     window.setTimeout(() => setCopied(false), 1800);
   };
 
+  const alignVersion = products[PRODUCT_SLUGS.align]?.latestRelease?.version;
+
   return (
     <main className={styles.page}>
-      <SiteHeader
-        onLogin={() => {
-              setSelectedSkill("sourcing");
-              setDetailOpen(true);
-              setShowLogin(true);
-        }}
-      />
+      <SiteHeader />
 
       <section className={styles.hero} id="top">
         <div className={styles.heroCopy}>
@@ -139,12 +190,12 @@ export default function Home() {
             <span /> HUNTER WORKS · 官方工作流
           </div>
           <h1>
-            把猎头 <span className={styles.noWrap}>Know-how</span>，
+            把猎头 <span className={styles.noWrap}>Know-how</span>,
             <em>装进你的 Agent。</em>
           </h1>
           <p>
             面向 SOHO 猎头的需求对齐与人才寻访工作流。安装到你自己的
-            Agent，在本地完成真实项目。
+            Agent,在本地完成真实项目。
           </p>
           <div className={styles.heroActions}>
             <button className={styles.primaryButton} onClick={() => openInstall("align")}>
@@ -197,7 +248,7 @@ export default function Home() {
             <span className={styles.sectionIndex}>01 / SKILLS</span>
             <h2>从一个真实职位开始</h2>
           </div>
-          <p>按猎头业务能力组织，而不是让你理解工具和命令。</p>
+          <p>按猎头业务能力组织,而不是让你理解工具和命令。</p>
         </div>
 
         <article className={styles.featuredCard}>
@@ -211,7 +262,7 @@ export default function Home() {
             </div>
             <h3>职位需求对齐</h3>
             <p>
-              把一份真实 JD 交给 Agent，通过关键追问厘清隐含要求，形成可直接用于寻访的
+              把一份真实 JD 交给 Agent,通过关键追问厘清隐含要求,形成可直接用于寻访的
               人才画像和任务书。
             </p>
             <ul className={styles.skillTags} aria-label="包含能力">
@@ -225,7 +276,7 @@ export default function Home() {
           <div className={styles.featuredAside}>
             <div>
               <small>当前版本</small>
-              <strong>v1.0</strong>
+              <strong>{alignVersion ? `v${alignVersion}` : "即将发布"}</strong>
             </div>
             <button onClick={() => openInstall("align")}>免费安装</button>
           </div>
@@ -237,13 +288,13 @@ export default function Home() {
             <div className={styles.proMeta}>专业版 · 年度授权</div>
             <h3>SOHO 猎头人才寻访</h3>
             <p>
-              接着已经对齐的需求，在猎聘和 LinkedIn 发现候选人，完成匹配判断、排序和寻访报告。
+              接着已经对齐的需求,在 LinkedIn 发现候选人,完成匹配判断、排序和寻访报告。
             </p>
           </div>
           <ul className={styles.proCapabilities} aria-label="专业版能力">
-            <li>猎聘寻访</li>
             <li>LinkedIn 寻访</li>
             <li>候选人初评</li>
+            <li>匹配排序</li>
             <li>寻访报告</li>
           </ul>
           <button onClick={() => openInstall("sourcing")}>查看专业版</button>
@@ -268,28 +319,28 @@ export default function Home() {
         <div className={styles.sectionHeading}>
           <div>
             <span className={styles.sectionIndex}>02 / HOW IT WORKS</span>
-            <h2>安装一次，项目留在本地</h2>
+            <h2>安装一次,项目留在本地</h2>
           </div>
         </div>
         <div className={styles.steps}>
           <article>
             <span>01</span>
             <h3>选择能力</h3>
-            <p>查看业务场景、适用范围和示例，找到适合自己的工作流。</p>
+            <p>查看业务场景、适用范围和示例,找到适合自己的工作流。</p>
           </article>
           <article>
             <span>02</span>
             <h3>交给 Agent 安装</h3>
-            <p>复制安装 Prompt。Agent 先检查环境并说明变更，经确认后再安装。</p>
+            <p>复制安装 Prompt。Agent 先检查环境并说明变更,经确认后再安装。</p>
           </article>
           <article>
             <span>03</span>
             <h3>直接开始项目</h3>
-            <p>在自己的 Agent 中粘贴 JD，Hunter 会追问、对齐并推进寻访。</p>
+            <p>在自己的 Agent 中粘贴 JD,Hunter 会追问、对齐并推进寻访。</p>
           </article>
         </div>
         <div className={styles.privacyStrip}>
-          <strong>你的项目，不进入我们的云端。</strong>
+          <strong>你的项目,不进入我们的云端。</strong>
           <span>本站只负责展示、授权、安装和更新。</span>
           <span className={styles.privacySeal}>LOCAL / PRIVATE</span>
         </div>
@@ -333,7 +384,10 @@ export default function Home() {
                 <Image src="/hunter-dog.svg" alt="" width={82} height={82} />
               </div>
               <div>
-                <span>{isFreeSkill ? "免费开放" : "专业版"} · Hunter 官方 · v1.0</span>
+                <span>
+                  {isFreeSkill ? "免费开放" : "专业版"} · Hunter 官方
+                  {product?.latestRelease ? ` · v${product.latestRelease.version}` : ""}
+                </span>
                 <h2 id="skill-title">
                   {isFreeSkill ? "职位需求对齐" : "SOHO 猎头人才寻访"}
                 </h2>
@@ -342,15 +396,15 @@ export default function Home() {
 
             <p className={styles.modalIntro}>
               {isFreeSkill
-                ? "从 JD 诊断、关键追问到人才画像和寻访任务书，把需求真正对齐后再开始找人。"
-                : "接着已经对齐的职位需求，在猎聘和 LinkedIn 开展寻访、候选人初评和报告输出。"}
+                ? "从 JD 诊断、关键追问到人才画像和寻访任务书,把需求真正对齐后再开始找人。"
+                : "接着已经对齐的职位需求,在 LinkedIn 开展寻访、候选人初评和报告输出。"}
               真实项目和数据始终在本地执行。
             </p>
 
             <div className={styles.modalFacts}>
               <div>
                 <small>{isFreeSkill ? "主要产出" : "覆盖渠道"}</small>
-                <strong>{isFreeSkill ? "寻访任务书" : "猎聘 · LinkedIn"}</strong>
+                <strong>{isFreeSkill ? "寻访任务书" : "LinkedIn"}</strong>
               </div>
               <div>
                 <small>运行方式</small>
@@ -389,8 +443,30 @@ export default function Home() {
                 </button>
               </div>
 
-              {!isFreeSkill && (!authorized || showLogin) ? (
-                <form className={styles.loginPanel} onSubmit={handleLogin}>
+              {isFreeSkill ? (
+                freeInstallText ? (
+                  <div className={styles.installPanel}>
+                    <p>
+                      {installMode === "agent"
+                        ? "复制以下 Prompt 给你的 Agent,它会检查环境并在确认后完成免费安装。"
+                        : "适合习惯使用终端的用户。在终端粘贴执行即可完成安装。"}
+                    </p>
+                    <div className={styles.codePanel}>
+                      <pre>{installText}</pre>
+                      <button onClick={copyInstall}>{copied ? "已复制" : "复制"}</button>
+                    </div>
+                    <div className={styles.compatibility}>
+                      适用于可访问本地终端与文件的 Agent 环境,包括 WorkBuddy、Codex、
+                      Claude Code 和 OpenClaw。
+                    </div>
+                  </div>
+                ) : (
+                  <div className={styles.installPanel}>
+                    <p>安装包准备中,即将发布。请稍后再来看看。</p>
+                  </div>
+                )
+              ) : !me ? (
+                <div className={styles.loginPanel}>
                   <div>
                     <span className={styles.lockIcon}>↳</span>
                     <div>
@@ -398,34 +474,42 @@ export default function Home() {
                       <p>安装仅对已授权的付费用户开放。</p>
                     </div>
                   </div>
-                  <label>
-                    <span>邮箱</span>
-                    <input type="email" placeholder="you@example.com" required />
-                  </label>
-                  <label>
-                    <span>密码</span>
-                    <input type="password" placeholder="输入密码" required />
-                  </label>
-                  <button type="submit">登录并校验授权</button>
-                  <small>首版账户由 Hunter 管理员手动开通。</small>
-                </form>
-              ) : (
+                  <Link className={styles.primaryButton} href="/login?next=/?login=1">
+                    去登录
+                  </Link>
+                  <small>账号由管理员开通;如需开通,请联系交付方。</small>
+                </div>
+              ) : paidLoading ? (
+                <div className={styles.installPanel}>
+                  <p>正在校验授权并生成安装令牌…</p>
+                </div>
+              ) : paidError ? (
+                <div className={styles.installPanel}>
+                  <p>{paidError}</p>
+                </div>
+              ) : paidInstall ? (
                 <div className={styles.installPanel}>
                   <p>
                     {installMode === "agent"
-                      ? `复制以下 Prompt 给你的 Agent，它会检查环境并在确认后完成${isFreeSkill ? "免费" : "授权"}安装。`
-                      : `适合习惯使用终端的用户。该入口安装同一套${isFreeSkill ? "免费需求对齐" : "专业寻访"}能力。`}
+                      ? "复制以下 Prompt 给你的 Agent,它会兑换令牌、校验安装包并完成安装。"
+                      : "适合习惯使用终端的用户。在终端粘贴执行即可完成安装。"}
+                    <strong>
+                      {" "}
+                      令牌 {Math.floor(tokenSecondsLeft / 60)}:
+                      {String(tokenSecondsLeft % 60).padStart(2, "0")} 后失效
+                      {tokenSecondsLeft === 0 ? "(已失效,请关闭弹窗重新打开)" : ""}
+                    </strong>
                   </p>
                   <div className={styles.codePanel}>
                     <pre>{installText}</pre>
                     <button onClick={copyInstall}>{copied ? "已复制" : "复制"}</button>
                   </div>
                   <div className={styles.compatibility}>
-                    适用于可访问本地终端与文件的 Agent 环境，包括 WorkBuddy、Codex、
+                    适用于可访问本地终端与文件的 Agent 环境,包括 WorkBuddy、Codex、
                     Claude Code 和 OpenClaw。
                   </div>
                 </div>
-              )}
+              ) : null}
             </div>
           </section>
         </div>

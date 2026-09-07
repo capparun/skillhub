@@ -1,5 +1,7 @@
 # Hunter SkillHub 技术架构（MVP）
 
+> **实施状态（2026-09-07）**：已按本文档落地，实际代码位于仓库根目录的 `src/app`（而非文中设想的 `hunter/skillhub` 子目录）。新增了 `GET /install.sh` 命令行安装引导脚本；本地 24h 版本检查实现在客户包的 `doctor.mjs`（csk 仓库）。部署见 `docs/DEPLOYMENT.md`。
+
 ## 1. 部署结构
 
 SkillHub 作为 `hunter/skillhub` 下的独立 Next.js 全栈项目部署到 Zeabur，并连接一个独立 PostgreSQL 服务。Hunter 私有 Git 仓库继续作为 Skill 内容的唯一来源。

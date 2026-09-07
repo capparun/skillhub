@@ -2,24 +2,32 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { api, SessionInfo } from "@/lib/client/api";
 import styles from "./site-header.module.css";
 
 type SiteHeaderProps = {
   active?: "guide";
-  onLogin?: () => void;
 };
 
-export function SiteHeader({ active, onLogin }: SiteHeaderProps) {
+export function SiteHeader({ active }: SiteHeaderProps) {
   const router = useRouter();
+  const [me, setMe] = useState<SessionInfo["user"] | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
-  const handleLogin = () => {
-    if (onLogin) {
-      onLogin();
-      return;
-    }
+  useEffect(() => {
+    api<SessionInfo>("/api/auth/me")
+      .then((data) => setMe(data.user))
+      .catch(() => setMe(null))
+      .finally(() => setLoaded(true));
+  }, []);
 
-    router.push("/?login=1");
+  const logout = async () => {
+    await api("/api/auth/logout", { method: "POST" }).catch(() => undefined);
+    setMe(null);
+    router.push("/");
+    router.refresh();
   };
 
   return (
@@ -37,10 +45,20 @@ export function SiteHeader({ active, onLogin }: SiteHeaderProps) {
         <Link className={active === "guide" ? styles.activeNav : undefined} href="/guide" aria-current={active === "guide" ? "page" : undefined}>
           新手入门
         </Link>
-        <button className={styles.loginButton} type="button" onClick={handleLogin}>
-          <span className={styles.loginLabelLong}>专业版登录</span>
-          <span className={styles.loginLabelShort}>登录</span>
-        </button>
+        {loaded && me ? (
+          <>
+            {me.role === "admin" && <Link href="/admin">管理后台</Link>}
+            <Link href="/account">{me.displayName || me.email}</Link>
+            <button className={styles.loginButton} type="button" onClick={logout}>
+              退出
+            </button>
+          </>
+        ) : (
+          <Link className={styles.loginButton} href="/login">
+            <span className={styles.loginLabelLong}>专业版登录</span>
+            <span className={styles.loginLabelShort}>登录</span>
+          </Link>
+        )}
       </nav>
     </header>
   );

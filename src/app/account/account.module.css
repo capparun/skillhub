@@ -1,0 +1,86 @@
+.page {
+  min-height: 100vh;
+  background: var(--background);
+}
+
+.panel {
+  max-width: 720px;
+  margin: 64px auto;
+  padding: 0 24px;
+}
+
+.panel h1 {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.panel h2 {
+  margin-top: 28px;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.email {
+  margin-top: 8px;
+  font-size: 14px;
+  color: rgba(16, 54, 49, 0.6);
+}
+
+.loading,
+.empty {
+  margin-top: 24px;
+  font-size: 14px;
+  color: rgba(16, 54, 49, 0.6);
+}
+
+.table {
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+  font-size: 14px;
+  background: #fff;
+  border: 1px solid rgba(16, 54, 49, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.table th,
+.table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid rgba(16, 54, 49, 0.08);
+}
+
+.table th {
+  font-size: 12px;
+  color: rgba(16, 54, 49, 0.55);
+  background: rgba(16, 54, 49, 0.03);
+}
+
+.badgeOk {
+  padding: 2px 10px;
+  font-size: 12px;
+  color: #067647;
+  background: #ecfdf3;
+  border-radius: 999px;
+}
+
+.badgeBad {
+  padding: 2px 10px;
+  font-size: 12px;
+  color: #b42318;
+  background: #fef3f2;
+  border-radius: 999px;
+}
+
+.hint {
+  margin-top: 20px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(16, 54, 49, 0.55);
+}
+
+.error {
+  margin-top: 24px;
+  color: #b42318;
+}

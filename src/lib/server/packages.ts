@@ -45,7 +45,9 @@ export async function savePackage(
   const size = fs.statSync(tempFilePath).size;
   const target = resolveKeyPath(key);
   fs.mkdirSync(path.dirname(target), { recursive: true });
-  fs.renameSync(tempFilePath, target);
+  // 持久卷挂载后与 /tmp 不在同一文件系统,rename 会 EXDEV,需复制后删除
+  fs.copyFileSync(tempFilePath, target);
+  fs.unlinkSync(tempFilePath);
   return { key, size, sha256 };
 }
 

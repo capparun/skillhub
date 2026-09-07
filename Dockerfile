@@ -1,6 +1,8 @@
 # 猎策分发站 - Next.js 全栈服务镜像
-# Zeabur 部署:服务设置中将 Dockerfile 路径指定为 deploy/site.Dockerfile,构建上下文为仓库根目录。
-# (根目录的 Dockerfile 是 Java 后端用的,两个服务互不影响)
+# 本文件必须位于仓库根目录:Zeabur 会优先使用根 Dockerfile 构建,
+# 子目录 Dockerfile 指定(zbpack.json / ZBPACK_DOCKERFILE_PATH)在多 Dockerfile
+# 仓库中并不可靠(实测会误选 server/Dockerfile)。
+# Java 后端镜像构建请使用 server/Dockerfile(CI 亦如此),与本文件互不影响。
 
 FROM node:22-alpine AS build
 WORKDIR /app

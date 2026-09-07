@@ -10,7 +10,7 @@
 ## 首次部署步骤
 
 1. **创建 Postgres 服务**:Zeabur 项目中添加 PostgreSQL,记下连接串。
-2. **创建 Next 服务**:从本仓库部署。根目录 `zbpack.json` 已指定 `deploy/site.Dockerfile`(Java 后端镜像构建请用 `server/Dockerfile`,勿在根目录再放 Dockerfile——Zeabur 检测到根 Dockerfile 会绕过 zbpack 直接构建,环境变量 `ZBPACK_DOCKERFILE_PATH` 不生效),只需在服务设置中:
+2. **创建 Next 服务**:从本仓库部署。根目录 `Dockerfile` 即本站镜像——Zeabur 优先使用根 Dockerfile 构建,无需任何配置(注意:子目录 Dockerfile 指定方式 zbpack.json / `ZBPACK_DOCKERFILE_PATH` 在本仓库不可靠,实测会误选 `server/Dockerfile`;Java 后端镜像始终用 `server/Dockerfile`,勿放根目录)。服务设置中:
    - 添加持久卷,挂载路径:`/data/packages`
 3. **配置环境变量**(参考 `.env.example`):
    - `DATABASE_URL`:Postgres 服务连接串

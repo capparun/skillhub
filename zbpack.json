@@ -1,5 +1,0 @@
-{
-  "dockerfile": {
-    "path": "deploy/site.Dockerfile"
-  }
-}

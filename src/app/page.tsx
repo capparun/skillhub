@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { SiteHeader } from "./components/site-header";
@@ -36,6 +37,11 @@ const CARD_PRESENTATION: Record<string, { bullets: string[]; includes: string[] 
   },
 };
 
+// 有独立介绍页的技能,卡片标题可点击进入详情(用于引流与 SEO)。
+const LANDING_PAGES: Record<string, string> = {
+  "hunter-align": "/skills/hunter-align",
+};
+
 // 接口不可用时的兜底展示,保证分发页始终可用。
 const FALLBACK_PRODUCTS: ProductInfo[] = [
   {
@@ -51,7 +57,7 @@ const FALLBACK_PRODUCTS: ProductInfo[] = [
     name: "SOHO 猎头人才寻访",
     description:
       "接着已经对齐的需求,在 LinkedIn 发现候选人,完成匹配判断、排序和寻访报告。",
-    isPublic: false,
+    isPublic: true,
     latestRelease: null,
   },
 ];
@@ -126,10 +132,10 @@ function DistributionPage() {
         <div className={styles.runtimeCard}>
           <div className={styles.runtimeIcon}>⚙</div>
           <div className={styles.runtimeBody}>
-            <h3>OpenCLI + LinkedIn 插件</h3>
+            <h3>OpenCLI + Chrome 扩展 + LinkedIn 插件</h3>
             <p>
-              寻访技能背后的数据采集引擎。安装「SOHO
-              猎头人才寻访」时会自动一并安装,通常无需单独操作。
+              寻访技能背后的数据采集环境:OpenCLI 命令行、浏览器里的 OpenCLI
+              扩展、hunter-linkedin 插件,三者齐备才能跑寻访。
             </p>
           </div>
           <button className={styles.runtimeButton} onClick={() => setShowRuntime(true)}>
@@ -147,41 +153,55 @@ function DistributionPage() {
         <div className={styles.cardGrid}>
           {list.map((product) => {
             const presentation = CARD_PRESENTATION[product.slug];
+            const landing = LANDING_PAGES[product.slug];
             return (
               <article className={styles.card} key={product.slug}>
                 <div className={styles.cardHead}>
                   <div className={styles.cardIcon}>
-                    <Image src="/hunter-dog.svg" alt="" width={56} height={56} />
+                    <Image src="/hunter-dog.svg" alt="" width={44} height={44} />
                   </div>
-                  <div className={styles.cardMeta}>
-                    <span>Hunter 官方</span>
-                    <small>
-                      {product.latestRelease ? `v${product.latestRelease.version}` : "即将发布"}
-                    </small>
+                  <div className={styles.cardTitle}>
+                    <div className={styles.cardName}>
+                      {landing ? (
+                        <Link className={styles.cardNameLink} href={landing}>
+                          <h3>{product.name}</h3>
+                        </Link>
+                      ) : (
+                        <h3>{product.name}</h3>
+                      )}
+                      <span className={styles.cardSlug}>{product.slug}</span>
+                    </div>
+                    <div className={styles.cardMeta}>
+                      <span>Hunter 官方</span>
+                      <small>
+                        {product.latestRelease ? `v${product.latestRelease.version}` : "即将发布"}
+                      </small>
+                    </div>
                   </div>
                 </div>
-                <h3>{product.name}</h3>
                 <p className={styles.cardDesc}>{product.description}</p>
                 {presentation && (
-                  <>
-                    <ul className={styles.bullets}>
-                      {presentation.bullets.map((b) => (
-                        <li key={b}>{b}</li>
-                      ))}
-                    </ul>
+                  <ul className={styles.bullets}>
+                    {presentation.bullets.map((b) => (
+                      <li key={b}>{b}</li>
+                    ))}
+                  </ul>
+                )}
+                <div className={styles.cardFoot}>
+                  {presentation && (
                     <div className={styles.includes}>
                       {presentation.includes.map((tag) => (
                         <span key={tag}>{tag}</span>
                       ))}
                     </div>
-                  </>
-                )}
-                <button
-                  className={styles.installButton}
-                  onClick={() => setSelected(product)}
-                >
-                  安装
-                </button>
+                  )}
+                  <button
+                    className={styles.installButton}
+                    onClick={() => setSelected(product)}
+                  >
+                    安装
+                  </button>
+                </div>
               </article>
             );
           })}
@@ -226,15 +246,20 @@ function RuntimeModal({
   onInstallSourcing?: () => void;
 }) {
   const [copied, setCopied] = useState(false);
-  const installPrompt = `请帮我安装猎策运行环境(OpenCLI + LinkedIn 插件)。
+  // origin 只能挂载后读取,否则 SSR 与客户端首渲染文本不一致(hydration 报错)
+  const [origin, setOrigin] = useState("");
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+  const installPrompt = `请帮我安装猎策运行环境(OpenCLI 命令行 + LinkedIn 插件)。
 
 步骤:
 1. 检查环境:终端里 node --version 需要 21 或更高。
 2. 向我说明将要发生的变更(全局安装 opencli 命令行工具),取得我确认后继续。
-3. 安装 OpenCLI:
+3. 安装 OpenCLI 命令行:
    npm install -g @jackwener/opencli
 4. 执行 opencli --version 确认可用。
-5. LinkedIn 插件不单独分发,随「SOHO 猎头人才寻访」技能包安装——引导我到 ${typeof window !== "undefined" ? window.location.origin : "猎策分发站"} 安装该技能包,安装器会自动注册插件。
+5. LinkedIn 插件不单独分发,随「SOHO 猎头人才寻访」技能包安装——引导我到 ${origin || "猎策分发站"} 安装该技能包,安装器会自动注册插件。
 6. 完成后执行 opencli plugin list,确认列表里出现 hunter-linkedin。
 
 如果任何一步失败,把报错原样告诉我。`;
@@ -268,42 +293,71 @@ function RuntimeModal({
         <button className={styles.runtimeClose} onClick={onClose} aria-label="关闭">
           ×
         </button>
-        <h2 id="runtime-modal-title">OpenCLI + LinkedIn 插件</h2>
+        <h2 id="runtime-modal-title">运行环境：OpenCLI + Chrome 扩展 + 插件</h2>
         <p className={styles.runtimeLead}>
-          寻访技能的运行环境:OpenCLI 负责驱动浏览器,hunter-linkedin 插件提供
-          LinkedIn 搜索、评估和报告命令。
+          寻访技能的数据采集靠三件东西配合：OpenCLI 命令行（驱动浏览器）、
+          OpenCLI 的 Chrome 扩展（读取你浏览器里的登录态）、
+          <span className={styles.nb}>hunter-linkedin</span> 插件（LinkedIn
+          搜索、评估和报告命令）。
         </p>
 
-        <div className={styles.runtimeBlock}>
-          <h3>怎么装</h3>
-          <p>
-            复制下面的 Prompt 发给你的 Agent(WorkBuddy / Claude Code /
-            Codex),它会逐步完成安装。也可以直接安装「SOHO
-            猎头人才寻访」技能包,运行环境会自动一并装好。
-          </p>
-          <div className={styles.runtimeCode}>
-            <pre>{installPrompt}</pre>
-            <button onClick={copy}>{copied ? "已复制" : "复制"}</button>
+        <div className={styles.runtimeColumns}>
+          <div className={styles.runtimeBlock}>
+            <h3><span className={styles.stepBadge}>1</span>怎么装</h3>
+            <p>
+              复制下面的 Prompt 发给你的 Agent（WorkBuddy / Claude Code /
+              Codex），它会装好 OpenCLI 命令行，并带你安装「SOHO
+              猎头人才寻访」技能包（<span className={styles.nb}>hunter-linkedin</span> 插件随包自动装好）。
+            </p>
+            <div className={styles.runtimeCode}>
+              <pre>{installPrompt}</pre>
+              <button onClick={copy}>{copied ? "已复制" : "复制"}</button>
+            </div>
           </div>
-          {onInstallSourcing && (
-            <button className={styles.installButton} onClick={onInstallSourcing}>
-              去安装寻访包
-            </button>
-          )}
+
+          <div className={styles.runtimeSide}>
+            <div className={styles.runtimeBlock}>
+              <h3><span className={styles.stepBadge}>2</span>Chrome 扩展（需要你手动装）</h3>
+              <p>
+                OpenCLI 通过 Chrome 扩展读取浏览器里的 LinkedIn
+                登录态，这一步只能你亲自点：打开 Chrome 应用商店，点「添加至
+                Chrome」即可。
+              </p>
+              <a
+                className={`${styles.installButton} ${styles.installButtonSecondary}`}
+                href="https://chromewebstore.google.com/detail/opencli/ildkmabpimmkaediidaifkhjpohdnifk"
+                target="_blank"
+                rel="noreferrer"
+              >
+                前往 Chrome 应用商店安装扩展 ↗
+              </a>
+            </div>
+
+            <div className={styles.runtimeBlock}>
+              <h3><span className={styles.stepBadge}>3</span>怎么确认已装好</h3>
+              <ul className={styles.checkList}>
+                <li><code>opencli --version</code> 能显示版本号</li>
+                <li>
+                  Chrome 扩展栏能看到 OpenCLI 图标（<code>chrome://extensions</code> 里已启用）
+                </li>
+                <li>
+                  <code>opencli plugin list</code> 里出现 <span className={styles.nb}>hunter-linkedin</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className={styles.runtimeBlock}>
+              <h3>什么时候需要重装</h3>
+              <p>换新电脑、插件异常或 LinkedIn 页面结构升级导致采集失败时,重新安装一次寻访包即可修复。</p>
+            </div>
+          </div>
         </div>
 
-        <div className={styles.runtimeBlock}>
-          <h3>怎么确认已装好</h3>
-          <p>
-            在终端执行 opencli plugin list,插件列表里出现 hunter-linkedin
-            即正常;opencli --version 能显示版本号说明 OpenCLI 可用。
-          </p>
-        </div>
-
-        <div className={styles.runtimeBlock}>
-          <h3>什么时候需要重装</h3>
-          <p>换新电脑、插件异常或 LinkedIn 页面结构升级导致采集失败时,重新安装一次寻访包即可修复。</p>
-        </div>
+        {onInstallSourcing && (
+          <button className={styles.installButton} onClick={onInstallSourcing}>
+            去安装寻访包
+          </button>
+        )}
       </section>
     </div>
   );

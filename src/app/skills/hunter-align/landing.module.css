@@ -1,0 +1,391 @@
+.page {
+  --teal: #20b8a6;
+  --teal-dark: #078b7d;
+  --ink: #103631;
+  --muted: #60736f;
+  --line: #d8e7e4;
+  --mist: #eaf8f5;
+  --paper: #f7faf9;
+  --signal: #dff56b;
+  min-height: 100vh;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+/* ── 首屏 ─────────────────────────────────── */
+
+.hero {
+  width: min(880px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 56px 0 44px;
+}
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 6px 10px;
+  color: var(--teal-dark);
+  background: var(--mist);
+  border: 1px solid #cfebe5;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.kicker span {
+  width: 8px;
+  height: 8px;
+  background: var(--teal);
+  border-radius: 50%;
+}
+
+.hero h1 {
+  font-family: "Alimama FangYuan", "PingFang SC", sans-serif;
+  font-size: clamp(32px, 4.5vw, 46px);
+  font-weight: 700;
+  font-variation-settings: "wght" 700, "BEVL" 1;
+  line-height: 1.15;
+  letter-spacing: -0.05em;
+}
+
+.slug {
+  display: inline-block;
+  margin-left: 12px;
+  padding: 4px 10px;
+  color: var(--teal-dark);
+  background: var(--mist);
+  border: 1px solid #cfebe5;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0;
+  vertical-align: 8px;
+}
+
+.hero > p {
+  max-width: 640px;
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 15.5px;
+  line-height: 1.75;
+}
+
+.ctaRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.primaryCta {
+  display: inline-flex;
+  height: 46px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 30px;
+  color: #fff;
+  background: var(--ink);
+  border: 0;
+  border-radius: 9px;
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.primaryCta:hover {
+  background: var(--teal-dark);
+}
+
+.secondaryCta {
+  display: inline-flex;
+  height: 46px;
+  align-items: center;
+  padding: 0 20px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  font-size: 15px;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color 160ms ease;
+}
+
+.secondaryCta:hover {
+  border-color: var(--teal-dark);
+}
+
+.factStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 22px;
+  padding: 0;
+  list-style: none;
+}
+
+.factStrip li {
+  padding: 4px 10px;
+  color: var(--teal-dark);
+  background: var(--mist);
+  border: 1px solid #cfebe5;
+  border-radius: 5px;
+  font-size: 12.5px;
+  font-weight: 780;
+}
+
+/* ── 通用段落 ─────────────────────────────── */
+
+.section {
+  width: min(880px, calc(100% - 48px));
+  margin: 0 auto;
+  padding-bottom: 44px;
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.sectionHeading h2 {
+  font-size: 19px;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+}
+
+.sectionHeading span {
+  color: var(--muted);
+  font-family: monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+/* ── 功能卡 ───────────────────────────────── */
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.featureCard {
+  padding: 20px 22px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.featureIcon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  background: var(--mist);
+  border: 1px solid #cfebe5;
+  border-radius: 10px;
+  font-size: 19px;
+}
+
+.featureCard h3 {
+  margin-top: 12px;
+  font-size: 16px;
+  font-weight: 850;
+}
+
+.featureCard p {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+/* ── 步骤 ─────────────────────────────────── */
+
+.stepList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stepList li {
+  display: flex;
+  gap: 14px;
+  padding: 18px 22px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.stepList li + li {
+  margin-top: 10px;
+}
+
+.stepNo {
+  display: grid;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  color: var(--teal-dark);
+  background: var(--mist);
+  border: 1px solid #cfebe5;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.stepList h3 {
+  font-size: 15.5px;
+  font-weight: 850;
+}
+
+.stepList p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+/* ── FAQ ──────────────────────────────────── */
+
+.faqList {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.faqItem {
+  padding: 16px 20px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.faqItem summary {
+  font-size: 14.5px;
+  font-weight: 850;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faqItem summary::before {
+  content: "+";
+  margin-right: 8px;
+  color: var(--teal-dark);
+  font-weight: 850;
+}
+
+.faqItem[open] summary::before {
+  content: "−";
+}
+
+.faqItem p {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+/* ── 结尾 CTA ─────────────────────────────── */
+
+.finalCta {
+  width: min(880px, calc(100% - 48px));
+  margin: 0 auto 64px;
+  padding: 36px 40px;
+  text-align: center;
+  background: var(--mist);
+  border: 1px solid #cfebe5;
+  border-radius: 14px;
+}
+
+.finalCta h2 {
+  font-family: "Alimama FangYuan", "PingFang SC", sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.finalCta p {
+  margin: 8px auto 20px;
+  max-width: 460px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* ── 页脚 ─────────────────────────────────── */
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 26px max(24px, calc((100vw - 880px) / 2));
+  color: var(--muted);
+  background: #fff;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.footer a {
+  color: var(--teal-dark);
+  font-weight: 780;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (max-width: 720px) {
+  .hero {
+    width: min(100% - 32px, 880px);
+    padding: 48px 0 36px;
+  }
+
+  .slug {
+    margin-left: 8px;
+    font-size: 13px;
+    vertical-align: 5px;
+  }
+
+  .section,
+  .finalCta {
+    width: min(100% - 32px, 880px);
+  }
+
+  .finalCta {
+    padding: 28px 22px;
+    margin-bottom: 48px;
+  }
+
+  .featureGrid,
+  .faqList {
+    grid-template-columns: 1fr;
+  }
+
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primaryCta,
+  .secondaryCta {
+    transition: none;
+  }
+}

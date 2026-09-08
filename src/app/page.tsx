@@ -226,7 +226,18 @@ function RuntimeModal({
   onInstallSourcing?: () => void;
 }) {
   const [copied, setCopied] = useState(false);
-  const checkCommands = "opencli --version && opencli plugin list";
+  const installPrompt = `请帮我安装猎策运行环境(OpenCLI + LinkedIn 插件)。
+
+步骤:
+1. 检查环境:终端里 node --version 需要 21 或更高。
+2. 向我说明将要发生的变更(全局安装 opencli 命令行工具),取得我确认后继续。
+3. 安装 OpenCLI:
+   npm install -g @jackwener/opencli
+4. 执行 opencli --version 确认可用。
+5. LinkedIn 插件不单独分发,随「SOHO 猎头人才寻访」技能包安装——引导我到 ${typeof window !== "undefined" ? window.location.origin : "猎策分发站"} 安装该技能包,安装器会自动注册插件。
+6. 完成后执行 opencli plugin list,确认列表里出现 hunter-linkedin。
+
+如果任何一步失败,把报错原样告诉我。`;
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -241,7 +252,7 @@ function RuntimeModal({
   }, [onClose]);
 
   const copy = async () => {
-    await navigator.clipboard.writeText(checkCommands);
+    await navigator.clipboard.writeText(installPrompt);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
   };
@@ -266,9 +277,14 @@ function RuntimeModal({
         <div className={styles.runtimeBlock}>
           <h3>怎么装</h3>
           <p>
-            不需要单独安装——安装「SOHO 猎头人才寻访」技能包时,安装器会自动把
-            OpenCLI 运行时和 LinkedIn 插件一并装好。
+            复制下面的 Prompt 发给你的 Agent(WorkBuddy / Claude Code /
+            Codex),它会逐步完成安装。也可以直接安装「SOHO
+            猎头人才寻访」技能包,运行环境会自动一并装好。
           </p>
+          <div className={styles.runtimeCode}>
+            <pre>{installPrompt}</pre>
+            <button onClick={copy}>{copied ? "已复制" : "复制"}</button>
+          </div>
           {onInstallSourcing && (
             <button className={styles.installButton} onClick={onInstallSourcing}>
               去安装寻访包
@@ -278,11 +294,10 @@ function RuntimeModal({
 
         <div className={styles.runtimeBlock}>
           <h3>怎么确认已装好</h3>
-          <p>在终端执行下面的命令,能看到版本号且插件列表里出现 hunter-linkedin 即正常:</p>
-          <div className={styles.runtimeCode}>
-            <pre>{checkCommands}</pre>
-            <button onClick={copy}>{copied ? "已复制" : "复制"}</button>
-          </div>
+          <p>
+            在终端执行 opencli plugin list,插件列表里出现 hunter-linkedin
+            即正常;opencli --version 能显示版本号说明 OpenCLI 可用。
+          </p>
         </div>
 
         <div className={styles.runtimeBlock}>

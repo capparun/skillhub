@@ -79,6 +79,73 @@
   line-height: 1.75;
 }
 
+/* ── 运行环境 ─────────────────────────────── */
+
+.runtime {
+  width: min(880px, calc(100% - 48px));
+  margin: 0 auto;
+  padding-bottom: 54px;
+}
+
+.runtimeCard {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 22px 26px;
+  background: var(--mist);
+  border: 1px solid #cfebe5;
+  border-radius: 12px;
+}
+
+.runtimeIcon {
+  display: grid;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  font-size: 26px;
+}
+
+.runtimeBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.runtimeBody h3 {
+  font-size: 17px;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+}
+
+.runtimeBody p {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.runtimeButton {
+  flex-shrink: 0;
+  height: 40px;
+  padding: 0 18px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 160ms ease;
+}
+
+.runtimeButton:hover {
+  border-color: var(--teal-dark);
+}
+
 /* ── 技能列表 ─────────────────────────────── */
 
 .list {
@@ -108,25 +175,32 @@
   letter-spacing: 0.08em;
 }
 
-.card {
+.cardGrid {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 24px;
-  padding: 26px 28px;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  padding: 28px;
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 12px;
 }
 
-.card + .card {
-  margin-top: 14px;
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .cardIcon {
   display: grid;
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   place-items: center;
   overflow: hidden;
   background: var(--teal);
@@ -140,60 +214,78 @@
 
 .cardMeta {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
   color: var(--muted);
   font-size: 13px;
 }
 
-.badgeFree {
-  padding: 4px 8px;
-  color: var(--ink);
-  background: var(--signal);
-  border-radius: 4px;
+.cardMeta small {
+  font-family: monospace;
   font-size: 12px;
-  font-weight: 850;
-}
-
-.badgePro {
-  padding: 4px 8px;
-  color: #fff;
-  background: var(--ink);
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 850;
 }
 
 .card h3 {
+  margin-top: 18px;
   font-size: 22px;
   font-weight: 850;
   letter-spacing: -0.025em;
 }
 
-.cardBody > p {
-  margin-top: 7px;
+.cardDesc {
+  margin-top: 8px;
   color: var(--muted);
   font-size: 15px;
   line-height: 1.7;
 }
 
-.cardAside {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 12px;
+.bullets {
+  margin-top: 16px;
+  padding: 0;
+  list-style: none;
 }
 
-.cardAside small {
-  color: var(--muted);
-  font-family: monospace;
+.bullets li {
+  position: relative;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 2.0;
+}
+
+.bullets li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--teal-dark);
+  font-weight: 850;
+}
+
+.includes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  margin-bottom: 22px;
+}
+
+.includes span {
+  padding: 4px 10px;
+  color: var(--teal-dark);
+  background: var(--mist);
+  border: 1px solid #cfebe5;
+  border-radius: 5px;
   font-size: 12px;
+  font-weight: 780;
 }
 
 .installButton {
-  height: 44px;
-  padding: 0 22px;
+  display: flex;
+  width: 100%;
+  height: 46px;
+  align-items: center;
+  justify-content: center;
+  margin-top: auto;
   color: #fff;
   background: var(--ink);
   border: 0;
@@ -209,14 +301,113 @@
   background: var(--teal-dark);
 }
 
-.notice {
-  padding: 26px 28px;
-  color: var(--muted);
+/* ── 运行环境弹窗 ──────────────────────────── */
+
+.runtimeBackdrop {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: rgba(9, 38, 34, 0.68);
+  backdrop-filter: blur(9px);
+}
+
+.runtimeModal {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: calc(100vh - 56px);
+  overflow: auto;
+  padding: 36px;
+  color: var(--ink);
   background: #fff;
-  border: 1px dashed var(--line);
-  border-radius: 12px;
+  border-radius: 18px;
+  box-shadow: 12px 12px 0 rgba(5, 36, 31, 0.58);
+}
+
+.runtimeClose {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  color: #45635d;
+  background: var(--mist);
+  border: 0;
+  border-radius: 8px;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.runtimeModal > h2 {
+  padding-right: 48px;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.runtimeLead {
+  margin-top: 12px;
+  color: var(--muted);
   font-size: 15px;
-  text-align: center;
+  line-height: 1.75;
+}
+
+.runtimeBlock {
+  margin-top: 22px;
+  padding: 20px;
+  background: #f7fbfa;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.runtimeBlock h3 {
+  font-size: 15px;
+  font-weight: 850;
+}
+
+.runtimeBlock p {
+  margin-top: 8px;
+  color: #596f69;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.runtimeBlock .installButton {
+  margin-top: 14px;
+}
+
+.runtimeCode {
+  position: relative;
+  margin-top: 12px;
+  padding: 14px 70px 14px 14px;
+  color: #dcece8;
+  background: var(--ink);
+  border-radius: 8px;
+}
+
+.runtimeCode pre {
+  overflow-x: auto;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.runtimeCode button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  height: 30px;
+  padding: 0 12px;
+  color: var(--ink);
+  background: var(--signal);
+  border: 0;
+  border-radius: 5px;
+  font-weight: 850;
+  cursor: pointer;
 }
 
 /* ── 页脚 ────────────────────────────────── */
@@ -257,18 +448,25 @@
     padding-bottom: 60px;
   }
 
-  .card {
-    grid-template-columns: auto minmax(0, 1fr);
-    padding: 22px;
+  .runtime {
+    width: min(100% - 32px, 880px);
+    padding-bottom: 40px;
   }
 
-  .cardAside {
-    grid-column: 1 / -1;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 14px;
-    border-top: 1px solid var(--line);
+  .runtimeCard {
+    flex-wrap: wrap;
+  }
+
+  .runtimeButton {
+    width: 100%;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .runtimeModal {
+    padding: 26px 20px;
   }
 
   .footer {

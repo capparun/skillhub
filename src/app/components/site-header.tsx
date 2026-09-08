@@ -9,7 +9,7 @@ import styles from "./site-header.module.css";
 
 type SiteHeaderProps = {
   active?: "guide";
-  /** full:完整营销站导航(用于 /landing);minimal:仅保留新手入门与登录入口。 */
+  /** full:完整营销站导航(用于 /landing);minimal:仅保留新手入门,隐藏登录入口(现阶段技能免登录安装)。 */
   nav?: "full" | "minimal";
 };
 
@@ -47,20 +47,21 @@ export function SiteHeader({ active, nav = "full" }: SiteHeaderProps) {
         <Link className={active === "guide" ? styles.activeNav : undefined} href="/guide" aria-current={active === "guide" ? "page" : undefined}>
           新手入门
         </Link>
-        {loaded && me ? (
-          <>
-            {me.role === "admin" && <Link href="/admin">管理后台</Link>}
-            <Link href="/account">{me.displayName || me.email}</Link>
-            <button className={styles.loginButton} type="button" onClick={logout}>
-              退出
-            </button>
-          </>
-        ) : (
-          <Link className={styles.loginButton} href="/login">
-            <span className={styles.loginLabelLong}>登录</span>
-            <span className={styles.loginLabelShort}>登录</span>
-          </Link>
-        )}
+        {nav === "full" &&
+          (loaded && me ? (
+            <>
+              {me.role === "admin" && <Link href="/admin">管理后台</Link>}
+              <Link href="/account">{me.displayName || me.email}</Link>
+              <button className={styles.loginButton} type="button" onClick={logout}>
+                退出
+              </button>
+            </>
+          ) : (
+            <Link className={styles.loginButton} href="/login">
+              <span className={styles.loginLabelLong}>登录</span>
+              <span className={styles.loginLabelShort}>登录</span>
+            </Link>
+          ))}
       </nav>
     </header>
   );

@@ -104,26 +104,6 @@
   background: var(--teal-dark);
 }
 
-.secondaryCta {
-  display: inline-flex;
-  height: 46px;
-  align-items: center;
-  padding: 0 20px;
-  color: var(--ink);
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  font-size: 15px;
-  font-weight: 800;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: border-color 160ms ease;
-}
-
-.secondaryCta:hover {
-  border-color: var(--teal-dark);
-}
-
 .factStrip {
   display: flex;
   flex-wrap: wrap;
@@ -258,46 +238,6 @@
   line-height: 1.7;
 }
 
-/* ── FAQ ──────────────────────────────────── */
-
-.faqList {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.faqItem {
-  padding: 16px 20px;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-}
-
-.faqItem summary {
-  font-size: 14.5px;
-  font-weight: 850;
-  cursor: pointer;
-  list-style: none;
-}
-
-.faqItem summary::before {
-  content: "+";
-  margin-right: 8px;
-  color: var(--teal-dark);
-  font-weight: 850;
-}
-
-.faqItem[open] summary::before {
-  content: "−";
-}
-
-.faqItem p {
-  margin-top: 8px;
-  color: var(--muted);
-  font-size: 13.5px;
-  line-height: 1.7;
-}
-
 /* ── 结尾 CTA ─────────────────────────────── */
 
 .finalCta {
@@ -311,9 +251,8 @@
 }
 
 .finalCta h2 {
-  font-family: "Alimama FangYuan", "PingFang SC", sans-serif;
-  font-size: 26px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 850;
   letter-spacing: -0.03em;
 }
 
@@ -372,8 +311,7 @@
     margin-bottom: 48px;
   }
 
-  .featureGrid,
-  .faqList {
+  .featureGrid {
     grid-template-columns: 1fr;
   }
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { SiteHeader } from "../../components/site-header";
 import { InstallModal, ModalProduct } from "../../components/install-modal";
 import { api } from "@/lib/client/api";
@@ -63,25 +62,6 @@ const STEPS = [
   },
 ];
 
-const FAQS = [
-  {
-    q: "需要登录或付费吗？",
-    a: "都不需要。职位需求对齐是免费技能，复制 Prompt 即可安装，没有账号体系。",
-  },
-  {
-    q: "我的 JD 和候选人数据会传到哪里？",
-    a: "哪里都不去。技能运行在你本地的 Agent 里，JD、追问答案和产出物都保存在你自己的电脑上。",
-  },
-  {
-    q: "支持哪些 Agent？",
-    a: "任何能访问本地终端与文件的 Agent 环境都可以，包括 WorkBuddy、Claude Code、Codex 和 OpenClaw。",
-  },
-  {
-    q: "和「SOHO 猎头人才寻访」是什么关系？",
-    a: "对齐是寻访的第一步：先用它把需求厘清，再用寻访包去 LinkedIn 找人。寻访包包含 LinkedIn 插件与运行时，由交付方授权安装。",
-  },
-];
-
 export function HunterAlignLanding() {
   const [product, setProduct] = useState<ProductInfo>(FALLBACK);
   const [showInstall, setShowInstall] = useState(false);
@@ -109,7 +89,7 @@ export function HunterAlignLanding() {
 
   return (
     <main className={styles.page}>
-      <SiteHeader nav="minimal" />
+      <SiteHeader nav="none" brandLinked={false} />
 
       <section className={styles.hero}>
         <div className={styles.kicker}>
@@ -127,9 +107,6 @@ export function HunterAlignLanding() {
           <button className={styles.primaryCta} onClick={() => setShowInstall(true)}>
             免费安装
           </button>
-          <Link className={styles.secondaryCta} href="/">
-            查看全部技能 →
-          </Link>
         </div>
         <ul className={styles.factStrip}>
           <li>免费</li>
@@ -173,21 +150,6 @@ export function HunterAlignLanding() {
         </ol>
       </section>
 
-      <section className={styles.section} aria-label="常见问题">
-        <div className={styles.sectionHeading}>
-          <h2>常见问题</h2>
-          <span>FAQ</span>
-        </div>
-        <div className={styles.faqList}>
-          {FAQS.map((f) => (
-            <details className={styles.faqItem} key={f.q}>
-              <summary>{f.q}</summary>
-              <p>{f.a}</p>
-            </details>
-          ))}
-        </div>
-      </section>
-
       <section className={styles.finalCta}>
         <h2>先对齐，再寻访。</h2>
         <p>需求厘清了，候选人搜索才不会跑偏。一分钟装好，从手头这份 JD 开始。</p>
@@ -198,7 +160,6 @@ export function HunterAlignLanding() {
 
       <footer className={styles.footer}>
         <span>© 2026 猎策 Hunter Works</span>
-        <Link href="/">返回技能分发首页</Link>
       </footer>
 
       {showInstall && (

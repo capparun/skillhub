@@ -33,16 +33,12 @@ const faqs = [
     question: "我的 JD 和候选人资料会上传吗？",
     answer: "不会上传到猎策。Hunter Skill 在你的本地 Agent 中执行，业务资料和执行结果留在你的电脑里。",
   },
-  {
-    question: "免费 Skill 和专业版有什么区别？",
-    answer: "免费的职位需求对齐帮助你把 JD 变成寻访任务书；专业版继续完成多渠道寻访、初评和报告。",
-  },
 ];
 
 export default function GuidePage() {
   return (
     <main className={styles.page}>
-      <SiteHeader active="guide" />
+      <SiteHeader active="guide" nav="minimal" brandLinked={false} />
 
       <section className={styles.hero}>
         <div className={styles.eyebrow}>第一次使用 Agent？从这里开始</div>
@@ -321,7 +317,7 @@ description: 当用户需要澄清 JD、
           <h2>从一份真实 JD 开始。</h2>
           <p>职位需求对齐永久免费，安装后直接在你的 Agent 中使用。</p>
         </div>
-        <Link href="/#skills">免费安装需求对齐 <span>↗</span></Link>
+        <Link href="/skills/hunter-align">免费安装需求对齐 <span>↗</span></Link>
       </section>
     </main>
   );

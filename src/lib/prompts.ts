@@ -41,6 +41,14 @@ export function freeCliCommand(input: Pick<FreePromptInput, 'appUrl' | 'productS
   return `curl -fsSL ${input.appUrl}/install.sh | bash -s -- ${input.productSlug}`;
 }
 
+export function windowsCliCommand(input: Pick<FreePromptInput, 'appUrl' | 'productSlug'>): string {
+  return `$script = irm ${input.appUrl}/install.ps1; & ([scriptblock]::Create($script)) -Product '${input.productSlug}'`;
+}
+
+export function windowsPaidCliCommand(input: Pick<PaidPromptInput, 'appUrl' | 'productSlug' | 'token'>): string {
+  return `$script = irm ${input.appUrl}/install.ps1; & ([scriptblock]::Create($script)) -Product '${input.productSlug}' -Token '${input.token}'`;
+}
+
 export function paidInstallPrompt(input: PaidPromptInput): string {
   const { appUrl, productName, productSlug, token, tokenTtlMinutes } = input;
   return `请帮我安装「${productName}」(猎策专业版)。

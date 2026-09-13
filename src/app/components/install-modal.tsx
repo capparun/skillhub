@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { api, ApiError, SessionInfo } from "@/lib/client/api";
-import { freeInstallPrompt, freeCliCommand } from "@/lib/prompts";
+import { freeInstallPrompt, freeCliCommand, windowsCliCommand } from "@/lib/prompts";
 import styles from "./install-modal.module.css";
 
 export interface ModalProduct {
@@ -18,6 +18,7 @@ export interface ModalProduct {
 interface PaidInstall {
   installPrompt: string;
   cliCommand: string;
+  windowsCliCommand: string;
   expiresAt: string;
 }
 
@@ -42,8 +43,9 @@ export function InstallModal({
   onClose,
 }: InstallModalProps) {
   const isFree = product.isPublic;
-  const [installMode, setInstallMode] = useState<"agent" | "cli">("agent");
+  const [installMode, setInstallMode] = useState<"posix" | "windows" | "agent">("posix");
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState("");
   const [paidInstall, setPaidInstall] = useState<PaidInstall | null>(null);
   const [paidError, setPaidError] = useState("");
   const [paidLoading, setPaidLoading] = useState(!isFree && !!me);
@@ -108,7 +110,8 @@ export function InstallModal({
       version: product.latestRelease.version,
       sha256: product.latestRelease.sha256,
     };
-    return installMode === "agent" ? freeInstallPrompt(input) : freeCliCommand(input);
+    if (installMode === "agent") return freeInstallPrompt(input);
+    return installMode === "windows" ? windowsCliCommand(input) : freeCliCommand(input);
   }, [isFree, product, installMode]);
 
   const installText = isFree
@@ -116,13 +119,21 @@ export function InstallModal({
     : paidInstall
       ? installMode === "agent"
         ? paidInstall.installPrompt
-        : paidInstall.cliCommand
+        : installMode === "windows"
+          ? paidInstall.windowsCliCommand
+          : paidInstall.cliCommand
       : "";
 
   const copyInstall = async () => {
-    await navigator.clipboard.writeText(installText);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1800);
+    try {
+      await navigator.clipboard.writeText(installText);
+      setCopyError("");
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setCopied(false);
+      setCopyError("复制失败，请手动选中上面的命令复制。");
+    }
   };
 
   const displayFacts = facts ?? [
@@ -184,26 +195,40 @@ export function InstallModal({
           <h3>安装方式</h3>
           <div className={styles.tabs} role="tablist" aria-label="安装方式">
             <button
+              className={installMode === "posix" ? styles.activeTab : ""}
+              onClick={() => {
+                setInstallMode("posix");
+                setCopied(false);
+                setCopyError("");
+              }}
+              role="tab"
+              aria-selected={installMode === "posix"}
+            >
+              macOS / Linux
+            </button>
+            <button
+              className={installMode === "windows" ? styles.activeTab : ""}
+              onClick={() => {
+                setInstallMode("windows");
+                setCopied(false);
+                setCopyError("");
+              }}
+              role="tab"
+              aria-selected={installMode === "windows"}
+            >
+              Windows PowerShell
+            </button>
+            <button
               className={installMode === "agent" ? styles.activeTab : ""}
               onClick={() => {
                 setInstallMode("agent");
                 setCopied(false);
+                setCopyError("");
               }}
               role="tab"
               aria-selected={installMode === "agent"}
             >
-              Agent 用户
-            </button>
-            <button
-              className={installMode === "cli" ? styles.activeTab : ""}
-              onClick={() => {
-                setInstallMode("cli");
-                setCopied(false);
-              }}
-              role="tab"
-              aria-selected={installMode === "cli"}
-            >
-              命令行用户
+              交给 Agent
             </button>
           </div>
 
@@ -213,12 +238,15 @@ export function InstallModal({
                 <p>
                   {installMode === "agent"
                     ? "复制以下 Prompt 给你的 Agent,它会检查环境并在确认后完成安装。"
-                    : "适合习惯使用终端的用户。在终端粘贴执行即可完成安装。"}
+                    : installMode === "windows"
+                      ? "复制命令，在 PowerShell 中粘贴执行即可完成安装。"
+                      : "复制命令，在终端中粘贴执行即可完成安装。"}
                 </p>
                 <div className={styles.codePanel}>
                   <pre>{installText}</pre>
                   <button onClick={copyInstall}>{copied ? "已复制" : "复制"}</button>
                 </div>
+                {copyError && <p className={styles.copyError} role="alert">{copyError}</p>}
                 <div className={styles.compatibility}>
                   适用于可访问本地终端与文件的 Agent 环境,包括 WorkBuddy、Codex、
                   Claude Code 和 OpenClaw。
@@ -259,7 +287,9 @@ export function InstallModal({
               <p>
                 {installMode === "agent"
                   ? "复制以下 Prompt 给你的 Agent,它会兑换令牌、校验安装包并完成安装。"
-                  : "适合习惯使用终端的用户。在终端粘贴执行即可完成安装。"}
+                  : installMode === "windows"
+                    ? "复制命令，在 PowerShell 中粘贴执行即可完成安装。"
+                    : "复制命令，在终端中粘贴执行即可完成安装。"}
                 <strong>
                   {" "}
                   令牌 {Math.floor(tokenSecondsLeft / 60)}:
@@ -271,6 +301,7 @@ export function InstallModal({
                 <pre>{installText}</pre>
                 <button onClick={copyInstall}>{copied ? "已复制" : "复制"}</button>
               </div>
+              {copyError && <p className={styles.copyError} role="alert">{copyError}</p>}
               <div className={styles.compatibility}>
                 适用于可访问本地终端与文件的 Agent 环境,包括 WorkBuddy、Codex、
                 Claude Code 和 OpenClaw。

@@ -5,7 +5,7 @@ import { checkEntitlement } from '@/lib/server/entitlements';
 import { randomToken } from '@/lib/server/tokens';
 import { audit } from '@/lib/server/audit';
 import { HttpError, errorResponse, json } from '@/lib/server/http';
-import { paidInstallPrompt, paidCliCommand } from '@/lib/prompts';
+import { paidInstallPrompt, paidCliCommand, windowsPaidCliCommand } from '@/lib/prompts';
 
 export const runtime = 'nodejs';
 
@@ -65,6 +65,7 @@ export async function POST(request: Request) {
         tokenTtlMinutes: ttlMinutes,
       }),
       cliCommand: paidCliCommand({ appUrl, productSlug, token: plain }),
+      windowsCliCommand: windowsPaidCliCommand({ appUrl, productSlug, token: plain }),
     });
   } catch (err) {
     return errorResponse(err);

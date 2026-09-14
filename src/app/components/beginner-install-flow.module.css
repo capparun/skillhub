@@ -1,0 +1,450 @@
+.section {
+  width: min(1040px, calc(100% - 48px));
+  margin: 18px auto 72px;
+  scroll-margin-top: 18px;
+}
+
+.heading {
+  margin-bottom: 24px;
+}
+
+.heading > span {
+  display: inline-block;
+  padding: 4px 9px;
+  color: #087f70;
+  background: #eaf8f5;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.heading h2 {
+  margin: 10px 0 5px;
+  font-size: 32px;
+  letter-spacing: -0.04em;
+}
+
+.heading p {
+  margin: 0;
+  color: #60736f;
+}
+
+.frame {
+  display: grid;
+  grid-template-columns: 248px 1fr;
+  min-height: 590px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #cbded9;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(16, 54, 49, 0.07);
+}
+
+/* ── 左侧步骤导航 ─────────────────────────── */
+
+.sidebar {
+  padding: 28px 24px;
+  background: #f2f8f6;
+  border-right: 1px solid #d8e7e4;
+}
+
+.sidebar > strong {
+  font-size: 16px;
+}
+
+.sidebar ol {
+  margin: 25px 0 30px;
+  padding: 0;
+  list-style: none;
+}
+
+.sidebar li {
+  margin: 0 0 18px;
+  color: #8a9894;
+}
+
+.sidebar button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  color: inherit;
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sidebar button:disabled {
+  cursor: default;
+}
+
+.sidebar button span:first-child {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid #b6c6c2;
+  border-radius: 50%;
+  font-size: 12px;
+}
+
+.sidebar li.active {
+  color: #103631;
+  font-weight: 850;
+}
+
+.sidebar li.active button span:first-child {
+  color: #fff;
+  background: #103631;
+  border-color: #103631;
+}
+
+.sidebar li.done {
+  color: #087f70;
+}
+
+.sidebar li.done button span:first-child {
+  border-color: #087f70;
+}
+
+.progress {
+  height: 7px;
+  overflow: hidden;
+  background: #dce9e6;
+  border-radius: 99px;
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  background: #103631;
+  transition: width 0.18s;
+}
+
+.sidebar small {
+  display: block;
+  margin-top: 7px;
+  color: #60736f;
+}
+
+/* ── 右侧步骤内容 ─────────────────────────── */
+
+.content {
+  display: flex;
+  flex-direction: column;
+  padding: 42px 48px;
+}
+
+.content > div:first-child {
+  flex: 1;
+}
+
+.tag {
+  font-size: 12px;
+  font-weight: 800;
+  color: #087f70;
+}
+
+.content h3 {
+  margin: 8px 0 5px;
+  font-size: 30px;
+  letter-spacing: -0.035em;
+}
+
+.lead {
+  margin: 0 0 26px;
+  color: #60736f;
+}
+
+/* 第 1 步:系统选择 */
+
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 13px;
+  margin: 25px 0;
+}
+
+.choices button {
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #a9bbb6;
+  border-radius: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.choices button.selected {
+  padding: 18px;
+  border: 3px solid #103631;
+}
+
+.choices strong,
+.choices span {
+  display: block;
+}
+
+.choices strong {
+  margin-bottom: 5px;
+  font-size: 18px;
+}
+
+.choices span {
+  color: #60736f;
+  font-size: 14px;
+}
+
+/* 说明卡片 */
+
+.info {
+  margin: 14px 0;
+  padding: 17px 19px;
+  background: #f7faf9;
+  border: 1px solid #d8e7e4;
+  border-radius: 9px;
+}
+
+.info strong {
+  font-size: 15px;
+}
+
+.info p {
+  margin: 4px 0 0;
+  color: #60736f;
+  font-size: 14px;
+}
+
+.info a {
+  color: #087f70;
+  font-weight: 800;
+}
+
+/* 复制给 AI 的 Prompt 框 */
+
+.copyBox {
+  margin: 20px 0;
+  padding: 18px;
+  background: #103631;
+  border-radius: 10px;
+  color: #e4f0ed;
+}
+
+.copyBox p {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.copyBox button {
+  height: 38px;
+  margin-top: 15px;
+  padding: 0 16px;
+  color: #103631;
+  background: #dff56b;
+  border: 0;
+  border-radius: 6px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+/* 真实验证勾选 */
+
+.check {
+  display: flex;
+  gap: 12px;
+  margin: 18px 0;
+  padding: 16px;
+  border: 1px solid #b9cbc6;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.check input {
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: #103631;
+}
+
+.check strong,
+.check small {
+  display: block;
+}
+
+.check small {
+  margin-top: 2px;
+  color: #60736f;
+  font-size: 13px;
+}
+
+/* 折叠的排查帮助 */
+
+.help {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px dashed #b9cbc6;
+}
+
+.help summary {
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.help p {
+  color: #60736f;
+  font-size: 14px;
+}
+
+/* 手动安装(高级) */
+
+.advanced {
+  padding: 0;
+  color: #087f70;
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.command {
+  margin-top: 12px;
+  padding: 14px;
+  overflow: auto;
+  background: #eef3f1;
+  border: 1px solid #c7d7d3;
+  border-radius: 7px;
+  font: 13px Consolas, monospace;
+}
+
+/* 完成页验证清单 */
+
+.results {
+  margin: 24px 0;
+  padding: 18px 22px;
+  list-style: none;
+  background: #f2f8f6;
+  border: 1px solid #cbded9;
+  border-radius: 10px;
+}
+
+.results li {
+  margin: 7px 0;
+}
+
+.copyError {
+  color: #a43b2f;
+  font-size: 14px;
+}
+
+/* 底部操作按钮 */
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #d8e7e4;
+}
+
+.actions button {
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 8px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.next {
+  color: #fff;
+  background: #103631;
+  border: 1px solid #103631;
+}
+
+.next:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.back {
+  color: #103631;
+  background: #fff;
+  border: 1px solid #a9bbb6;
+}
+
+/* ── 窄屏:导航折叠为图标条 ────────────────── */
+
+@media (max-width: 760px) {
+  .section {
+    width: min(100% - 28px, 1040px);
+  }
+
+  .heading h2 {
+    font-size: 27px;
+  }
+
+  .frame {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    padding: 18px;
+    border-right: 0;
+    border-bottom: 1px solid #d8e7e4;
+  }
+
+  .sidebar > strong {
+    display: none;
+  }
+
+  .sidebar ol {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 0 14px;
+  }
+
+  .sidebar li {
+    margin: 0;
+  }
+
+  .sidebar button {
+    display: block;
+  }
+
+  .sidebar button span:first-child {
+    margin: auto;
+  }
+
+  .sidebar button span:last-child {
+    display: none;
+  }
+
+  .sidebar small {
+    display: none;
+  }
+
+  .content {
+    min-height: 540px;
+    padding: 28px 20px;
+  }
+
+  .content h3 {
+    font-size: 25px;
+  }
+
+  .choices {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    justify-content: stretch;
+  }
+
+  .actions button {
+    flex: 1;
+  }
+}

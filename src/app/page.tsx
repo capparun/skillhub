@@ -6,6 +6,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { SiteHeader } from "./components/site-header";
 import { InstallModal, ModalProduct } from "./components/install-modal";
+import { BeginnerInstallFlow } from "./components/beginner-install-flow";
 import { api, SessionInfo } from "@/lib/client/api";
 import styles from "./page.module.css";
 
@@ -68,7 +69,6 @@ function DistributionPage() {
   const [products, setProducts] = useState<ProductInfo[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [selected, setSelected] = useState<ProductInfo | null>(null);
-  const [showRuntime, setShowRuntime] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -119,30 +119,15 @@ function DistributionPage() {
           <em>装进你的 Agent。</em>
         </h1>
         <p>
-          这里提供猎策官方技能包的安装与更新。技能运行在你本地的 Agent
-          中,职位与候选人数据不离开你的电脑。
+          不懂命令也没关系。跟着页面一步一步操作，就能把猎策装进你的 AI
+          助手；职位与候选人数据仍留在你的电脑中。
         </p>
+        <button className={styles.heroButton} onClick={() => document.getElementById("install-center")?.scrollIntoView({ behavior: "smooth" })}>
+          开始安装
+        </button>
       </section>
 
-      <section className={styles.runtime} aria-label="运行环境">
-        <div className={styles.listHeading}>
-          <h2>运行环境</h2>
-          <span>RUNTIME</span>
-        </div>
-        <div className={styles.runtimeCard}>
-          <div className={styles.runtimeIcon}>⚙</div>
-          <div className={styles.runtimeBody}>
-            <h3>OpenCLI + Chrome 扩展 + LinkedIn 插件</h3>
-            <p>
-              寻访技能背后的数据采集环境:OpenCLI 命令行、浏览器里的 OpenCLI
-              扩展、hunter-linkedin 插件,三者齐备才能跑寻访。
-            </p>
-          </div>
-          <button className={styles.runtimeButton} onClick={() => setShowRuntime(true)}>
-            查看安装
-          </button>
-        </div>
-      </section>
+      <BeginnerInstallFlow product={sourcing} />
 
       <section className={styles.list} aria-label="技能列表">
         <div className={styles.listHeading}>
@@ -197,9 +182,15 @@ function DistributionPage() {
                   )}
                   <button
                     className={styles.installButton}
-                    onClick={() => setSelected(product)}
+                    onClick={() => {
+                      if (product.slug === "soho-sourcing") {
+                        document.getElementById("install-center")?.scrollIntoView({ behavior: "smooth" });
+                      } else {
+                        setSelected(product);
+                      }
+                    }}
                   >
-                    安装
+                    {product.slug === "soho-sourcing" ? "开始安装" : "安装"}
                   </button>
                 </div>
               </article>
@@ -221,145 +212,7 @@ function DistributionPage() {
         />
       )}
 
-      {showRuntime && (
-        <RuntimeModal
-          onClose={() => setShowRuntime(false)}
-          onInstallSourcing={
-            sourcing
-              ? () => {
-                  setShowRuntime(false);
-                  setSelected(sourcing);
-                }
-              : undefined
-          }
-        />
-      )}
     </main>
-  );
-}
-
-function RuntimeModal({
-  onClose,
-  onInstallSourcing,
-}: {
-  onClose: () => void;
-  onInstallSourcing?: () => void;
-}) {
-  const [copied, setCopied] = useState(false);
-  // origin 只能挂载后读取,否则 SSR 与客户端首渲染文本不一致(hydration 报错)
-  const [origin, setOrigin] = useState("");
-  useEffect(() => {
-    setOrigin(window.location.origin);
-  }, []);
-  const installPrompt = `请帮我安装猎策运行环境(OpenCLI 命令行 + LinkedIn 插件)。
-
-步骤:
-1. 检查环境:终端里 node --version 需要 21 或更高。
-2. 向我说明将要发生的变更(全局安装 opencli 命令行工具),取得我确认后继续。
-3. 安装 OpenCLI 命令行:
-   npm install -g @jackwener/opencli
-4. 执行 opencli --version 确认可用。
-5. LinkedIn 插件不单独分发,随「SOHO 猎头人才寻访」技能包安装——引导我到 ${origin || "猎策分发站"} 安装该技能包,安装器会自动注册插件。
-6. 完成后执行 opencli plugin list,确认列表里出现 hunter-linkedin。
-
-如果任何一步失败,把报错原样告诉我。`;
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [onClose]);
-
-  const copy = async () => {
-    await navigator.clipboard.writeText(installPrompt);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1800);
-  };
-
-  return (
-    <div
-      className={styles.runtimeBackdrop}
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-    >
-      <section className={styles.runtimeModal} role="dialog" aria-modal="true" aria-labelledby="runtime-modal-title">
-        <button className={styles.runtimeClose} onClick={onClose} aria-label="关闭">
-          ×
-        </button>
-        <h2 id="runtime-modal-title">运行环境：OpenCLI + Chrome 扩展 + 插件</h2>
-        <p className={styles.runtimeLead}>
-          寻访技能的数据采集靠三件东西配合：OpenCLI 命令行（驱动浏览器）、
-          OpenCLI 的 Chrome 扩展（读取你浏览器里的登录态）、
-          <span className={styles.nb}>hunter-linkedin</span> 插件（LinkedIn
-          搜索、评估和报告命令）。
-        </p>
-
-        <div className={styles.runtimeColumns}>
-          <div className={styles.runtimeBlock}>
-            <h3><span className={styles.stepBadge}>1</span>怎么装</h3>
-            <p>
-              复制下面的 Prompt 发给你的 Agent（WorkBuddy / Claude Code /
-              Codex），它会装好 OpenCLI 命令行，并带你安装「SOHO
-              猎头人才寻访」技能包（<span className={styles.nb}>hunter-linkedin</span> 插件随包自动装好）。
-            </p>
-            <div className={styles.runtimeCode}>
-              <pre>{installPrompt}</pre>
-              <button onClick={copy}>{copied ? "已复制" : "复制"}</button>
-            </div>
-          </div>
-
-          <div className={styles.runtimeSide}>
-            <div className={styles.runtimeBlock}>
-              <h3><span className={styles.stepBadge}>2</span>Chrome 扩展（需要你手动装）</h3>
-              <p>
-                OpenCLI 通过 Chrome 扩展读取浏览器里的 LinkedIn
-                登录态，这一步只能你亲自点：打开 Chrome 应用商店，点「添加至
-                Chrome」即可。
-              </p>
-              <a
-                className={`${styles.installButton} ${styles.installButtonSecondary}`}
-                href="https://chromewebstore.google.com/detail/opencli/ildkmabpimmkaediidaifkhjpohdnifk"
-                target="_blank"
-                rel="noreferrer"
-              >
-                前往 Chrome 应用商店安装扩展 ↗
-              </a>
-            </div>
-
-            <div className={styles.runtimeBlock}>
-              <h3><span className={styles.stepBadge}>3</span>怎么确认已装好</h3>
-              <ul className={styles.checkList}>
-                <li><code>opencli --version</code> 能显示版本号</li>
-                <li>
-                  Chrome 扩展栏能看到 OpenCLI 图标（<code>chrome://extensions</code> 里已启用）
-                </li>
-                <li>
-                  <code>opencli plugin list</code> 里出现 <span className={styles.nb}>hunter-linkedin</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className={styles.runtimeBlock}>
-              <h3>什么时候需要重装</h3>
-              <p>换新电脑、插件异常或 LinkedIn 页面结构升级导致采集失败时,重新安装一次寻访包即可修复。</p>
-            </div>
-          </div>
-        </div>
-
-        {onInstallSourcing && (
-          <button className={styles.installButton} onClick={onInstallSourcing}>
-            去安装寻访包
-          </button>
-        )}
-      </section>
-    </div>
   );
 }
 

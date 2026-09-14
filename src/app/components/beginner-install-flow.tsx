@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { freeInstallPrompt, freeCliCommand, windowsCliCommand } from "@/lib/prompts";
+import {
+  freeInstallPrompt,
+  freeCliCommand,
+  windowsCliCommand,
+  windowsFreeInstallPrompt,
+} from "@/lib/prompts";
 import styles from "./beginner-install-flow.module.css";
 
 interface InstallProduct {
@@ -34,14 +39,15 @@ export function BeginnerInstallFlow({ product }: { product?: InstallProduct }) {
     if (!product) return "正在获取猎策发布信息，请稍候……";
     if (!product.latestRelease) return "当前没有可安装的已发布版本。请联系管理员在后台发布 Hunter 安装包后，再回到此页面继续。";
     if (!origin) return "正在准备安装地址，请稍候……";
-    return freeInstallPrompt({
+    const input = {
       appUrl: origin,
       productName: product.name,
       productSlug: product.slug,
       version: product.latestRelease.version,
       sha256: product.latestRelease.sha256,
-    });
-  }, [origin, product]);
+    };
+    return os === "windows" ? windowsFreeInstallPrompt(input) : freeInstallPrompt(input);
+  }, [origin, os, product]);
 
   const terminalCommand = useMemo(() => {
     if (!product || !origin) return "";
@@ -67,7 +73,7 @@ export function BeginnerInstallFlow({ product }: { product?: InstallProduct }) {
   }
 
   const opencliInstallPrompt = `请帮我安装 Hunter 所需的 OpenCLI，不要跳过任何验证：
-1. 先运行 node --version；OpenCLI 需要 Node.js 21 或更高版本。若版本不够或未安装，请先说明要安装什么，等我确认后再继续。
+1. 先运行 node --version；OpenCLI 需要 Node.js 20 或更高版本。若版本不够或未安装，请先说明要安装什么，等我确认后再继续。
 2. 安装 OpenCLI：npm install -g @jackwener/opencli
 3. 安装后运行 opencli --version，确认命令真实可用。
 4. 把 Node.js 版本和 OpenCLI 版本的真实输出发给我。`;
@@ -92,7 +98,7 @@ export function BeginnerInstallFlow({ product }: { product?: InstallProduct }) {
           <Info title="推荐交给 AI 助手安装">不用自己输入命令。WorkBuddy、Codex、Claude Code 都可以。</Info>
         </Step>}
         {step === 1 && <Step tag="第 2 步，共 6 步" title="安装 OpenCLI" lead="OpenCLI 是猎策连接 LinkedIn 的基础工具；这一阶段必须先把它装好。">
-          <Info title="会安装什么？">先确认 Node.js 21 或更高版本，再执行 <code>npm install -g @jackwener/opencli</code> 安装 OpenCLI。</Info>
+          <Info title="会安装什么？">先确认 Node.js 20 或更高版本，再执行 <code>npm install -g @jackwener/opencli</code> 安装 OpenCLI。</Info>
           <CopyBox text={opencliInstallPrompt} copied={copied === "opencli"} onCopy={() => copy("opencli", opencliInstallPrompt)} />
           <Check checked={confirmed} onChange={setConfirmed} title="AI 已返回 OpenCLI 的真实版本号">必须看到 <code>opencli --version</code> 的真实输出；只说“已安装”不算完成。</Check>
           <Help>如果没有 AI 助手，请在 {os === "windows" ? "Windows PowerShell" : "macOS 终端"}运行上面的安装命令；遇到权限或 Node.js 版本问题，把完整报错交给 AI 处理。</Help>
@@ -119,7 +125,7 @@ export function BeginnerInstallFlow({ product }: { product?: InstallProduct }) {
           </> : <Info title="等待安装包发布">这不是你的电脑或 OpenCLI 的问题。管理员需在发布后台上传并发布 Hunter 安装包；发布后刷新本页即可继续。</Info>}
         </Step>}
         {step === 5 && <Step tag="安装完成" title="猎策已经准备好了" lead="环境、浏览器、LinkedIn 和 Hunter Skill 均已完成验证。">
-          <ul className={styles.results}><li>✓ Node.js 21+</li><li>✓ OpenCLI 已安装并返回版本号</li><li>✓ Chrome 扩展与 opencli doctor</li><li>✓ LinkedIn 真实账号连接</li><li>✓ Hunter 插件和 3 个 Skill</li></ul>
+          <ul className={styles.results}><li>✓ Node.js 20+</li><li>✓ OpenCLI 已安装并返回版本号</li><li>✓ Chrome 扩展与 opencli doctor</li><li>✓ LinkedIn 真实账号连接</li><li>✓ Hunter 插件和 3 个 Skill</li></ul>
           <p>现在把一份 JD 发给 AI，然后说：</p><CopyBox text="帮我梳理这个职位，并在 LinkedIn 上寻找合适的候选人。" copied={copied === "start"} onCopy={() => copy("start", "帮我梳理这个职位，并在 LinkedIn 上寻找合适的候选人。")} />
         </Step>}
         {copied === "error" && <p className={styles.copyError}>复制失败，请手动选中文字复制。</p>}

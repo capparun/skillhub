@@ -92,13 +92,19 @@ function DistributionPage() {
 
   const list = products.length > 0 ? products : FALLBACK_PRODUCTS;
 
-  // 登录回跳:/login?next=/?install=<slug> → 自动打开对应技能的安装弹窗
+  // 登录回跳：寻访产品进入新手向导，其余产品打开对应安装弹窗。
   useEffect(() => {
     const slug = searchParams.get("install");
     if (!slug || !loaded) return;
     const target = list.find((p) => p.slug === slug);
     if (target) {
-      const timer = window.setTimeout(() => setSelected(target), 0);
+      const timer = window.setTimeout(() => {
+        if (target.slug === "soho-sourcing") {
+          document.getElementById("install-center")?.scrollIntoView({ behavior: "smooth" });
+        } else {
+          setSelected(target);
+        }
+      }, 0);
       return () => window.clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

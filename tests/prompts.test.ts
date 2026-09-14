@@ -4,6 +4,7 @@ import {
   freeInstallPrompt,
   freeCliCommand,
   windowsCliCommand,
+  windowsFreeInstallPrompt,
   windowsPaidCliCommand,
   paidInstallPrompt,
   paidCliCommand,
@@ -66,4 +67,14 @@ test('Windows 命令行命令指向 install.ps1 并传递参数', () => {
     windowsPaidCliCommand(paidInput),
     "$script = irm https://skills.example.com/install.ps1; & ([scriptblock]::Create($script)) -Product 'soho-sourcing' -Token 'hunter_it_testtoken123'",
   );
+});
+
+test('Windows 免费安装 Prompt 只调用 PowerShell 官方入口', () => {
+  const prompt = windowsFreeInstallPrompt(freeInput);
+  assert.ok(prompt.includes('https://skills.example.com/install.ps1'));
+  assert.ok(prompt.includes("-Product 'hunter-align'"));
+  assert.ok(prompt.includes('Node.js 20'));
+  assert.ok(prompt.includes('a'.repeat(64)));
+  assert.ok(!prompt.includes('shasum'));
+  assert.ok(!prompt.includes('curl -'));
 });

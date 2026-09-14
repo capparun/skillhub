@@ -45,6 +45,21 @@ export function windowsCliCommand(input: Pick<FreePromptInput, 'appUrl' | 'produ
   return `$script = irm ${input.appUrl}/install.ps1; & ([scriptblock]::Create($script)) -Product '${input.productSlug}'`;
 }
 
+export function windowsFreeInstallPrompt(input: FreePromptInput): string {
+  return `请帮我在 Windows 上安装「${input.productName}」技能（猎策官方）。
+
+要求：
+1. 先运行 node --version，需要 Node.js 20 或更高版本；把真实版本输出告诉我。
+2. 运行下面这一条 PowerShell 命令。不要自行改写安装步骤或手工复制文件：
+   ${windowsCliCommand(input)}
+3. 官方脚本会自动获取 v${input.version}、校验 SHA-256、安装插件和 Skills，并运行 doctor。
+4. 把安装脚本和 doctor 的真实输出发给我；只有全部显示通过才算完成。
+5. 如果 Agent 沙箱禁止写入用户目录，不要反复尝试或跳过检查。把同一条 PowerShell 命令交给我，让我在普通 PowerShell 中执行一次。
+
+预期安装包 SHA-256：${input.sha256}
+如果任何一步失败，把完整报错原样告诉我。`;
+}
+
 export function windowsPaidCliCommand(input: Pick<PaidPromptInput, 'appUrl' | 'productSlug' | 'token'>): string {
   return `$script = irm ${input.appUrl}/install.ps1; & ([scriptblock]::Create($script)) -Product '${input.productSlug}' -Token '${input.token}'`;
 }

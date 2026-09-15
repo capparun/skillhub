@@ -15,9 +15,9 @@
 /* ── 顶部简介 ─────────────────────────────── */
 
 .hero {
-  width: min(880px, calc(100% - 48px));
+  width: min(1040px, calc(100% - 48px));
   margin: 0 auto;
-  padding: 52px 0 38px;
+  padding: 52px 0 32px;
 }
 
 .kicker {
@@ -97,7 +97,7 @@
 /* ── 技能列表 ─────────────────────────────── */
 
 .list {
-  width: min(880px, calc(100% - 48px));
+  width: min(1040px, calc(100% - 48px));
   margin: 0 auto;
   padding-bottom: 64px;
 }
@@ -301,7 +301,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 26px max(24px, calc((100vw - 880px) / 2));
+  padding: 26px max(24px, calc((100vw - 1040px) / 2));
   color: var(--muted);
   background: #fff;
   border-top: 1px solid var(--line);
@@ -315,7 +315,7 @@
 
 @media (max-width: 720px) {
   .hero {
-    width: min(100% - 32px, 880px);
+    width: min(100% - 32px, 1040px);
     padding: 56px 0 40px;
   }
 
@@ -328,7 +328,7 @@
   }
 
   .list {
-    width: min(100% - 32px, 880px);
+    width: min(100% - 32px, 1040px);
     padding-bottom: 60px;
   }
 

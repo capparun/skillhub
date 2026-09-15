@@ -77,6 +77,11 @@ export function BeginnerInstallFlow({ product }: { product?: InstallProduct }) {
 2. 安装 OpenCLI：npm install -g @jackwener/opencli
 3. 安装后运行 opencli --version，确认命令真实可用。
 4. 把 Node.js 版本和 OpenCLI 版本的真实输出发给我。`;
+  const browserConnectPrompt = `请帮我检查 OpenCLI 是否已经连接 Chrome 浏览器：
+1. 运行 opencli doctor。
+2. 根据真实输出确认 Chrome 扩展和浏览器连接是否正常，不要只回复“已连接”。
+3. 如果检查失败，请告诉我具体是哪一项失败，并一步一步指导我处理。
+4. 检查完成后，把 opencli doctor 的真实结果发给我。`;
   const linkedinPrompt = "请执行 opencli linkedin whoami -f json，确认是否能真实读取我当前登录的 LinkedIn 账号。不要修改任何数据。如果失败，请判断是未登录、Chrome 扩展未启用，还是 OpenCLI 未连接浏览器。";
 
   return <section className={styles.section} id="install-center" aria-labelledby="install-heading">
@@ -106,9 +111,10 @@ export function BeginnerInstallFlow({ product }: { product?: InstallProduct }) {
         {step === 2 && <Step tag="第 3 步，共 6 步" title="连接 Chrome 浏览器" lead="猎策通过 OpenCLI 扩展使用你已经登录的网站。">
           <Info title="1. 安装 OpenCLI Chrome 扩展"><a href="https://chromewebstore.google.com/detail/opencli/ildkmabpimmkaediidaifkhjpohdnifk" target="_blank" rel="noreferrer">打开 Chrome 应用商店 ↗</a></Info>
           <Info title="2. 确认扩展已启用">在 Chrome 右上角的扩展菜单中，确认能看到 OpenCLI 图标。</Info>
-          <Info title="3. 验证浏览器已连接">让 AI 或在终端运行 <code>opencli doctor</code>，确认浏览器连接检查通过。</Info>
-          <Check checked={confirmed} onChange={setConfirmed} title="扩展已连接，OpenCLI doctor 检查通过">如果没看到图标或 doctor 报浏览器连接错误，请先在扩展菜单中将它固定并重新打开 LinkedIn。</Check>
-          <Help>如果 Chrome 商店打不开、扩展未启用或图标不见了，这里提供对应排查方法。</Help>
+          <Info title="3. 让 AI 帮你检查连接">复制下面这段话发给你的 AI 助手，它会替你运行检查并告诉你结果。</Info>
+          <CopyBox text={browserConnectPrompt} copied={copied === "browser"} onCopy={() => copy("browser", browserConnectPrompt)} />
+          <Check checked={confirmed} onChange={setConfirmed} title="AI 已告诉我浏览器连接正常">必须看到 AI 返回的真实检查结果；只说“应该可以”不算完成。</Check>
+          <Help>没有 AI 助手时，才需要在终端运行 <code>opencli doctor</code>。如果 Chrome 商店打不开、扩展未启用或图标不见了，请先处理这些问题。</Help>
         </Step>}
         {step === 3 && <Step tag="第 4 步，共 6 步" title="确认 LinkedIn 登录" lead="先在 Chrome 中登录 LinkedIn，再做一次真实账号读取。">
           <CopyBox text={linkedinPrompt} copied={copied === "linkedin"} onCopy={() => copy("linkedin", linkedinPrompt)} />

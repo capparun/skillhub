@@ -56,6 +56,7 @@ target/
 coverage/
 dist/
 node_modules/
+next-env.d.ts
 *.tsbuildinfo
 package-lock.json
 !/package-lock.json

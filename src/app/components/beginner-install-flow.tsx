@@ -6,6 +6,9 @@ import {
   freeCliCommand,
   windowsCliCommand,
   windowsFreeInstallPrompt,
+  staticCliInstallPrompt,
+  staticCliCommand,
+  type StaticCliRelease,
 } from "@/lib/prompts";
 import styles from "./beginner-install-flow.module.css";
 
@@ -24,6 +27,7 @@ export function BeginnerInstallFlow({ product }: { product?: InstallProduct }) {
   const [copied, setCopied] = useState("");
   const [advanced, setAdvanced] = useState(false);
   const [origin, setOrigin] = useState("");
+  const [staticRelease, setStaticRelease] = useState<StaticCliRelease | null>(null);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -35,26 +39,50 @@ export function BeginnerInstallFlow({ product }: { product?: InstallProduct }) {
     return () => window.cancelAnimationFrame(frame);
   }, []);
 
+  // 数据库尚无发布记录时，降级到 public/download/latest.json 的静态安装包
+  useEffect(() => {
+    if (!product || product.latestRelease || !origin) return;
+    let alive = true;
+    fetch("/download/latest.json")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (alive && data?.version && data?.file) {
+          setStaticRelease({ version: data.version, file: data.file, sha256: data.sha256 || "" });
+        }
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [product, origin]);
+
+  const effectiveRelease = product?.latestRelease
+    ?? (staticRelease ? { version: staticRelease.version, sha256: staticRelease.sha256 } : null);
+
   const installPrompt = useMemo(() => {
     if (!product) return "正在获取猎策发布信息，请稍候……";
-    if (!product.latestRelease) return "当前没有可安装的已发布版本。请联系管理员在后台发布 Hunter 安装包后，再回到此页面继续。";
+    if (!effectiveRelease) return "当前没有可安装的已发布版本。请联系管理员在后台发布 Hunter 安装包后，再回到此页面继续。";
     if (!origin) return "正在准备安装地址，请稍候……";
+    if (!product.latestRelease && staticRelease) {
+      return staticCliInstallPrompt({ appUrl: origin, release: staticRelease });
+    }
     const input = {
       appUrl: origin,
       productName: product.name,
       productSlug: product.slug,
-      version: product.latestRelease.version,
-      sha256: product.latestRelease.sha256,
+      version: effectiveRelease.version,
+      sha256: effectiveRelease.sha256,
     };
     return os === "windows" ? windowsFreeInstallPrompt(input) : freeInstallPrompt(input);
-  }, [origin, os, product]);
+  }, [origin, os, product, staticRelease, effectiveRelease]);
 
   const terminalCommand = useMemo(() => {
     if (!product || !origin) return "";
+    if (!product.latestRelease && staticRelease) {
+      return staticCliCommand({ appUrl: origin, file: staticRelease.file });
+    }
     const input = { appUrl: origin, productSlug: product.slug };
     if (!os) return "";
     return os === "windows" ? windowsCliCommand(input) : freeCliCommand(input);
-  }, [origin, os, product]);
+  }, [origin, os, product, staticRelease]);
 
   function go(next: number) {
     setStep(Math.max(0, Math.min(steps.length - 1, next)));
@@ -121,12 +149,12 @@ export function BeginnerInstallFlow({ product }: { product?: InstallProduct }) {
           <Check checked={confirmed} onChange={setConfirmed} title="AI 已返回我的 LinkedIn 账号信息">必须显示真实账号信息，只有“命令执行成功”不算完成。</Check>
           <Help>读取失败时，依次检查 LinkedIn 登录、Chrome 扩展和 OpenCLI 浏览器连接。</Help>
         </Step>}
-        {step === 4 && <Step tag="第 5 步，共 6 步" title="安装猎策寻访能力" lead={product?.latestRelease ? "安装职位梳理、LinkedIn 寻访和候选人报告。" : "当前站点尚无已发布的 Hunter 安装包，发布后才能继续安装。"}>
-          {product?.latestRelease ? <>
+        {step === 4 && <Step tag="第 5 步，共 6 步" title="安装猎策寻访能力" lead={effectiveRelease ? "安装职位梳理、LinkedIn 寻访和候选人报告。" : "当前站点尚无已发布的 Hunter 安装包，发布后才能继续安装。"}>
+          {effectiveRelease ? <>
             <CopyBox text={installPrompt} copied={copied === "hunter"} onCopy={() => copy("hunter", installPrompt)} />
             <button className={styles.advanced} onClick={() => setAdvanced(!advanced)}>{advanced ? "收起手动安装" : "我想自己用终端安装（高级）"}</button>
             {advanced && <div className={styles.command}>{terminalCommand}</div>}
-            <Check checked={confirmed} onChange={setConfirmed} title="Hunter doctor 显示全部通过">插件和 3 个 Skill 都必须显示 ✓。</Check>
+            <Check checked={confirmed} onChange={setConfirmed} title={product?.latestRelease ? "Hunter doctor 显示全部通过" : "hunter-linkedin 命令已可正常使用"}>{product?.latestRelease ? "插件和 3 个 Skill 都必须显示 ✓。" : "opencli hunter-linkedin --help 必须列出 8 个命令。"}</Check>
             <Help>安装失败时，把完整报错交给 AI，不要跳过 doctor，也不要反复安装。</Help>
           </> : <Info title="等待安装包发布">这不是你的电脑或 OpenCLI 的问题。管理员需在发布后台上传并发布 Hunter 安装包；发布后刷新本页即可继续。</Info>}
         </Step>}

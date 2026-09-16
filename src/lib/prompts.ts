@@ -64,6 +64,21 @@ export function windowsPaidCliCommand(input: Pick<PaidPromptInput, 'appUrl' | 'p
   return `$script = irm ${input.appUrl}/install.ps1; & ([scriptblock]::Create($script)) -Product '${input.productSlug}' -Token '${input.token}'`;
 }
 
+export function windowsPaidInstallPrompt(input: PaidPromptInput): string {
+  return `请帮我在 Windows 上安装「${input.productName}」（猎策专业版）。
+
+要求：
+1. 先运行 node --version，需要 Node.js 20 或更高版本；把真实版本输出告诉我。
+2. 向我说明即将兑换一次性令牌、下载并校验安装包、安装技能与 OpenCLI 插件；取得我确认后继续。
+3. 确认后只运行下面这一条 PowerShell 命令。不要调用 bash、WSL 或 Git Bash，也不要自行改写安装步骤：
+   ${windowsPaidCliCommand(input)}
+4. 官方脚本会兑换令牌、校验 SHA-256、安装插件和 Skills，并运行 doctor。
+5. 把安装脚本和 doctor 的真实输出发给我；只有全部显示通过才算完成。
+6. 如果 Agent 沙箱禁止写入用户目录，不要反复尝试或跳过检查。把同一条 PowerShell 命令交给我，让我在普通 PowerShell 中执行一次。
+
+安装令牌 ${input.tokenTtlMinutes} 分钟内有效且只能兑换一次。如果失败，把完整报错原样告诉我，不要重复兑换。`;
+}
+
 export function paidInstallPrompt(input: PaidPromptInput): string {
   const { appUrl, productName, productSlug, token, tokenTtlMinutes } = input;
   return `请帮我安装「${productName}」(猎策专业版)。
@@ -88,4 +103,35 @@ ${token}
 
 export function paidCliCommand(input: Pick<PaidPromptInput, 'appUrl' | 'productSlug' | 'token'>): string {
   return `curl -fsSL ${input.appUrl}/install.sh | bash -s -- ${input.productSlug} ${input.token}`;
+}
+
+export interface StaticCliRelease {
+  version: string;
+  file: string;
+  sha256: string;
+}
+
+// 静态托管的 npm 安装包兜底提示词：当数据库里还没有发布记录时，
+// 直接引导安装 public/download/ 下的官方 tgz。npm 命令三平台一致，
+// 无需区分 mac / Windows。
+export function staticCliInstallPrompt(input: { appUrl: string; release: StaticCliRelease }): string {
+  const { appUrl, release } = input;
+  return `请帮我在本机安装猎策 LinkedIn 寻访能力（猎策官方安装包）。
+
+步骤：
+1. 确认 Node.js 20 或更高：node --version，把真实版本告诉我。
+2. 运行这一条命令安装：
+   npm install -g ${appUrl}/download/${release.file}
+3. 安装完成后运行 opencli hunter-linkedin --help 验证：
+   必须能看到 scout、normalize、evaluate、report、company、company-id-lookup、recruiter-scout、setup 这 8 个命令；
+   不应再出现 xray、profile-view、list、tag、stats、export 这些旧命令。
+4. 运行 opencli doctor 确认浏览器连接正常。
+5. 把每一步的真实输出原样发给我，全部通过才算完成。
+
+安装包版本 v${release.version}，SHA-256：${release.sha256}
+如果任何一步失败，把完整报错原样告诉我。`;
+}
+
+export function staticCliCommand(input: { appUrl: string; file: string }): string {
+  return `npm install -g ${input.appUrl}/download/${input.file}`;
 }

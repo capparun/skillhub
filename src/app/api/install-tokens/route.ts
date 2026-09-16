@@ -5,7 +5,12 @@ import { checkEntitlement } from '@/lib/server/entitlements';
 import { randomToken } from '@/lib/server/tokens';
 import { audit } from '@/lib/server/audit';
 import { HttpError, errorResponse, json } from '@/lib/server/http';
-import { paidInstallPrompt, paidCliCommand, windowsPaidCliCommand } from '@/lib/prompts';
+import {
+  paidInstallPrompt,
+  paidCliCommand,
+  windowsPaidCliCommand,
+  windowsPaidInstallPrompt,
+} from '@/lib/prompts';
 
 export const runtime = 'nodejs';
 
@@ -58,6 +63,13 @@ export async function POST(request: Request) {
       redeemUrl: `${appUrl}/api/install-tokens/${plain}/redeem`,
       product: { slug: productSlug, name: product.name, version },
       installPrompt: paidInstallPrompt({
+        appUrl,
+        productName: product.name,
+        productSlug,
+        token: plain,
+        tokenTtlMinutes: ttlMinutes,
+      }),
+      windowsInstallPrompt: windowsPaidInstallPrompt({
         appUrl,
         productName: product.name,
         productSlug,

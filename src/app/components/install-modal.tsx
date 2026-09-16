@@ -4,7 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { api, ApiError, SessionInfo } from "@/lib/client/api";
-import { freeInstallPrompt, freeCliCommand, windowsCliCommand } from "@/lib/prompts";
+import {
+  freeInstallPrompt,
+  freeCliCommand,
+  windowsCliCommand,
+  windowsFreeInstallPrompt,
+} from "@/lib/prompts";
 import styles from "./install-modal.module.css";
 
 export interface ModalProduct {
@@ -17,6 +22,7 @@ export interface ModalProduct {
 
 interface PaidInstall {
   installPrompt: string;
+  windowsInstallPrompt: string;
   cliCommand: string;
   windowsCliCommand: string;
   expiresAt: string;
@@ -44,12 +50,24 @@ export function InstallModal({
 }: InstallModalProps) {
   const isFree = product.isPublic;
   const [installMode, setInstallMode] = useState<"posix" | "windows" | "agent">("posix");
+  const [windowsEnvironment, setWindowsEnvironment] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState("");
   const [paidInstall, setPaidInstall] = useState<PaidInstall | null>(null);
   const [paidError, setPaidError] = useState("");
   const [paidLoading, setPaidLoading] = useState(!isFree && !!me);
   const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const platform = [navigator.userAgent, navigator.platform].join(" ").toLowerCase();
+      if (platform.includes("win")) {
+        setWindowsEnvironment(true);
+        setInstallMode("windows");
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   // 付费弹窗:登录后自动签发一次性安装令牌
   useEffect(() => {
@@ -110,15 +128,19 @@ export function InstallModal({
       version: product.latestRelease.version,
       sha256: product.latestRelease.sha256,
     };
-    if (installMode === "agent") return freeInstallPrompt(input);
+    if (installMode === "agent") {
+      return windowsEnvironment ? windowsFreeInstallPrompt(input) : freeInstallPrompt(input);
+    }
     return installMode === "windows" ? windowsCliCommand(input) : freeCliCommand(input);
-  }, [isFree, product, installMode]);
+  }, [isFree, product, installMode, windowsEnvironment]);
 
   const installText = isFree
     ? freeInstallText
     : paidInstall
       ? installMode === "agent"
-        ? paidInstall.installPrompt
+        ? windowsEnvironment
+          ? paidInstall.windowsInstallPrompt
+          : paidInstall.installPrompt
         : installMode === "windows"
           ? paidInstall.windowsCliCommand
           : paidInstall.cliCommand
@@ -198,6 +220,7 @@ export function InstallModal({
               className={installMode === "posix" ? styles.activeTab : ""}
               onClick={() => {
                 setInstallMode("posix");
+                setWindowsEnvironment(false);
                 setCopied(false);
                 setCopyError("");
               }}
@@ -210,6 +233,7 @@ export function InstallModal({
               className={installMode === "windows" ? styles.activeTab : ""}
               onClick={() => {
                 setInstallMode("windows");
+                setWindowsEnvironment(true);
                 setCopied(false);
                 setCopyError("");
               }}

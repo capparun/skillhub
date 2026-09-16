@@ -6,6 +6,7 @@ import {
   windowsCliCommand,
   windowsFreeInstallPrompt,
   windowsPaidCliCommand,
+  windowsPaidInstallPrompt,
   paidInstallPrompt,
   paidCliCommand,
 } from '../src/lib/prompts';
@@ -77,4 +78,14 @@ test('Windows 免费安装 Prompt 只调用 PowerShell 官方入口', () => {
   assert.ok(prompt.includes('a'.repeat(64)));
   assert.ok(!prompt.includes('shasum'));
   assert.ok(!prompt.includes('curl -'));
+});
+
+test('Windows 付费安装 Prompt 不依赖 Bash 并调用 PowerShell 官方入口', () => {
+  const prompt = windowsPaidInstallPrompt(paidInput);
+  assert.ok(prompt.includes('https://skills.example.com/install.ps1'));
+  assert.ok(prompt.includes("-Product 'soho-sourcing'"));
+  assert.ok(prompt.includes("-Token 'hunter_it_testtoken123'"));
+  assert.ok(prompt.includes('不要调用 bash、WSL 或 Git Bash'));
+  assert.ok(!prompt.includes('curl -'));
+  assert.ok(!prompt.includes('shasum'));
 });

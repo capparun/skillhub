@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>猎策 LinkedIn · 业务流程简图</title>
+<style>
+:root{--paper:#f2f0ea;--card:#fffdf8;--ink:#202824;--muted:#66706b;--line:#d8d4ca;--green:#215c49;--green-soft:#e8f0ec;--orange:#d66532;--orange-soft:#faeee7;--blue:#355f8d;--blue-soft:#eaf0f6}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Avenir Next","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;font-size:16px;line-height:1.65}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.17;background-image:radial-gradient(#756f62 .5px,transparent .5px);background-size:8px 8px}
+main{position:relative;max-width:1380px;margin:auto;padding:44px 28px 70px}
+.masthead{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:end;padding-top:18px;border-top:5px solid var(--ink)}
+.eyebrow{color:var(--orange);font-size:13px;font-weight:800;letter-spacing:.15em}.masthead h1{max-width:760px;margin:8px 0 12px;font-family:"Songti SC","STSong",Georgia,serif;font-size:clamp(38px,6vw,72px);font-weight:600;letter-spacing:-.045em;line-height:1.05}.subtitle{max-width:780px;margin:0;color:var(--muted);font-size:17px}.edition{padding-left:28px;border-left:1px solid var(--line);text-align:right}.edition strong{display:block;font:700 28px Georgia,serif}.edition span{color:var(--muted);font-size:14px}
+.plain-rule{display:flex;flex-wrap:wrap;gap:10px;margin:28px 0 18px}.plain-rule span{padding:6px 10px;border:1px solid var(--line);background:rgba(255,253,248,.6);color:var(--muted);font-size:14px}.plain-rule b{color:var(--ink)}
+.flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);background:var(--card);box-shadow:0 16px 44px rgba(48,43,33,.06)}
+.phase{position:relative;padding:24px}.phase+.phase{border-left:1px solid var(--line)}.phase-head{display:flex;align-items:baseline;gap:12px;margin-bottom:18px}.phase-no{color:var(--orange);font:700 13px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em}.phase h2{margin:0;font-family:"Songti SC","STSong",Georgia,serif;font-size:25px}.phase-note{margin:-10px 0 18px;color:var(--muted);font-size:14px}
+.steps{display:grid;gap:12px}.step{position:relative;min-height:150px;padding:16px 16px 14px;border:1px solid var(--line);border-radius:3px;background:#fff}.step:after{content:"↓";position:absolute;left:50%;bottom:-23px;z-index:2;color:#9b968c;font-size:18px}.step:last-child:after{display:none}.step-top{display:flex;align-items:center;gap:9px}.step-no{display:grid;width:27px;height:27px;place-items:center;border:1px solid currentColor;border-radius:50%;color:var(--green);font:700 12px Georgia,serif}.step h3{margin:0;font-size:17px}.state{margin-left:auto;padding:2px 7px;border-radius:99px;background:var(--green-soft);color:var(--green);font-size:12px;font-weight:800}.state.verify{background:var(--orange-soft);color:#9b4e28}.step p{margin:9px 0 0;color:var(--muted);font-size:15px;line-height:1.6}.deliverable{display:block;margin-top:9px;color:var(--ink);font-size:14px;font-weight:700}.human{margin-top:10px;padding:7px 9px;border-left:3px solid var(--orange);background:var(--orange-soft);color:#814424;font-size:14px}.sample-link{display:inline-flex;margin-top:10px;padding:5px 8px;border:1px solid #b7c9dc;border-radius:3px;background:var(--blue-soft);color:var(--blue);font-size:14px;font-weight:800;text-decoration:none}.sample-link:hover{border-color:var(--blue);background:#dfeaf5}.sample-link:focus-visible{outline:3px solid rgba(53,95,141,.25);outline-offset:2px}
+.handoff{margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:18px}.handoff section{padding:20px 22px;border-top:3px solid var(--green);background:var(--card)}.handoff section:last-child{border-color:var(--orange)}.handoff h2{margin:0 0 8px;font-family:"Songti SC","STSong",Georgia,serif;font-size:22px}.handoff p{margin:0;color:var(--muted);font-size:15px}.decisions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:15px}.decision{padding:10px;border:1px solid #ead3c7;background:var(--orange-soft);font-size:14px}.decision b{display:block;color:#874522}
+.boundary{margin-top:18px;padding:14px 16px;border:1px dashed #c4bca9;background:rgba(255,253,248,.55);color:var(--muted);font-size:14px}.boundary b{color:var(--ink)}footer{margin-top:26px;padding-top:12px;border-top:1px solid var(--line);color:#7b817e;font-size:13px}
+@media(max-width:980px){.masthead{grid-template-columns:1fr}.edition{text-align:left;border-left:0;padding-left:0}.flow{grid-template-columns:1fr}.phase+.phase{border-left:0;border-top:1px solid var(--line)}.handoff{grid-template-columns:1fr}}
+@media(max-width:620px){main{padding:28px 15px 46px}.phase{padding:18px}.decisions{grid-template-columns:1fr}}@media print{body{background:white}body:before{display:none}main{max-width:none;padding:0}.flow{box-shadow:none}.sample-link{color:var(--blue)}}
+</style></head><body><main>
+<header class="masthead"><div><div class="eyebrow">HUNTER · LINKEDIN BUSINESS FLOW</div><h1>从岗位需求，到一次安全触达</h1><p class="subtitle">系统负责发现、整理和提供证据；人负责决定什么时候开始、联系谁，以及最终发送哪一版内容。</p></div><div class="edition"><strong>9 步</strong><span>当前业务能力 · 2026-09-21</span></div></header>
+<div class="plain-rule" aria-label="阅读说明"><span><b>绿色</b>：当前可用</span><span><b>橙色</b>：核心可用，仍需更多真实场景验收</span><span><b>审核范例</b>：点击即可查看交付样式</span></div>
+<section class="flow" aria-label="Hunter LinkedIn 九步业务流程">
+<article class="phase"><div class="phase-head"><span class="phase-no">01</span><h2>需求与寻访</h2></div><p class="phase-note">先把“要找什么人”说清楚，再开始搜索。</p><div class="steps">
+<section class="step"><div class="step-top"><span class="step-no">1</span><h3>明确岗位需求</h3><span class="state">可用</span></div><p>整理 JD、业务背景和已有招聘判断，明确人才画像与待确认信息。</p><span class="deliverable">交付：需求对齐报告</span><a class="sample-link" href="examples/alignment-report-example.html">查看需求对齐范例 →</a></section>
+<section class="step"><div class="step-top"><span class="step-no">2</span><h3>确认寻访方案</h3><span class="state">可用</span></div><p>确认从哪里找、如何筛选、如何评分，以及本轮需要多少候选人。</p><div class="human">由你确认画像、渠道与本轮启动授权</div><a class="sample-link" href="examples/sourcing-plan-example.html">查看寻访方案范例 →</a></section>
+<section class="step"><div class="step-top"><span class="step-no">3</span><h3>发现并整理候选人</h3><span class="state">可用</span></div><p>组合公开搜索与 LinkedIn 搜索，合并不同来源并去除重复人选。</p><span class="deliverable">交付：统一候选人池</span></section>
+</div></article>
+<article class="phase"><div class="phase-head"><span class="phase-no">02</span><h2>评估与短名单</h2></div><p class="phase-note">先低成本初评，再把详情读取留给更值得的人。</p><div class="steps">
+<section class="step"><div class="step-top"><span class="step-no">4</span><h3>列表初评</h3><span class="state">可用</span></div><p>按照已确认的硬条件和评分规则，筛出值得进一步了解的人选。</p><span class="deliverable">交付：初选名单</span></section>
+<section class="step"><div class="step-top"><span class="step-no">5</span><h3>深读与复评</h3><span class="state verify">需验收</span></div><p>选择性读取工作经历、项目和公开内容，用更完整证据重新评分。</p><span class="deliverable">交付：最终短名单报告</span><a class="sample-link" href="examples/candidate-report-example.html">查看候选人报告范例 →</a></section>
+<section class="step"><div class="step-top"><span class="step-no">6</span><h3>确认可触达人选</h3><span class="state">可用</span></div><p>系统说明推荐理由和证据缺口，但不会自行决定联系谁。</p><div class="human">由你逐人批准谁可以进入触达</div></section>
+</div></article>
+<article class="phase"><div class="phase-head"><span class="phase-no">03</span><h2>触达与闭环</h2></div><p class="phase-note">先看真实关系状态，再生成内容，最后一次性执行。</p><div class="steps">
+<section class="step"><div class="step-top"><span class="step-no">7</span><h3>核验关系并生成方案</h3><span class="state verify">需验收</span></div><p>判断是连接、发消息、等待，还是生成邮件草稿，并结合岗位与候选人事实写内容。</p><span class="deliverable">交付：候选人专属渠道与内容</span></section>
+<section class="step"><div class="step-top"><span class="step-no">8</span><h3>确认渠道与内容</h3><span class="state">可用</span></div><p>完整展示候选人、渠道和待发内容；任何变化都会使旧审批失效。</p><div class="human">由你确认这一位候选人的这一版内容</div></section>
+<section class="step"><div class="step-top"><span class="step-no">9</span><h3>安全执行与防重</h3><span class="state verify">需验收</span></div><p>发送前重新检查页面状态，只执行一次，并记录成功、失败或待核验结果。</p><span class="deliverable">交付：可追溯的触达台账</span></section>
+</div></article>
+</section>
+<section class="handoff"><section><h2>系统负责什么</h2><p>发现候选人、整理资料、解释评分、核验关系、生成个性化内容、执行前预检和防止重复触达。</p></section><section><h2>人始终决定什么</h2><div class="decisions"><div class="decision"><b>第一次决定</b>是否启动本轮搜索</div><div class="decision"><b>第二次决定</b>哪些候选人可以联系</div><div class="decision"><b>第三次决定</b>发送哪个渠道和内容版本</div></div></section></section>
+<div class="boundary"><b>当前边界：</b>LinkedIn 原子发送已经完成真实操作验证；不同账号类型与关系场景仍需扩展验收矩阵；统一执行链仍待整链真机验收；邮件只生成已验证地址的草稿，不自动发送。</div>
+<footer>本页只解释业务逻辑，不展示命令和技术分层。技术实现状态请查看《业务与技术开发地图》。</footer>
+</main></body></html>

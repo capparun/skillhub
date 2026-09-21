@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>猎策 LinkedIn PRD · 业务与技术开发地图</title>
+<style>
+:root{--paper:#f5f5f5;--card:#fff;--ink:#2d3142;--muted:#4f5d75;--soft:#8794a8;--line:#e3e7ee;--accent:#eb6c36;
+--skill:#2f7d55;--skill-t:#edf4ee;--plugin:#eb6c36;--plugin-t:#fff2ec;--official:#3b6ea5;--official-t:#eef3fb;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",Arial,sans-serif}
+main{max-width:1600px;margin:0 auto;padding:20px 16px 40px}
+h1{margin:0;font-size:25px}
+.lead{margin:7px 0 12px;color:var(--muted);font-size:14px;line-height:1.65}
+.toolbar{display:flex;gap:8px;align-items:center;margin:0 0 10px;flex-wrap:wrap}
+.toolbar button{border:1px solid #c9ced8;background:#fff;border-radius:7px;padding:7px 12px;font-size:14px;cursor:pointer;color:#2d3142}
+.toolbar button:hover{background:#eef1f6}
+.hint{font-size:14px;color:var(--soft)}
+.business-workbench{margin:14px 0 16px;border-top:4px solid var(--ink);background:#fff;box-shadow:0 10px 28px rgba(45,49,66,.05)}
+.business-intro{display:flex;align-items:end;justify-content:space-between;gap:20px;padding:18px 20px 14px;border-bottom:1px solid var(--line)}
+.business-intro small{display:block;margin-bottom:4px;color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.12em}.business-intro h2{margin:0;font-family:"Songti SC","STSong",Georgia,serif;font-size:25px;font-weight:600}.business-intro p{max-width:560px;margin:0;color:var(--muted);font-size:14px;line-height:1.6;text-align:right}
+.business-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-bottom:1px solid var(--line)}
+.business-phase{padding:18px 20px 22px}.business-phase+.business-phase{border-left:1px solid var(--line)}
+.business-phase-head{display:flex;align-items:baseline;gap:8px;margin-bottom:12px}.business-phase-head b{font:700 13px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--accent)}.business-phase-head span{font-size:16px;font-weight:800}
+.business-steps{display:grid;gap:9px}.business-step{position:relative;width:100%;border:1px solid #dfe3ea;border-radius:7px;background:#fbfbfa;padding:11px 12px;text-align:left;color:var(--ink);cursor:pointer;transition:transform .15s,border-color .15s,background .15s}.business-step:hover{transform:translateX(3px);border-color:#aeb8c7}.business-step.selected{border-color:var(--accent);background:#fff7f2;box-shadow:inset 3px 0 var(--accent)}.business-step:focus-visible{outline:3px solid rgba(235,108,54,.22);outline-offset:2px}.business-step-top{display:flex;align-items:center;gap:8px}.business-step-num{color:var(--soft);font:700 12px ui-monospace,SFMono-Regular,Menlo,monospace}.business-step-title{font-size:15px;font-weight:800}.business-step-state{margin-left:auto;font-size:12px;font-weight:700;color:var(--skill)}.business-step-state.partial{color:#a86a1f}.business-step-output{display:block;margin:5px 0 0 27px;color:var(--muted);font-size:14px;line-height:1.45}
+.business-detail{padding:20px;display:grid;grid-template-columns:minmax(220px,.75fr) minmax(0,1.25fr);gap:28px}.business-detail h3{margin:0 0 7px;font-family:"Songti SC","STSong",Georgia,serif;font-size:23px}.business-detail p{margin:0;color:var(--muted);font-size:15px;line-height:1.7}.business-outcome{margin-top:14px;padding:10px 12px;border-left:3px solid var(--accent);background:#fff7f2;color:#3d4657;font-size:14px;line-height:1.6}.implementation-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}.implementation-head b{font-size:14px}.implementation-head span{color:var(--soft);font-size:13px}.implementation-list{display:grid;gap:7px}.implementation-item{display:grid;grid-template-columns:82px minmax(0,1fr) auto;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:#fff}.implementation-lane{font-size:12px;font-weight:800}.implementation-lane.skill{color:var(--skill)}.implementation-lane.plugin{color:#b04a1c}.implementation-lane.official{color:var(--official)}.implementation-copy{min-width:0}.implementation-copy b{display:block;font-size:14px}.implementation-copy code{display:block;overflow:hidden;color:var(--soft);font-size:12px;text-overflow:ellipsis;white-space:nowrap}.implementation-actions{display:flex;align-items:center;gap:7px}.implementation-actions a,.implementation-actions button{border:0;background:transparent;color:#2c5580;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer}.implementation-actions a:hover,.implementation-actions button:hover{text-decoration:underline}
+.tech-details{margin-top:16px;border:1px solid #d8dbe2;background:#fff}.tech-details>summary{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;cursor:pointer;list-style:none}.tech-details>summary::-webkit-details-marker{display:none}.tech-details>summary span{font-size:16px;font-weight:800}.tech-details>summary span:before{content:"＋";display:inline-block;width:24px;color:var(--accent)}.tech-details[open]>summary span:before{content:"－"}.tech-details>summary small{color:var(--muted);font-size:14px}.tech-details>.layout{padding:0 14px 14px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:16px;align-items:start}
+.diagram{position:relative;min-width:0;overflow:hidden;border:1px solid #d8dbe2;background:var(--card);padding:12px 12px 16px}
+.stage{margin-bottom:14px}
+.stage>h3{margin:0 0 8px;font-size:16px}
+.lane{display:flex;align-items:stretch;border-left:4px solid var(--plugin);background:var(--plugin-t);border-top:1px solid var(--line)}
+.lane.skill{border-left-color:var(--skill);background:var(--skill-t)}
+.lane.official{border-left-color:var(--official);background:var(--official-t)}
+.lane:last-child{border-bottom:1px solid var(--line)}
+.lane-label{width:128px;flex:0 0 128px;padding:12px 10px}
+.lane-label b{display:block;font-size:14px}
+.lane.skill .lane-label b{color:#255c40}.lane.plugin .lane-label b{color:#b04a1c}.lane.official .lane-label b{color:#2c5580}
+.lane-label span{display:block;margin-top:5px;font-size:14px;color:var(--muted);line-height:1.55}
+.lane-body{min-width:0;flex:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;padding:15px 0;align-items:start}
+.card{min-width:0;background:#fff;border:1.6px solid var(--plugin);border-radius:9px;overflow:hidden;cursor:pointer;transition:box-shadow .15s,border-color .15s}
+.card:hover{box-shadow:0 3px 12px rgba(45,49,66,.12)}
+.card:focus-visible,.toolbar button:focus-visible,.preview-link:focus-visible,.html-mark:focus-visible{outline:3px solid rgba(59,110,165,.28);outline-offset:2px}
+.card.selected{border-color:var(--accent);box-shadow:0 0 0 2px rgba(235,108,54,.2)}
+.card.skill{border-color:var(--skill)}.card.official{border-color:var(--official)}
+.card-head{display:flex;align-items:center;gap:6px;padding:8px 9px;font-weight:700;font-size:14px}
+.card.skill .card-head{background:var(--skill-t)}.card.plugin .card-head{background:var(--plugin-t)}.card.official .card-head{background:var(--official-t)}
+.num{width:22px;height:22px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;border:1.1px solid currentColor;flex:0 0 22px}
+.card.skill .num{color:var(--skill)}.card.plugin .num{color:var(--plugin)}.card.official .num{color:var(--official)}
+.card-body{padding:7px 9px 8px}
+.cmd-line{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;color:#3d4657;line-height:1.5;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.more{margin-top:4px;font-size:14px;color:var(--soft)}
+.html-mark{display:inline-flex;align-items:center;margin-top:7px;padding:4px 8px;border:1px solid #b9cfe8;border-radius:99px;background:#eef5fc;color:#2c5580;font-size:14px;font-weight:700;text-decoration:none}
+.html-mark:hover{border-color:#3b6ea5;background:#e3effb}
+.helper{min-width:0;border:1.2px dashed #c9b7ad;border-radius:9px;padding:10px 12px;background:#fff;font-size:14px;color:#6b7280;line-height:1.65;cursor:default;overflow-wrap:anywhere}
+.helper b{display:block;font-size:14px;color:#8a6a58;margin-bottom:4px}
+.helper.blue{border-color:#a8bcd4}.helper.blue b{color:#3f5f85}
+.wires{position:absolute;left:0;top:0;pointer-events:none;z-index:5;overflow:visible}
+.store{margin-top:2px;border:1.3px dashed #b9aa82;border-radius:9px;background:#faf7ef;padding:10px 14px;font-size:14px;color:#8a7c58;line-height:1.65}
+.store b{color:#7a6a45;font-size:14px}
+.panel{position:sticky;z-index:10;top:12px;border:1px solid #d8dbe2;background:#fff;border-radius:10px;padding:16px 17px;min-height:240px}
+.p-empty{color:var(--soft);font-size:14px;line-height:1.8}
+.p-head{display:flex;align-items:center;gap:7px;padding-bottom:9px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.p-head .num{width:24px;height:24px;flex:0 0 24px;font-size:13px}
+.p-title{font-size:17px;font-weight:700}
+.badge{margin-left:auto;font-size:12px;font-weight:700;padding:3px 8px;border-radius:99px}
+.badge.skill{background:var(--skill-t);color:#255c40}.badge.plugin{background:var(--plugin-t);color:#b04a1c}.badge.official{background:var(--official-t);color:#2c5580}
+.p-sec{margin-bottom:11px}
+.p-k{font-size:14px;font-weight:700;margin-bottom:4px}
+.p-sec.skill .p-k{color:var(--skill)}.p-sec.plugin .p-k{color:var(--plugin)}.p-sec.official .p-k{color:var(--official)}
+.p-v{font-size:15px;color:#3d4657;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+.p-v ul{margin:0;padding-left:20px}.p-v li+li{margin-top:4px}.p-sec.notice{padding:10px 12px;border:1px solid #ead8b3;border-radius:7px;background:#fff9ed}.p-sec.notice .p-k{color:#8a5a1c}
+.p-v.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;background:#f6f7f9;border:1px solid #e6e9ef;border-radius:6px;padding:8px 10px}
+.preview-links{display:grid;gap:7px}.preview-link{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 11px;border:1px solid #c9d9ea;border-radius:7px;background:#f4f8fc;color:#2c5580;font-size:14px;font-weight:700;text-decoration:none}.preview-link:hover{border-color:#3b6ea5;background:#eaf2fa}.preview-link span:last-child{font-size:14px;font-weight:500;color:#64748b}
+.status{font-size:12px;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap}
+.card-head .status{margin-left:auto}
+.p-head .status{margin-left:2px}
+.status.done{background:#e3f0e7;color:#2f7d55;border:1px solid #bcd9c6}
+.status.partial{background:#fdf3e3;color:#a86a1f;border:1px solid #ecd9b8}
+.status.todo{background:#fdeaea;color:#b04a4a;border:1px solid #ecc8c8}
+.todo-list{margin-top:14px;border:1.3px dashed #d9b48a;background:#fffaf3;border-radius:9px;padding:12px 16px}
+.todo-list>b{display:block;color:#8a5a1c;font-size:14px;margin-bottom:6px}
+.todo-list ol{margin:0;padding-left:20px}
+.todo-list li{font-size:14px;line-height:1.7;color:#5a5344;margin-bottom:4px}
+.todo-list li b{color:#3d4657}
+.appendix{display:none}
+.note{margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.note div{padding:11px 13px;border-left:3px solid var(--accent);background:#fff;font-size:14px;line-height:1.6;color:var(--muted)}
+.note strong{color:var(--ink)}
+.supporting-body{padding:0 14px 14px}.supporting-body .note{margin-top:0}
+@media(max-width:1450px){.layout{grid-template-columns:1fr}.panel{position:static;margin-top:12px}}
+@media(max-width:1050px){.business-grid{grid-template-columns:1fr}.business-phase+.business-phase{border-left:0;border-top:1px solid var(--line)}.business-detail{grid-template-columns:1fr}.business-intro{align-items:start;flex-direction:column}.business-intro p{text-align:left}}
+@media(max-width:900px){.lane-label{width:110px;flex-basis:110px}.lane-body{grid-template-columns:repeat(4,minmax(150px,1fr));overflow-x:auto;padding-bottom:20px}}
+@media print{.toolbar,.panel,.note{display:none}.layout{grid-template-columns:1fr}.appendix{display:block}.card{break-inside:avoid}.lane-body{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head><body><main>
+<h1>猎策 LinkedIn · 业务与技术开发地图</h1>
+<p class="lead">默认先看从岗位需求到安全触达的业务闭环；点击任一步骤可查看 Skill、Hunter 插件与 OpenCLI 的实现归属。当前基线：Hunter LinkedIn CLI 2.0.6 / cskh-outreach 1.6.0 · 2026-09-20</p>
+<div class="toolbar">
+  <button id="printBtn" type="button">打印 / 导出（含全部详情）</button>
+  <span class="hint">橙色表示待整链验收；HTML 审核页可从对应步骤直接打开</span>
+</div>
+<section class="business-workbench" aria-labelledby="businessTitle">
+  <div class="business-intro"><div><small>BUSINESS × IMPLEMENTATION</small><h2 id="businessTitle">业务主线与开发状态</h2></div><p>先看业务闭环，再点开每一步查看 Skill、Hunter 插件和 OpenCLI 的实现归属与验收状态。</p></div>
+  <div class="business-grid" id="businessGrid"></div>
+  <div class="business-detail" id="businessDetail"></div>
+</section>
+<details class="tech-details" id="techDetails">
+  <summary><span>三层技术实现全图</span><small>需要排查命令、跨层调用或数据落点时展开</small></summary>
+  <div class="layout">
+    <div class="diagram" id="diagram"></div>
+    <aside class="panel" id="panel"></aside>
+  </div>
+</details>
+<section class="appendix" id="appendix"></section>
+<details class="tech-details supporting">
+  <summary><span>开发边界与待验收项</span><small>原则、风险和当前验收边界</small></summary>
+  <div class="supporting-body">
+    <div class="note">
+      <div><strong>分层原则</strong><br>业务策略、人工门和话术生成归 Skill；确定性状态、评估和台账归 Hunter CLI；页面读写优先复用 OpenCLI。</div>
+      <div><strong>两层关系状态</strong><br>搜索阶段仅保存 relationshipHint 用于排序；最终短名单获准后，才实时解析 relationshipState 用于渠道选择。</div>
+      <div><strong>阅读方式</strong><br>默认阅读业务主线；需要开发或排错时，再展开对应技术节点或完整三层泳道。</div>
+      <div><strong>安全触达</strong><br>先确认候选人可触达，再按“候选人 × 渠道 × 内容版本”确认执行；默认防重，首版不自动跟进。</div>
+    </div>
+    <div class="todo-list">
+      <b>触达闭环进展与待开发项（PRD 2026-09-20）</b>
+      <ol>
+        <li><b>两级短名单</b>：cskh-sourcing-linkedin 已强制区分初选、选择性深读、复评与最终短名单。</li>
+        <li><b>关系状态与渠道路由</b>：只读证据采集、thread-snapshot、relationship-state、outreach-plan 与 ledger check 已自动串联，并以 Shawn Ruan 完成真机核验。</li>
+        <li><b>人工确认</b>：候选人门、Connect 准备确认与逐条真实发送确认已统一到 cskh-outreach。</li>
+        <li><b>执行闭环</b>：统一执行器已接入并通过全量测试，待完成整链真机验收；邮件草稿导出已实现，只接受已验证邮箱且不连接发送器。</li>
+      </ol>
+    </div>
+  </div>
+</details>
+</main>
+<script>
+var DATA = {
+  businessPhases: [
+    { id:'phase-demand', n:'01', title:'需求与寻访', steps:[
+      { id:'b1', n:'01', title:'明确岗位需求', output:'得到可讨论的人才画像', purpose:'把零散 JD、业务背景和招聘判断收拢成一致的问题定义。', outcome:'人才画像、岗位边界和仍需确认的信息被明确记录。', nodes:['n1','n2'] },
+      { id:'b2', n:'02', title:'确认寻访方案', output:'授权本轮搜索', purpose:'确认搜索渠道、淘汰条件、评分方式和本轮投入规模。', outcome:'只有获得当次授权，系统才进入候选人发现。', nodes:['n3'] },
+      { id:'b3', n:'03', title:'发现并整理候选人', output:'形成统一候选人池', purpose:'优先使用公开搜索，再按账号能力补充 LinkedIn 浏览器搜索。', outcome:'不同来源被归一化、去重，并保留关系线索。', nodes:['n4','n5','n6','n7'] }
+    ]},
+    { id:'phase-selection', n:'02', title:'评估与短名单', steps:[
+      { id:'b4', n:'04', title:'列表初评', output:'得到初选名单', purpose:'依据已确认的硬条件和评分权重，对候选人池进行第一轮筛选。', outcome:'只让值得进一步投入的人进入详情深读。', nodes:['n8','n9'] },
+      { id:'b5', n:'05', title:'深读与复评', output:'生成最终短名单报告', purpose:'选择性读取候选人详情，用更完整证据重新判断。', outcome:'产出带评分、理由、证据缺口和 HTML 审核页的最终短名单。', nodes:['n10','n11'] },
+      { id:'b6', n:'06', title:'确认可触达人选', output:'批准进入触达的人', purpose:'由人逐一决定最终短名单中的哪些候选人可以进入触达阶段。', outcome:'未批准者保留在报告中，但不会解析渠道或生成话术。', nodes:['n12'] }
+    ]},
+    { id:'phase-outreach', n:'03', title:'触达与闭环', steps:[
+      { id:'b7', n:'07', title:'核验关系并生成方案', output:'得到候选人专属渠道与内容', purpose:'实时核验连接、邀请和会话状态，再结合 JD 与候选人证据生成内容。', outcome:'确定 Connect、LinkedIn 消息、等待或邮件草稿等候选动作。', nodes:['n13','n14','n15'] },
+      { id:'b8', n:'08', title:'确认渠道与内容', output:'批准准确的内容版本', purpose:'按“候选人 × 渠道 × 内容版本”进行第二次人工确认。', outcome:'任何收件人、渠道、正文或关系状态变化都会使原审批失效。', nodes:['n16'] },
+      { id:'b9', n:'09', title:'安全执行与防重', output:'留下可追溯结果', purpose:'执行前再次预检，只进行一次获批动作，并记录平台结果。', outcome:'成功、明确失败和不确定结果都会进入台账，避免重复触达。', nodes:['n17','n18'] }
+    ]}
+  ],
+  stages: [
+    { title: '阶段一 · 需求对齐与候选人发现', lanes: ['skill','plugin','official'] },
+    { title: '阶段二 · 两级短名单与候选人确认', lanes: ['skill','plugin','official'] },
+    { title: '阶段三 · 关系驱动的个性化触达（部分上线）', lanes: ['skill','plugin','official'] }
+  ],
+  laneMeta: {
+    skill:    { name: 'SKILL 层',       badge: 'SKILL',    sub: '业务剧本 · 可频繁迭代' },
+    plugin:   { name: 'HUNTER 插件层',  badge: 'PLUGIN',   sub: '我们开发的 opencli 插件 · 当前 15 个命令' },
+    official: { name: 'OPENCLI 官方层', badge: 'OFFICIAL', sub: '官方维护 · 长期稳定' }
+  },
+  cards: [
+    { id:'n1', stage:0, lane:'skill', col:1, n:'1', title:'JD 输入', status:'done',
+      cmd:['（对话输入，无命令）'],
+      input:['用户粘贴的 JD / 会议纪要 / 零散要求'],
+      output:['原始需求文本 raw-requirement（交给步骤 2）'],
+      logic:['新需求 → 建新项目','补充信息 → 并入已有项目'],
+      notes:['这一步只收集、不加工；细节追问留给步骤 2。'] },
+    { id:'n2', stage:0, lane:'skill', col:2, n:'2', title:'需求对齐', status:'done',
+      cmd:['cskh-align（Skill 剧本，无 CLI 调用）'],
+      input:['步骤 1 的原始需求'],
+      output:['align.html（JBF + 需求对齐审核页）','JBF（职位画像 + 人才要求）','渠道寻访方案 per channel：search / filters / scoring'],
+      htmlLinks:[{ label:'打开需求对齐报告范例', href:'examples/alignment-report-example.html', note:'示例数据 · 可交互 HTML' }],
+      logic:['关键字段缺失 → 追问补齐','五个关口任一不成立 → 不创建 SourcingRequest','五关全过 → 产出 SourcingRequest + 各渠道寻访方案'],
+      notes:['寻访方案按渠道拆分；LinkedIn 方案内包含 search 可传字段、profile 可读字段、逻辑可推导字段。'] },
+    { id:'n3', stage:0, lane:'skill', col:3, n:'3', title:'寻访编排', status:'done',
+      cmd:['cskh-sourcing-linkedin（校验授权契约与分发）'],
+      input:['步骤 2 的 SourcingRequest + LinkedIn 寻访方案'],
+      output:['sourcing-plan.html（供人工审核）','本轮执行计划 sourcing-plan.json：量级 / 轮次 / 发现路径（X-Ray 或浏览器搜索）'],
+      htmlLinks:[{ label:'打开寻访方案报告范例', href:'examples/sourcing-plan-example.html', note:'示例数据 · 可交互 HTML' }],
+      logic:['授权不满足 → 拒绝','按寻访方案拆分 search 条件与 filter 规则','默认走 4→5：公开搜索，免费、不耗额度','结果不足且有登录态 → 降级 6：浏览器搜索'],
+      notes:['search 条件只能传平台原生字段；filters 与 scoring 留到步骤 7/8 在本地执行。'] },
+    { id:'n4', stage:0, lane:'skill', col:4, n:'4', title:'X-Ray 编排', status:'done',
+      cmd:['node scripts/discover-linkedin-xray.mjs','  --plan <align.json> --channel linkedin','  （回退）--keyword <词> --location <地点> --limit N'],
+      input:['步骤 3 确认的 LinkedIn 寻访方案中 search 部分'],
+      output:['xray-result-*.json（Hunter X-Ray schema）'],
+      logic:['按方案 query 公开搜索；Google 首次超时收紧到 45 秒','Google 空结果/超时（疑似人机验证）→ 提示用户在 Chrome 验证，30 秒自动重试 ×3','验证通过 → 继续 Google；超时 → 标记 googleSuspectedBlocked，降级 Brave / Yahoo','同任务后续关键词组带 --skip-google 跳过 Google'],
+      notes:['公开搜索不消耗 LinkedIn 搜索额度；脚本只做编排，解析交给插件。','attempts 记录 humanAssist 状态（prompted/retry/resolved/timeout），报告可看到本轮实际搜索源。'] },
+    { id:'n6', stage:0, lane:'plugin', col:3, n:'6', title:'浏览器搜索', status:'done',
+      cmd:['opencli hunter-linkedin scout','  --keyword <search.keywords>','  --location <search.location>','  --connection <search.connection>','  --limit <search.limit>'],
+      input:['寻访方案.search 字段 + 已登录的 Chrome（公开搜索不足时的降级路径）'],
+      output:['linkedin-scout-result.json（统一 schema 候选人列表）'],
+      logic:['按账号档位钳制 limit（free → 10）','滚动加载 → 按 profileId 去重 → 按 search 条件兜底过滤','结果交回步骤 7 归一化；仍不足 → 回步骤 3 换词重跑'],
+      notes:['recruiter-scout 需要 Recruiter 档；company 用来取目标公司员工列表。'] },
+    { id:'n5', stage:0, lane:'official', col:4, n:'5', title:'公开搜索执行', status:'done',
+      cmd:['opencli google search <query> --limit <search.limit> -f json','（降级备用）opencli brave search / yahoo search'],
+      input:['步骤 4 按寻访方案 query 组装好的搜索词'],
+      output:['原始搜索 JSON（title / url / snippet）'],
+      logic:['第一优先级：免费、不耗 LinkedIn 搜索额度','无需 LinkedIn 登录，但要走浏览器','按 Google → Brave → Yahoo 顺序降级；结果 ≥5 → 交步骤 7；不足 → 降级步骤 6 浏览器搜索'],
+      notes:['官方命令，我们不做二次封装，避免重复实现。'] },
+    { id:'n7', stage:1, lane:'plugin', col:4, n:'7', title:'归一化 + 关系线索', status:'done',
+      cmd:['opencli hunter-linkedin normalize','  --source xray|scout --input <文件> --output <文件>'],
+      input:['步骤 5（公开搜索）或 6（浏览器搜索）的原始结果'],
+      output:['normalized-*-result.json（统一候选人 schema）','relationshipHint（可为空）'],
+      logic:['识别 xray / scout 来源并映射字段','按 profileId 去重合并','scout 保存 1st / 2nd / 3rd+ 等线索；X-Ray 不猜测关系'],
+      notes:['relationshipHint 只用于排序和深读优先级，不能直接决定触达动作。'] },
+    { id:'n8', stage:1, lane:'plugin', col:3, n:'8', title:'列表初评', status:'done',
+      cmd:['opencli hunter-linkedin evaluate <input.json>','  --plan <align.json> --channel linkedin'],
+      input:['归一化结果 + 寻访方案.filters + 寻访方案.scoring'],
+      output:['列表评分、理由和初选建议'],
+      logic:['filters 硬淘汰 / 保留','按 scoring 维度加权排序','relationshipHint 只作为可解释线索，不替代能力证据'],
+      notes:['打分规则来自已确认方案；不可达字段不得硬性扣分。'] },
+    { id:'n9', stage:1, lane:'skill', col:2, n:'9', title:'初选名单', status:'done',
+      cmd:['cskh-sourcing-linkedin Step 8.25'],
+      input:['步骤 8 列表初评结果','目标数量与深读预算'],
+      output:['preliminaryShortlist','每位候选人的深读理由和优先级'],
+      logic:['初选只决定谁进入详情深读','证据不足可保留，但必须标记待核验','未进初选的候选人不消耗详情读取额度'],
+      notes:['初选名单不等于最终交付名单，不能进入触达。'] },
+    { id:'n10', stage:1, lane:'official', col:2, n:'10', title:'选择性详情深读', status:'partial',
+      cmd:['opencli linkedin profile-read --profile-url <URL>','opencli linkedin profile-experience / profile-projects','opencli linkedin posts / services-read'],
+      input:['步骤 9 初选候选人 URL，受评分维度控制深读深度'],
+      output:['结构化详情（经历 / 项目 / 内容）','合并进候选人 detail 字段'],
+      logic:['默认只读 profile-read，按岗位需要追加其它能力','单项失败 → 记入 detailFetch，不丢其它已成功字段','详情读取失败 → 标记证据缺口，不自动淘汰'],
+      notes:['学历字段官方拿不到，不得因详情页缺学历而扣分；每人一次浏览会消耗额度。','基础主页、经历与项目可用；posts 导航漂移、services-read 本机补丁和 site-session 二次导航仍存在上游稳定性边界。'] },
+    { id:'n11', stage:1, lane:'plugin', col:1, n:'11', title:'详情复评与报告', status:'done',
+      cmd:['opencli hunter-linkedin report <input.json>','  --formats html,csv,md'],
+      input:['步骤 8 初评 + 步骤 10 详情证据'],
+      output:['finalShortlist','HTML / MD / CSV 报告'],
+      htmlLinks:[{ label:'打开候选人报告范例', href:'examples/candidate-report-example.html', note:'示例数据 · 可交互 HTML' }],
+      logic:['根据详情证据重新评分','列表与详情冲突时以详情为准','证据缺失显示「暂缺」，并进入风险栏'],
+      notes:['报告命令已上线；cskh-sourcing-linkedin 1.7.0 已加入初评保留、详情复评与 finalShortlist 强制契约。'] },
+    { id:'n12', stage:1, lane:'skill', col:1, n:'12', title:'确认可触达候选人', status:'done',
+      cmd:['cskh-outreach（候选人门）'],
+      input:['finalShortlist + 入选理由 + 证据缺口'],
+      output:['outreachEligibleCandidates','未批准候选人保留在报告中'],
+      logic:['第一道人工门：逐人确认是否可进入触达','未批准 → 不解析 relationshipState、不生成话术','数量不足 → 可返回寻访方案调整，但不自动续跑'],
+      notes:['“值得联系”与“这条内容可发送”是两次独立确认。'] },
+    { id:'n13', stage:2, lane:'official', col:1, n:'13', title:'实时关系状态', status:'partial',
+      cmd:['opencli hunter-linkedin capability-probe <URL>','opencli linkedin connections / sent-invitations','opencli linkedin inbox + hunter-linkedin thread-snapshot'],
+      input:['步骤 12 已批准候选人'],
+      output:['relationshipState + observedAt + evidence'],
+      logic:['会话级探测当前可见产品入口','候选人级区分直接 Connect / More → Connect / Pending / Message / InMail','合并已连接、待处理邀请和历史会话','生成方案和执行前均核验时效性'],
+      notes:['capability-probe 固定 executionAllowed=false，不使用私有接口；已在 Shawn Ruan 一度关系页面验证 Message 位于主页且无 Connect。不同关系和账号场景仍需扩展真机矩阵。'] },
+    { id:'n14', stage:2, lane:'plugin', col:2, n:'14', title:'关系状态归并', status:'done',
+      cmd:['opencli hunter-linkedin relationship-state <evidence.json>','  --output <relationship-state.json>'],
+      input:['候选人精确主页 + relationshipHint','connections + sentInvitations + conversations + profile actions 证据包'],
+      output:['确定性 relationshipState + observedAt + evidence + warnings'],
+      logic:['仅按精确主页 URL 跨来源匹配，不按姓名猜测','区分已连接、邀请待处理、已有会话和未连接','Message 按钮只记为可见动作，不直接推断普通消息权限'],
+      notes:['本地状态解析 CLI 与官方证据采集编排已实现，并以 Shawn Ruan 真机验证 connected → linkedin_message → ledger check；已有线程还会判断 candidate_replied / awaiting_candidate_reply，全程 executionAllowed=false。'] },
+    { id:'n15', stage:2, lane:'skill', col:3, n:'15', title:'渠道路由与个性化内容', status:'done',
+      cmd:['opencli hunter-linkedin outreach-plan <input.json>','cskh-outreach（个性化话术与邮件草稿）'],
+      input:['relationshipState + JD/JBF + 岗位卖点 + 候选人可核验证据 + 已验证邮箱（可选）'],
+      output:['Connect 附言 / LinkedIn Message / 邮件主题与正文','contentHash'],
+      logic:['已连接且无线程 → First Message；候选人已回复 → 后续 Message；等待候选人回复 → 停止重复跟进','待处理邀请 → 等待；可 Connect → Connect；否则可选邮件草稿','每条至少使用一个 JD 事实和一个候选人事实','Connect 推荐 80–150 字符，200 字符硬上限；不猜测邮箱'],
+      notes:['确定性渠道计划、线程快照与 cskh-outreach 话术编排已实现；邮件可导出 JSON/Markdown 草稿，但不连接发送器。'] },
+    { id:'n16', stage:2, lane:'skill', col:4, n:'16', title:'渠道与内容确认', status:'done',
+      cmd:['cskh-outreach（人工确认门）'],
+      input:['候选人 + 渠道 + 完整内容 + 证据 + contentHash'],
+      output:['approval：approvedAt / source / contentHash'],
+      logic:['第二道人工门：按候选人 × 渠道 × 内容版本确认','收件人、渠道、主题、正文或关系状态变化 → 审批失效','批量确认不能替代逐条核对'],
+      notes:['已统一候选人门、Connect 准备确认与逐条执行门；预检、准备确认和生成草稿都不等于发送授权。'] },
+    { id:'n17', stage:2, lane:'official', col:4, n:'17', title:'预检与执行', status:'partial',
+      cmd:['opencli hunter-linkedin connect-safe <URL> ...','opencli hunter-linkedin first-message-safe <URL> ...','已有线程：opencli linkedin safe-send ...','邮件：create-email-draft.mjs（只导出草稿）'],
+      input:['有效审批 + 执行前最新 relationshipState'],
+      output:['success / explicit_failure / uncertain'],
+      logic:['执行前轻量核验关系状态','状态变化 → 暂停并回步骤 14','只有明确失败且确认无外部动作才允许安全重试'],
+      notes:['Shawn Ruan 的 Connect 与首次 Message 已完成真实写入和平台回查；统一执行器已接入 Skill，覆盖 ledger check → send=false → 单次 send=true → record，并通过 Connect、首条消息、已有线程和 uncertain 测试，尚待整链真机验收；邮件不发送。'] },
+    { id:'n18', stage:2, lane:'plugin', col:3, n:'18', title:'触达台账与防重', status:'done',
+      cmd:['opencli hunter-linkedin outreach-ledger <input.json>','  --action check|record --ledger <ledger.json>'],
+      input:['渠道计划 + 审批 + 执行结果 + 平台核验证据'],
+      output:['可追溯 ledger + 待核验项 + 人工跟进建议','批次 JSON / Markdown 业务汇总表'],
+      logic:['同一候选人 + 渠道 + 触达目的默认防重','Connect 已发出 → 等待，不重复邀请','uncertain → 待核验；首版不自动跟进'],
+      notes:['用户要求再次触达时，也必须展示历史、重新生成方案并审批。批次汇总固定 advisoryOnly=true、executionAllowed=false，不构成授权。'] }
+  ],
+  helpers: [
+    { stage:0, lane:'plugin', span:2, cls:'', title:'插件命令清单（当前 15 个）',
+      lines:['本图使用 scout · normalize · evaluate · report · capability-probe · relationship-state · outreach-plan · outreach-ledger · thread-snapshot','真实写入：connect-safe · first-message-safe','另有 recruiter-scout · company · company-id-lookup · setup；命令编排由 Skill 决定'] },
+    { stage:0, lane:'official', span:2, cls:'blue', title:'浏览器底座（前置条件，不属于流程步骤）',
+      lines:['opencli doctor 检查连接 · opencli linkedin whoami 确认登录态','Chrome 扩展 + 已登录会话，是步骤 6 与 9 能执行的前提','步骤 5 公开搜索不需要 LinkedIn 登录，但同样要走浏览器'] }
+  ],
+  links: [
+    { from:'n1', to:'n2', mode:'h' }, { from:'n2', to:'n3', mode:'h' }, { from:'n3', to:'n4', mode:'h' },
+    { from:'n4', to:'n5', mode:'v' }, { from:'n4', to:'n6', mode:'elbow-down' },
+    { from:'n5', to:'n7', mode:'v' }, { from:'n6', to:'n7', mode:'elbow-down' },
+    { from:'n7', to:'n8', mode:'h' }, { from:'n8', to:'n9', mode:'elbow-up' },
+    { from:'n9', to:'n10', mode:'v' }, { from:'n10', to:'n11', mode:'elbow-up' },
+    { from:'n11', to:'n12', mode:'v' }, { from:'n12', to:'n13', mode:'v' },
+    { from:'n13', to:'n14', mode:'elbow-up' }, { from:'n14', to:'n15', mode:'h' },
+    { from:'n15', to:'n16', mode:'h' }, { from:'n16', to:'n17', mode:'v' },
+    { from:'n17', to:'n18', mode:'elbow-up' }, { from:'n18', to:'store', mode:'v' }
+  ]
+};
+var NL = String.fromCharCode(10);
+var STATUS_LABEL = {done:'已上线', partial:'部分上线', todo:'待开发'};
+function joinLines(v){ if (v == null) return ""; if (Object.prototype.toString.call(v) === "[object Array]") return v.join(NL); return String(v); }
+function cardById(id){
+  for (var i = 0; i < DATA.cards.length; i++) if (DATA.cards[i].id === id) return DATA.cards[i];
+  return null;
+}
+function businessStatus(step){
+  var status = 'done';
+  step.nodes.forEach(function(id){
+    var card = cardById(id);
+    if (card && card.status === 'todo') status = 'todo';
+    else if (card && card.status === 'partial' && status !== 'todo') status = 'partial';
+  });
+  return status;
+}
+var businessGrid = document.getElementById("businessGrid");
+var businessDetail = document.getElementById("businessDetail");
+var techDetails = document.getElementById("techDetails");
+function showBusinessStep(step){
+  document.querySelectorAll(".business-step").forEach(function(node){ node.classList.toggle("selected", node.dataset.businessId === step.id); });
+  businessDetail.innerHTML = "";
+  var narrative = el("div");
+  narrative.appendChild(el("h3", null, step.n + " · " + step.title));
+  narrative.appendChild(el("p", null, step.purpose));
+  narrative.appendChild(el("div","business-outcome", "本步交付：" + step.outcome));
+  businessDetail.appendChild(narrative);
+  var implementation = el("div");
+  var ih = el("div","implementation-head");
+  ih.appendChild(el("b", null, "分层技术实现"));
+  ih.appendChild(el("span", null, step.nodes.length + " 个实现节点"));
+  implementation.appendChild(ih);
+  var list = el("div","implementation-list");
+  step.nodes.forEach(function(id){
+    var card = cardById(id);
+    if (!card) return;
+    var row = el("div","implementation-item");
+    row.appendChild(el("span","implementation-lane " + card.lane, DATA.laneMeta[card.lane].badge));
+    var copy = el("div","implementation-copy");
+    copy.appendChild(el("b", null, card.n + ". " + card.title + " · " + STATUS_LABEL[card.status]));
+    copy.appendChild(el("code", null, card.cmd[0]));
+    row.appendChild(copy);
+    var actions = el("div","implementation-actions");
+    if (card.htmlLinks && card.htmlLinks.length) {
+      var preview = el("a", null, "HTML 范例");
+      preview.href = card.htmlLinks[0].href;
+      actions.appendChild(preview);
+    }
+    var detail = el("button", null, "技术详情");
+    detail.type = "button";
+    detail.addEventListener("click", function(){
+      techDetails.open = true;
+      select(card.id);
+      techDetails.scrollIntoView({ behavior:"smooth", block:"start" });
+    });
+    actions.appendChild(detail);
+    row.appendChild(actions);
+    list.appendChild(row);
+  });
+  implementation.appendChild(list);
+  businessDetail.appendChild(implementation);
+}
+DATA.businessPhases.forEach(function(phase){
+  var phaseNode = el("section","business-phase");
+  var phaseHead = el("div","business-phase-head");
+  phaseHead.appendChild(el("b", null, phase.n));
+  phaseHead.appendChild(el("span", null, phase.title));
+  phaseNode.appendChild(phaseHead);
+  var steps = el("div","business-steps");
+  phase.steps.forEach(function(step){
+    var status = businessStatus(step);
+    var button = el("button","business-step");
+    button.type = "button";
+    button.dataset.businessId = step.id;
+    var top = el("span","business-step-top");
+    top.appendChild(el("span","business-step-num", step.n));
+    top.appendChild(el("span","business-step-title", step.title));
+    top.appendChild(el("span","business-step-state " + status, status === 'done' ? "已实现" : status === 'partial' ? "待整链验收" : "待开发"));
+    button.appendChild(top);
+    button.appendChild(el("span","business-step-output", step.output));
+    button.addEventListener("click", function(){ showBusinessStep(step); });
+    steps.appendChild(button);
+  });
+  phaseNode.appendChild(steps);
+  businessGrid.appendChild(phaseNode);
+});
+var diagram = document.getElementById("diagram");
+var panel = document.getElementById("panel");
+var svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+svg.setAttribute("class","wires");
+diagram.appendChild(svg);
+function el(tag, cls, text){ var e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; return e; }
+for (var si = 0; si < DATA.stages.length; si++) {
+  var st = DATA.stages[si];
+  var stage = el("div","stage");
+  stage.appendChild(el("h3", null, st.title));
+  for (var li = 0; li < st.lanes.length; li++) {
+    var laneId = st.lanes[li];
+    var meta = DATA.laneMeta[laneId];
+    var lane = el("div","lane " + laneId);
+    var label = el("div","lane-label");
+    label.appendChild(el("b", null, meta.name));
+    label.appendChild(el("span", null, meta.sub));
+    lane.appendChild(label);
+    var body = el("div","lane-body");
+    var cards = DATA.cards.filter(function(c){ return c.stage === si && c.lane === laneId; });
+    for (var ci = 0; ci < cards.length; ci++) {
+      var c = cards[ci];
+      var card = el("div","card " + laneId);
+      card.id = c.id;
+      card.style.gridColumn = String(c.col);
+      card.style.gridRow = "1";
+      card.tabIndex = 0;
+      card.setAttribute("role", "button");
+      card.setAttribute("aria-expanded", "false");
+      card.setAttribute("aria-label", "查看步骤 " + c.n + "：" + c.title + " 的详情");
+      var head = el("div","card-head");
+      head.appendChild(el("span","num", c.n));
+      head.appendChild(el("span", null, c.title));
+      if (c.status) head.appendChild(el("span","status " + c.status, STATUS_LABEL[c.status]));
+      card.appendChild(head);
+      var cb = el("div","card-body");
+      cb.appendChild(el("div","cmd-line", c.cmd[0]));
+      cb.appendChild(el("div","more","点击看命令 / 输入输出 / 逻辑 ▸"));
+      if (c.htmlLinks && c.htmlLinks.length) {
+        var quickLink = el("a","html-mark","打开 HTML 范例 ↗");
+        quickLink.href = c.htmlLinks[0].href;
+        quickLink.setAttribute("aria-label", c.htmlLinks[0].label);
+        quickLink.addEventListener("click", function(ev){ ev.stopPropagation(); });
+        quickLink.addEventListener("keydown", function(ev){ ev.stopPropagation(); });
+        cb.appendChild(quickLink);
+      }
+      card.appendChild(cb);
+      (function(cardEl, data){
+        cardEl.addEventListener("click", function(){ select(data.id); });
+        cardEl.addEventListener("keydown", function(ev){ if(ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); select(data.id); } });
+      })(card, c);
+      body.appendChild(card);
+    }
+    var helpers = DATA.helpers.filter(function(h){ return h.stage === si && h.lane === laneId; });
+    for (var hi = 0; hi < helpers.length; hi++) {
+      var h = helpers[hi];
+      var box = el("div","helper " + (h.cls || ""));
+      box.style.gridColumn = "1 / span " + h.span;
+      box.style.gridRow = "1";
+      box.appendChild(el("b", null, h.title));
+      h.lines.forEach(function(l){ box.appendChild(el("div", null, l)); });
+      body.appendChild(box);
+    }
+    lane.appendChild(body);
+    stage.appendChild(lane);
+  }
+  diagram.appendChild(stage);
+}
+var store = el("div","store");
+store.id = "store";
+store.appendChild(el("b", null, "本机数据落点（不上传服务器）"));
+store.appendChild(el("div", null, "~/.hunter/channels/linkedin/…（原始与归一化结果）· ~/.hunter/output/…（HTML / MD / CSV 报告）· ~/.hunter/sourcing/…（短名单与评估）· outreach-ledger.json（已自动串联；待整链真机验收）"));
+diagram.appendChild(store);
+function rectOf(id){
+  var node = document.getElementById(id);
+  if (!node) return null;
+  var base = diagram.getBoundingClientRect();
+  var r = node.getBoundingClientRect();
+  var x = r.left - base.left, y = r.top - base.top;
+  return { l:x, r:x + r.width, t:y, b:y + r.height, cx:x + r.width / 2, cy:y + r.height / 2 };
+}
+function pathEl(d, kind){
+  var p = document.createElementNS("http://www.w3.org/2000/svg","path");
+  p.setAttribute("d", d);
+  p.setAttribute("fill","none");
+  if (kind === "accent") {
+    p.setAttribute("stroke","#eb6c36");
+    p.setAttribute("stroke-width","2.2");
+    p.setAttribute("stroke-dasharray","7 5");
+    p.setAttribute("marker-end","url(#arA)");
+  } else {
+    p.setAttribute("stroke","#687286");
+    p.setAttribute("stroke-width","2");
+    p.setAttribute("marker-end","url(#ar)");
+  }
+  return p;
+}
+function draw(){
+  var base = diagram.getBoundingClientRect();
+  svg.setAttribute("width", String(base.width));
+  svg.setAttribute("height", String(base.height));
+  svg.setAttribute("viewBox", "0 0 " + base.width + " " + base.height);
+  var defs = document.createElementNS("http://www.w3.org/2000/svg","defs");
+  defs.innerHTML = "<marker id='ar' viewBox='0 0 10 10' refX='9' refY='5' markerWidth='7' markerHeight='7' orient='auto-start-reverse'><path d='M0 0L10 5L0 10z' fill='#687286'/></marker>"
+    + "<marker id='arA' viewBox='0 0 10 10' refX='9' refY='5' markerWidth='7' markerHeight='7' orient='auto-start-reverse'><path d='M0 0L10 5L0 10z' fill='#eb6c36'/></marker>";
+  svg.innerHTML = "";
+  svg.appendChild(defs);
+  for (var i = 0; i < DATA.links.length; i++) {
+    var lk = DATA.links[i];
+    var a = rectOf(lk.from), b = rectOf(lk.to);
+    if (!a || !b) continue;
+    var d = "";
+    if (lk.to === "store") { d = "M" + a.cx + " " + a.b + " V" + b.t; svg.appendChild(pathEl(d, "gray")); continue; }
+    if (lk.mode === "h") {
+      d = (b.cx >= a.cx) ? ("M" + a.r + " " + a.cy + " H" + b.l) : ("M" + a.l + " " + a.cy + " H" + b.r);
+      svg.appendChild(pathEl(d, "gray"));
+    } else if (lk.mode === "v") {
+      d = (b.cy > a.cy) ? ("M" + a.cx + " " + a.b + " V" + b.t) : ("M" + a.cx + " " + a.t + " V" + b.b);
+      svg.appendChild(pathEl(d, "accent"));
+    } else if (lk.mode === "elbow-down") {
+      var midY = a.b + (b.t - a.b) / 2;
+      d = "M" + a.cx + " " + a.b + " V" + midY + " H" + b.cx + " V" + b.t;
+      svg.appendChild(pathEl(d, "accent"));
+    } else if (lk.mode === "elbow-up") {
+      var midY2 = b.b + (a.t - b.b) / 2;
+      d = "M" + a.cx + " " + a.t + " V" + midY2 + " H" + b.cx + " V" + b.b;
+      svg.appendChild(pathEl(d, "accent"));
+    }
+  }
+}
+function section(lane, key, value){
+  var s = el("div","p-sec " + lane + (key === "注意事项" ? " notice" : ""));
+  s.appendChild(el("div","p-k", key));
+  var v = el("div","p-v" + (key === "调用的命令" ? " mono" : ""));
+  if (Object.prototype.toString.call(value) === "[object Array]" && key !== "调用的命令") {
+    var list = el("ul");
+    value.forEach(function(item){ list.appendChild(el("li", null, item)); });
+    v.appendChild(list);
+  } else {
+    v.textContent = joinLines(value);
+  }
+  s.appendChild(v);
+  return s;
+}
+function previewSection(lane, links){
+  var s = el("div","p-sec " + lane);
+  s.appendChild(el("div","p-k", "HTML 审核页范例 / 模板"));
+  var list = el("div","preview-links");
+  links.forEach(function(link){
+      var a = el("a","preview-link");
+      a.href = link.href;
+      a.appendChild(el("span", null, link.label + " ↗"));
+    a.appendChild(el("span", null, link.note || "打开查看"));
+    list.appendChild(a);
+  });
+  s.appendChild(list);
+  return s;
+}
+function select(id){
+  var c = null;
+  DATA.cards.forEach(function(x){ if (x.id === id) c = x; });
+  if (!c) return;
+  var nodes = document.querySelectorAll(".card");
+  for (var i = 0; i < nodes.length; i++) {
+    nodes[i].classList.remove("selected");
+    nodes[i].setAttribute("aria-expanded", "false");
+  }
+  var target = document.getElementById(id);
+  if (target) {
+    target.classList.add("selected");
+    target.setAttribute("aria-expanded", "true");
+  }
+  var meta = DATA.laneMeta[c.lane];
+  panel.innerHTML = "";
+  var head = el("div","p-head");
+  head.appendChild(el("span","num", c.n));
+  head.appendChild(el("span","p-title", c.title));
+  if (c.status) head.appendChild(el("span","status " + c.status, STATUS_LABEL[c.status]));
+  head.appendChild(el("span","badge " + c.lane, meta.badge));
+  panel.appendChild(head);
+  panel.appendChild(section(c.lane, "调用的命令", c.cmd));
+  panel.appendChild(section(c.lane, "输入", c.input));
+  panel.appendChild(section(c.lane, "输出", c.output));
+  if (c.htmlLinks && c.htmlLinks.length) panel.appendChild(previewSection(c.lane, c.htmlLinks));
+  panel.appendChild(section(c.lane, "处理逻辑", c.logic));
+  if (c.notes) panel.appendChild(section(c.lane, "注意事项", c.notes));
+  requestAnimationFrame(draw);
+}
+var appendix = document.getElementById("appendix");
+var apTitle = el("h2", null, "附录 · 每个步骤的完整说明");
+apTitle.style.cssText = "font-size:16px;margin:24px 0 10px";
+appendix.appendChild(apTitle);
+DATA.cards.forEach(function(c){
+  var wrap = el("div");
+  wrap.style.cssText = "border:1px solid #e3e7ee;border-radius:8px;padding:10px 12px;margin-bottom:8px";
+  var h = el("div", null, c.n + ". " + c.title + "  ·  " + DATA.laneMeta[c.lane].badge + (c.status ? "  ·  " + STATUS_LABEL[c.status] : ""));
+  h.style.cssText = "font-weight:700;font-size:13px;margin-bottom:6px";
+  wrap.appendChild(h);
+  [["命令", c.cmd], ["输入", c.input], ["输出", c.output], ["逻辑", c.logic], ["注意事项", c.notes]].forEach(function(pair){
+    if (!pair[1]) return;
+    var line = el("div", null, pair[0] + "：" + joinLines(pair[1]));
+    line.style.cssText = "font-size:12px;line-height:1.6;white-space:pre-wrap;color:#3d4657";
+    wrap.appendChild(line);
+  });
+  if (c.htmlLinks && c.htmlLinks.length) {
+    var linksLine = el("div", null, "HTML 范例：");
+    linksLine.style.cssText = "font-size:12px;line-height:1.8;color:#3d4657";
+    c.htmlLinks.forEach(function(link, index){
+      if (index) linksLine.appendChild(document.createTextNode(" · "));
+      var a = el("a", null, link.label);
+      a.href = link.href;
+      linksLine.appendChild(a);
+    });
+    wrap.appendChild(linksLine);
+  }
+  appendix.appendChild(wrap);
+});
+var printOpenState = false;
+window.addEventListener("beforeprint", function(){ printOpenState = techDetails.open; techDetails.open = true; });
+window.addEventListener("afterprint", function(){ techDetails.open = printOpenState; });
+document.getElementById("printBtn").addEventListener("click", function(){ window.print(); });
+window.addEventListener("resize", function(){ requestAnimationFrame(draw); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ requestAnimationFrame(draw); });
+requestAnimationFrame(draw);
+setTimeout(draw, 300);
+select("n4");
+showBusinessStep(DATA.businessPhases[0].steps[0]);
+</script>
+</body></html>

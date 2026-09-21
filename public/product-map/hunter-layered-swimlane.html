@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>猎策 LinkedIn PRD · 业务与技术开发地图</title>
+<title>猎策 Hunter PRD · 业务与技术开发地图</title>
 <style>
 :root{--paper:#f5f5f5;--card:#fff;--ink:#2d3142;--muted:#4f5d75;--soft:#8794a8;--line:#e3e7ee;--accent:#eb6c36;
 --skill:#2f7d55;--skill-t:#edf4ee;--plugin:#eb6c36;--plugin-t:#fff2ec;--official:#3b6ea5;--official-t:#eef3fb;}
@@ -20,6 +20,7 @@ h1{margin:0;font-size:25px}
 .business-intro{display:flex;align-items:end;justify-content:space-between;gap:20px;padding:18px 20px 14px;border-bottom:1px solid var(--line)}
 .business-intro small{display:block;margin-bottom:4px;color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.12em}.business-intro h2{margin:0;font-family:"Songti SC","STSong",Georgia,serif;font-size:25px;font-weight:600}.business-intro p{max-width:560px;margin:0;color:var(--muted);font-size:14px;line-height:1.6;text-align:right}
 .business-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-bottom:1px solid var(--line)}
+.integration-hub{padding:16px 20px 18px;border-bottom:1px solid var(--line);background:#faf9f6}.integration-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:11px}.integration-head h3{margin:0;font-size:16px}.integration-head p{margin:0;color:var(--muted);font-size:14px}.integration-flow{display:grid;grid-template-columns:minmax(210px,.8fr) minmax(0,1fr) minmax(0,1fr);gap:12px}.integration-entry,.integration-route{padding:13px 14px;border-radius:7px;background:#fff}.integration-entry{border:1.5px dashed var(--plugin)}.integration-route{border:1px solid var(--line)}.integration-kicker{display:flex;align-items:center;gap:8px;margin-bottom:5px;color:#b04a1c;font-size:12px;font-weight:800}.integration-kicker .status{margin-left:auto}.integration-entry h4,.integration-route h4{margin:0 0 5px;font-size:15px}.integration-entry p,.integration-route p{margin:0;color:var(--muted);font-size:14px;line-height:1.55}.integration-entry code{display:block;margin:8px 0;color:#3d4657;font-size:12px}.integration-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:9px}.integration-actions a{color:#2c5580;font-size:13px;font-weight:800;text-decoration:none}.integration-actions a:hover{text-decoration:underline}.optional-tag{display:inline-block;margin-bottom:6px;color:#8a5a1c;font-size:12px;font-weight:800}.integration-route strong{color:var(--ink)}
 .business-phase{padding:18px 20px 22px}.business-phase+.business-phase{border-left:1px solid var(--line)}
 .business-phase-head{display:flex;align-items:baseline;gap:8px;margin-bottom:12px}.business-phase-head b{font:700 13px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--accent)}.business-phase-head span{font-size:16px;font-weight:800}
 .business-steps{display:grid;gap:9px}.business-step{position:relative;width:100%;border:1px solid #dfe3ea;border-radius:7px;background:#fbfbfa;padding:11px 12px;text-align:left;color:var(--ink);cursor:pointer;transition:transform .15s,border-color .15s,background .15s}.business-step:hover{transform:translateX(3px);border-color:#aeb8c7}.business-step.selected{border-color:var(--accent);background:#fff7f2;box-shadow:inset 3px 0 var(--accent)}.business-step:focus-visible{outline:3px solid rgba(235,108,54,.22);outline-offset:2px}.business-step-top{display:flex;align-items:center;gap:8px}.business-step-num{color:var(--soft);font:700 12px ui-monospace,SFMono-Regular,Menlo,monospace}.business-step-title{font-size:15px;font-weight:800}.business-step-state{margin-left:auto;font-size:12px;font-weight:700;color:var(--skill)}.business-step-state.partial{color:#a86a1f}.business-step-output{display:block;margin:5px 0 0 27px;color:var(--muted);font-size:14px;line-height:1.45}
@@ -89,13 +90,13 @@ h1{margin:0;font-size:25px}
 .note strong{color:var(--ink)}
 .supporting-body{padding:0 14px 14px}.supporting-body .note{margin-top:0}
 @media(max-width:1450px){.layout{grid-template-columns:1fr}.panel{position:static;margin-top:12px}}
-@media(max-width:1050px){.business-grid{grid-template-columns:1fr}.business-phase+.business-phase{border-left:0;border-top:1px solid var(--line)}.business-detail{grid-template-columns:1fr}.business-intro{align-items:start;flex-direction:column}.business-intro p{text-align:left}}
+@media(max-width:1050px){.business-grid{grid-template-columns:1fr}.business-phase+.business-phase{border-left:0;border-top:1px solid var(--line)}.business-detail{grid-template-columns:1fr}.business-intro{align-items:start;flex-direction:column}.business-intro p{text-align:left}.integration-flow{grid-template-columns:1fr}.integration-head{align-items:start;flex-direction:column}}
 @media(max-width:900px){.lane-label{width:110px;flex-basis:110px}.lane-body{grid-template-columns:repeat(4,minmax(150px,1fr));overflow-x:auto;padding-bottom:20px}}
 @media print{.toolbar,.panel,.note{display:none}.layout{grid-template-columns:1fr}.appendix{display:block}.card{break-inside:avoid}.lane-body{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head><body><main>
-<h1>猎策 LinkedIn · 业务与技术开发地图</h1>
-<p class="lead">默认先看从岗位需求到安全触达的业务闭环；点击任一步骤可查看 Skill、Hunter 插件与 OpenCLI 的实现归属。当前基线：Hunter LinkedIn CLI 2.0.6 / cskh-outreach 1.6.0 · 2026-09-20</p>
+<h1>猎策 Hunter · 业务与技术开发地图</h1>
+<p class="lead">默认先看从岗位需求到安全触达的通用业务闭环；客户可选渠道以独立插件入口呈现，不改变未启用客户的主流程。当前基线：Hunter LinkedIn CLI 2.0.6 / Gllue 1.0.0 · 2026-09-21</p>
 <div class="toolbar">
   <button id="printBtn" type="button">打印 / 导出（含全部详情）</button>
   <span class="hint">橙色表示待整链验收；HTML 审核页可从对应步骤直接打开</span>
@@ -103,6 +104,20 @@ h1{margin:0;font-size:25px}
 <section class="business-workbench" aria-labelledby="businessTitle">
   <div class="business-intro"><div><small>BUSINESS × IMPLEMENTATION</small><h2 id="businessTitle">业务主线与开发状态</h2></div><p>先看业务闭环，再点开每一步查看 Skill、Hunter 插件和 OpenCLI 的实现归属与验收状态。</p></div>
   <div class="business-grid" id="businessGrid"></div>
+  <section class="integration-hub" aria-labelledby="integrationTitle">
+    <div class="integration-head"><h3 id="integrationTitle">客户可选集成入口</h3><p>独立安装、按客户配置启用；不是 LinkedIn 插件内部能力，也不是所有客户的必经步骤。</p></div>
+    <div class="integration-flow">
+      <article class="integration-entry">
+        <div class="integration-kicker">独立插件 <span class="status partial">PRD 已确认</span></div>
+        <h4>Gllue 人才库 / ATS</h4>
+        <p>一个独立插件承接两个业务切入点；现有 8 个原子命令先审计复用，只增补真实缺口。</p>
+        <code>opencli gllue &lt;command&gt;</code>
+        <div class="integration-actions"><a href="gllue-prd.html">打开 Gllue PRD HTML →</a><a href="#techDetails">查看三层技术图 ↓</a></div>
+      </article>
+      <article class="integration-route"><span class="optional-tag">切入点 A · JBF 确认后</span><h4>先查客户人才库</h4><p>询问是否启用、确认人数（默认建议 50），完整读取本轮简历并统一评分；展示结果后，由人决定是否继续外部寻访。</p></article>
+      <article class="integration-route"><span class="optional-tag">切入点 B · 最终短名单后</span><h4>查重并回流 ATS</h4><p>整批预览、逐人确认；<strong>已存在则建议更新，未存在才新建</strong>。找不到职位不创建职位，也不阻止候选人入库。</p></article>
+    </div>
+  </section>
   <div class="business-detail" id="businessDetail"></div>
 </section>
 <details class="tech-details" id="techDetails">
@@ -129,6 +144,15 @@ h1{margin:0;font-size:25px}
         <li><b>关系状态与渠道路由</b>：只读证据采集、thread-snapshot、relationship-state、outreach-plan 与 ledger check 已自动串联，并以 Shawn Ruan 完成真机核验。</li>
         <li><b>人工确认</b>：候选人门、Connect 准备确认与逐条真实发送确认已统一到 cskh-outreach。</li>
         <li><b>执行闭环</b>：统一执行器已接入并通过全量测试，待完成整链真机验收；邮件草稿导出已实现，只接受已验证邮箱且不连接发送器。</li>
+      </ol>
+    </div>
+    <div class="todo-list">
+      <b>Gllue 独立插件进展（PRD 2026-09-21）</b>
+      <ol>
+        <li><b>产品范围</b>：已确认“JBF 后库内搜索 + 最终短名单后 ATS 回流”两个客户可选切入点。</li>
+        <li><b>分层边界</b>：`opencli gllue &lt;command&gt;` 保持原子化；Skill 负责搜索数量、批量编排、人工门和 HTML 报告。</li>
+        <li><b>当前基线</b>：已有 8 个命令与 cskh-gllue 1.0.0；历史可用状态待按当前真实租户重新验收。</li>
+        <li><b>下一步</b>：先做现有命令差距审计和只读测速，再决定是否增加检查点、更新与职位关联命令。</li>
       </ol>
     </div>
   </div>

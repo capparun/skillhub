@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hunter × Gllue 一期 PRD</title>
+<style>:root{--paper:#f5f5f5;--card:#fff;--ink:#2d3142;--muted:#4f5d75;--line:#dfe3ea;--accent:#eb6c36;--green:#2f7d55}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:"PingFang SC","Microsoft YaHei",sans-serif;font-size:16px;line-height:1.7}main{max-width:1080px;margin:auto;padding:38px 24px 72px}a{color:#2e5aa8}.back{font-size:14px;font-weight:700;text-decoration:none}header{margin:20px 0 28px;padding:28px;border-top:5px solid var(--ink);background:var(--card)}.eyebrow{color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.12em}h1{margin:8px 0 10px;font-family:"Songti SC","STSong",serif;font-size:42px;line-height:1.15}header p{max-width:780px;margin:0;color:var(--muted)}.status{display:inline-block;margin-top:14px;padding:4px 9px;border:1px solid #bcd9c6;border-radius:99px;background:#eaf4ed;color:var(--green);font-size:13px;font-weight:800}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card,section{padding:22px;background:var(--card);border:1px solid var(--line)}h2{margin:0 0 12px;font-size:22px}h3{margin:18px 0 6px;font-size:17px}.flow{padding:15px 17px;border-left:4px solid var(--accent);background:#fff7f2;white-space:pre-line}.card p,section p{color:var(--muted)}ul,ol{padding-left:22px}.rules{width:100%;border-collapse:collapse}.rules th,.rules td{padding:10px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.rules th{font-size:13px;color:var(--muted)}code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px}.wide{margin-top:16px}.notice{border-style:dashed;border-color:#d9b48a;background:#fffaf3}@media(max-width:760px){main{padding:24px 14px 50px}.grid{grid-template-columns:1fr}h1{font-size:32px}}</style></head>
+<body><main><a class="back" href="hunter-layered-swimlane.html">← 返回业务与技术开发地图</a><header><div class="eyebrow">HUNTER · CUSTOMER OPTIONAL INTEGRATION</div><h1>Gllue 人才库集成 · 一期 PRD</h1><p>Gllue 是客户可选的内部人才渠道与 ATS 出口。它以独立插件存在，不写死进 LinkedIn，也不改变未启用客户的主流程。</p><span class="status">一期需求已确认 · 待能力审计与真实验收</span></header>
+<div class="grid"><article class="card"><h2>闭环一：复用库内人才</h2><div class="flow">JD → JBF 确认
+→ 询问是否搜索 Gllue
+→ 确认人数（默认建议 50）
+→ 完整读取本轮简历并统一评分
+→ 本地 HTML 审核报告
+→ 人工决定是否继续外部寻访</div></article><article class="card"><h2>闭环二：外部候选人回流</h2><div class="flow">LinkedIn 最终短名单
+→ 选择需要入库的人选
+→ Gllue 查重 → 整批预览
+→ 逐人确认新建或更新
+→ 找到职位则关联
+→ 找不到职位不新建，候选人照常入库
+→ 写后读取核验</div></article></div>
+<section class="wide"><h2>分层与独立插件入口</h2><table class="rules"><tr><th>层级</th><th>负责</th><th>不负责</th></tr><tr><td>Skill</td><td>搜索人数、批量编排、JBF 评分、人工确认、HTML 报告</td><td>页面解析和隐式写入</td></tr><tr><td>Gllue 插件</td><td><code>opencli gllue &lt;command&gt;</code> 原子能力，可独立调用和测试</td><td>完整业务剧本与替用户做决定</td></tr><tr><td>OpenCLI</td><td>浏览器连接与页面交互底座</td><td>招聘判断</td></tr></table><h3>现有命令先审计复用</h3><p><code>login</code> · <code>test-connection</code> · <code>search-candidates</code> · <code>get-candidate</code> · <code>check-exists</code> · <code>search-jobs</code> · <code>get-job</code> · <code>add-candidate</code></p><p>候选能力缺口只有在确认无法复用现有命令后才新增：能力预检、字段差异、已有候选人更新、职位关联和 HTML 报告。</p></section>
+<section class="wide"><h2>关键业务规则</h2><ul><li>Gllue 搜索发生在 JBF 确认后；结果不能静默修改已确认 JBF。</li><li>搜索前必须询问人数；50 是建议值，不是固定上限。</li><li>Gllue 与 LinkedIn 使用同一 JBF 评分标准，但报告中分开呈现来源。</li><li>优先使用库内已有且验证过的联系方式；真实触达仍需人工确认。</li><li>其他顾问或其他项目正在推进时，默认阻止触达，直到获得协作或转交确认。</li><li>查重命中不创建重复记录；先给出字段更新建议。</li><li>整批生成预览，真实写入逐人确认；不确定写入不得自动重试。</li><li>报告只保存到本地任务目录，不上传敏感信息。</li></ul></section>
+<section class="wide notice"><h2>真实验收顺序</h2><ol><li>审计现有 8 个命令的原子性、输入输出和真实状态。</li><li>验证连接、登录、租户、搜索入口和单份完整简历读取。</li><li>经用户确认后测试 50 人读取速度、失败率和续跑。</li><li>根据测速决定是否增加每 10 人检查点。</li><li>再开发确有缺口的更新、关联和报告能力。</li><li>最后对明确测试候选人逐项完成真实写入和回读验收。</li></ol></section>
+</main></body></html>

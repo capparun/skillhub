@@ -44,7 +44,10 @@ Write-Host '✓ 安装完成，可以开始使用了'
 }
 
 export async function GET() {
-  return new Response(renderScript(env.publicAppUrl()), {
+  // Windows PowerShell 5.1 treats a UTF-8 .ps1 without BOM as the active ANSI
+  // code page. The generated script contains Chinese diagnostics, so prefix a
+  // UTF-8 BOM to keep downloaded files parseable on GBK Windows hosts.
+  return new Response(`\uFEFF${renderScript(env.publicAppUrl())}`, {
     headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' },
   });
 }

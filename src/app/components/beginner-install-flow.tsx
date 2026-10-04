@@ -6,28 +6,27 @@ import {
   freeCliCommand,
   windowsCliCommand,
   windowsFreeInstallPrompt,
-  staticCliInstallPrompt,
-  staticCliCommand,
-  type StaticCliRelease,
 } from "@/lib/prompts";
+import { releaseLabel, type ReleaseState } from "@/lib/product-release";
 import styles from "./beginner-install-flow.module.css";
 
 interface InstallProduct {
   slug: string;
   name: string;
+  isPublic: boolean;
   latestRelease: { version: string; sha256: string } | null;
 }
 
 const steps = ["选择电脑", "安装 OpenCLI", "连接 Chrome", "确认 LinkedIn", "安装猎策", "完成验证"];
 
-export function BeginnerInstallFlow({ product }: { product?: InstallProduct }) {
+export function BeginnerInstallFlow({ product, releaseState, onInstall }: { product?: InstallProduct; releaseState: ReleaseState; onInstall: (platform: "mac" | "windows") => void }) {
   const [step, setStep] = useState(0);
   const [os, setOs] = useState<"mac" | "windows" | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [copied, setCopied] = useState("");
   const [advanced, setAdvanced] = useState(false);
   const [origin, setOrigin] = useState("");
-  const [staticRelease, setStaticRelease] = useState<StaticCliRelease | null>(null);
+
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -39,31 +38,11 @@ export function BeginnerInstallFlow({ product }: { product?: InstallProduct }) {
     return () => window.cancelAnimationFrame(frame);
   }, []);
 
-  // 数据库尚无发布记录时，降级到 public/download/latest.json 的静态安装包
-  useEffect(() => {
-    if (!product || product.latestRelease || !origin) return;
-    let alive = true;
-    fetch("/download/latest.json")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (alive && data?.version && data?.file) {
-          setStaticRelease({ version: data.version, file: data.file, sha256: data.sha256 || "" });
-        }
-      })
-      .catch(() => {});
-    return () => { alive = false; };
-  }, [product, origin]);
-
-  const effectiveRelease = product?.latestRelease
-    ?? (staticRelease ? { version: staticRelease.version, sha256: staticRelease.sha256 } : null);
-
+  const effectiveRelease = product?.latestRelease;
   const installPrompt = useMemo(() => {
     if (!product) return "正在获取猎策发布信息，请稍候……";
     if (!effectiveRelease) return "当前没有可安装的已发布版本。请联系管理员在后台发布 Hunter 安装包后，再回到此页面继续。";
     if (!origin) return "正在准备安装地址，请稍候……";
-    if (!product.latestRelease && staticRelease) {
-      return staticCliInstallPrompt({ appUrl: origin, release: staticRelease });
-    }
     const input = {
       appUrl: origin,
       productName: product.name,
@@ -72,17 +51,14 @@ export function BeginnerInstallFlow({ product }: { product?: InstallProduct }) {
       sha256: effectiveRelease.sha256,
     };
     return os === "windows" ? windowsFreeInstallPrompt(input) : freeInstallPrompt(input);
-  }, [origin, os, product, staticRelease, effectiveRelease]);
+  }, [origin, os, product, effectiveRelease]);
 
   const terminalCommand = useMemo(() => {
     if (!product || !origin) return "";
-    if (!product.latestRelease && staticRelease) {
-      return staticCliCommand({ appUrl: origin, file: staticRelease.file });
-    }
     const input = { appUrl: origin, productSlug: product.slug };
     if (!os) return "";
     return os === "windows" ? windowsCliCommand(input) : freeCliCommand(input);
-  }, [origin, os, product, staticRelease]);
+  }, [origin, os, product]);
 
   function go(next: number) {
     setStep(Math.max(0, Math.min(steps.length - 1, next)));
@@ -101,7 +77,7 @@ export function BeginnerInstallFlow({ product }: { product?: InstallProduct }) {
   }
 
   const opencliInstallPrompt = `请帮我安装 Hunter 所需的 OpenCLI，不要跳过任何验证：
-1. 先运行 node --version；OpenCLI 需要 Node.js 20 或更高版本。若版本不够或未安装，请先说明要安装什么，等我确认后再继续。
+1. 先运行 node --version；OpenCLI 需要 Node.js 22 或更高版本。若版本不够或未安装，请先说明要安装什么，等我确认后再继续。
 2. 安装 OpenCLI：npm install -g @jackwener/opencli
 3. 安装后运行 opencli --version，确认命令真实可用。
 4. 把 Node.js 版本和 OpenCLI 版本的真实输出发给我。`;
@@ -112,15 +88,32 @@ export function BeginnerInstallFlow({ product }: { product?: InstallProduct }) {
 4. 检查完成后，把 opencli doctor 的真实结果发给我。`;
   const linkedinPrompt = "请执行 opencli linkedin whoami -f json，确认是否能真实读取我当前登录的 LinkedIn 账号。不要修改任何数据。如果失败，请判断是未登录、Chrome 扩展未启用，还是 OpenCLI 未连接浏览器。";
 
+  if (product?.slug === "hunter-align") {
+    const alignSteps = ["选择电脑", "安装职位对齐", "验证与开始使用"];
+    return <section className={styles.section} id="install-center" aria-labelledby="install-heading">
+      <header className={styles.heading}><span>新手安装</span><h2 id="install-heading">{product.name} · 3 步</h2><p>{releaseLabel(releaseState, effectiveRelease)} · 通过本地 Agent 完成职位需求对齐。</p></header>
+      <div className={styles.frame}><nav className={styles.sidebar} aria-label="安装步骤"><strong>{product.name}</strong><ol>{alignSteps.map((label, index) => <li key={label} className={index === step ? styles.active : stepClass(index, step)}><button disabled={index > step} onClick={() => go(index)}><span>{index + 1}</span>{label}</button></li>)}</ol></nav><div className={styles.content}>
+        {step === 0 && <Step tag="第 1 步，共 3 步" title="准备本地 AI 助手" lead="使用能访问本地文件和终端的 WorkBuddy、Codex 或 Claude Code。">
+          <div className={styles.choices}><button className={os === "mac" ? styles.selected : ""} onClick={() => setOs("mac")}><strong>macOS</strong></button><button className={os === "windows" ? styles.selected : ""} onClick={() => setOs("windows")}><strong>Windows</strong></button></div><Info title="准备环境">让 AI 助手检查 Node.js；具体要求以此产品安装包的 doctor 为准。</Info>
+        </Step>}
+        {step === 1 && <Step tag="第 2 步，共 3 步" title="安装职位需求对齐" lead={releaseLabel(releaseState, effectiveRelease)}>
+          {effectiveRelease ? <><button className={styles.next} onClick={() => onInstall(os ?? "mac")}>获取职位对齐安装方式</button><Check checked={confirmed} onChange={setConfirmed} title="安装与 doctor 检查均已通过">核对安装包清单中的职位对齐 Skill 已安装到所用 AI 助手。</Check></> : <Info title="当前不能安装">刷新页面获取产品发布信息后再继续。</Info>}
+        </Step>}
+        {step === 2 && <Step tag="第 3 步，共 3 步" title="验证职位对齐能力" lead="把一份 JD 交给 AI 助手，确认它能调用职位对齐 Skill。"><CopyBox text="请使用职位需求对齐 Skill 分析这份 JD，先指出缺失与模糊条件，再向我提问，形成目标人才画像和寻访任务书。" copied={copied === "align"} onCopy={() => copy("align", "请使用职位需求对齐 Skill 分析这份 JD，先指出缺失与模糊条件，再向我提问，形成目标人才画像和寻访任务书。" )} /><Info title="成功标准">能看到 JD 诊断和针对这份职位的追问；对齐后形成画像与任务书。</Info></Step>}
+        {copied === "error" && <p role="alert">复制失败，请手动选中文字复制。</p>}
+        <footer className={styles.actions}>{step > 0 && <button className={styles.back} onClick={() => go(step - 1)}>上一步</button>}{step < 2 && <button className={styles.next} disabled={step === 0 ? !os : !confirmed || !effectiveRelease} onClick={() => go(step + 1)}>{step === 0 ? "继续" : "我已完成，继续"}</button>}</footer>
+      </div></div>
+    </section>;
+  }
   return <section className={styles.section} id="install-center" aria-labelledby="install-heading">
     <header className={styles.heading}>
       <span>新手安装</span>
-      <h2 id="install-heading">跟着 6 步，完成猎策安装</h2>
-      <p>每一步都告诉你做什么、看到什么才算成功。预计需要 3–5 分钟。</p>
+      <h2 id="install-heading">{product?.name ?? "产品安装"} · 6 步</h2>
+      <p>{releaseLabel(releaseState, effectiveRelease)} · 每一步都告诉你做什么、看到什么才算成功。</p>
     </header>
     <div className={styles.frame}>
       <nav className={styles.sidebar} aria-label="安装步骤">
-        <strong>安装完整寻访</strong>
+        <strong>{product?.name}</strong>
         <ol>{steps.map((label, index) => <li key={label} className={index === step ? styles.active : stepClass(index, step)}><button onClick={() => index <= step && go(index)} disabled={index > step}><span>{index < step ? "✓" : index + 1}</span>{label}</button></li>)}</ol>
         <div className={styles.progress}><span style={{ width: `${step / (steps.length - 1) * 100}%` }} /></div>
         <small>进度 {Math.round(step / (steps.length - 1) * 100)}%</small>
@@ -131,7 +124,7 @@ export function BeginnerInstallFlow({ product }: { product?: InstallProduct }) {
           <Info title="推荐交给 AI 助手安装">不用自己输入命令。WorkBuddy、Codex、Claude Code 都可以。</Info>
         </Step>}
         {step === 1 && <Step tag="第 2 步，共 6 步" title="安装 OpenCLI" lead="OpenCLI 是猎策连接 LinkedIn 的基础工具；这一阶段必须先把它装好。">
-          <Info title="会安装什么？">先确认 Node.js 20 或更高版本，再执行 <code>npm install -g @jackwener/opencli</code> 安装 OpenCLI。</Info>
+          <Info title="会安装什么？">先确认 Node.js 22 或更高版本，再执行 <code>npm install -g @jackwener/opencli</code> 安装 OpenCLI。</Info>
           <CopyBox text={opencliInstallPrompt} copied={copied === "opencli"} onCopy={() => copy("opencli", opencliInstallPrompt)} />
           <Check checked={confirmed} onChange={setConfirmed} title="AI 已返回 OpenCLI 的真实版本号">必须看到 <code>opencli --version</code> 的真实输出；只说“已安装”不算完成。</Check>
           <Help>如果没有 AI 助手，请在 {os === "windows" ? "Windows PowerShell" : "macOS 终端"}运行上面的安装命令；遇到权限或 Node.js 版本问题，把完整报错交给 AI 处理。</Help>
@@ -149,17 +142,19 @@ export function BeginnerInstallFlow({ product }: { product?: InstallProduct }) {
           <Check checked={confirmed} onChange={setConfirmed} title="AI 已返回我的 LinkedIn 账号信息">必须显示真实账号信息，只有“命令执行成功”不算完成。</Check>
           <Help>读取失败时，依次检查 LinkedIn 登录、Chrome 扩展和 OpenCLI 浏览器连接。</Help>
         </Step>}
-        {step === 4 && <Step tag="第 5 步，共 6 步" title="安装猎策寻访能力" lead={effectiveRelease ? "安装职位梳理、LinkedIn 寻访和候选人报告。" : "当前站点尚无已发布的 Hunter 安装包，发布后才能继续安装。"}>
+        {step === 4 && <Step tag="第 5 步，共 6 步" title="安装猎策寻访能力" lead={effectiveRelease ? "安装职位梳理、LinkedIn 寻访和候选人报告。" : releaseLabel(releaseState, effectiveRelease)}>
           {effectiveRelease ? <>
+            {!product?.isPublic ? <button className={styles.next} onClick={() => onInstall(os ?? "mac")}>登录或校验授权，获取安装方式</button> : <>
             <CopyBox text={installPrompt} copied={copied === "hunter"} onCopy={() => copy("hunter", installPrompt)} />
             <button className={styles.advanced} onClick={() => setAdvanced(!advanced)}>{advanced ? "收起手动安装" : "我想自己用终端安装（高级）"}</button>
             {advanced && <div className={styles.command}>{terminalCommand}</div>}
-            <Check checked={confirmed} onChange={setConfirmed} title={product?.latestRelease ? "Hunter doctor 显示全部通过" : "hunter-linkedin 命令已可正常使用"}>{product?.latestRelease ? "插件和 3 个 Skill 都必须显示 ✓。" : "opencli hunter-linkedin --help 必须列出 8 个命令。"}</Check>
+            </>}
+            <Check checked={confirmed} onChange={setConfirmed} title="Hunter doctor 显示全部通过">按安装包清单核对所有 Skill、插件及必要环境；不能只验证 CLI 命令。</Check>
             <Help>安装失败时，把完整报错交给 AI，不要跳过 doctor，也不要反复安装。</Help>
-          </> : <Info title="等待安装包发布">这不是你的电脑或 OpenCLI 的问题。管理员需在发布后台上传并发布 Hunter 安装包；发布后刷新本页即可继续。</Info>}
+          </> : <Info title={releaseLabel(releaseState, effectiveRelease)}>请刷新页面获取发布信息。只有取得产品的正式发布记录后，才能继续安装。</Info>}
         </Step>}
         {step === 5 && <Step tag="安装完成" title="猎策已经准备好了" lead="环境、浏览器、LinkedIn 和 Hunter Skill 均已完成验证。">
-          <ul className={styles.results}><li>✓ Node.js 20+</li><li>✓ OpenCLI 已安装并返回版本号</li><li>✓ Chrome 扩展与 opencli doctor</li><li>✓ LinkedIn 真实账号连接</li><li>✓ Hunter 插件和 3 个 Skill</li></ul>
+          <ul className={styles.results}><li>✓ Node.js 22+</li><li>✓ OpenCLI 已安装并返回版本号</li><li>✓ Chrome 扩展与 opencli doctor</li><li>✓ LinkedIn 真实账号连接</li><li>✓ Hunter 插件和安装包清单内的 Skill</li></ul>
           <p>现在把一份 JD 发给 AI，然后说：</p><CopyBox text="帮我梳理这个职位，并在 LinkedIn 上寻找合适的候选人。" copied={copied === "start"} onCopy={() => copy("start", "帮我梳理这个职位，并在 LinkedIn 上寻找合适的候选人。")} />
         </Step>}
         {copied === "error" && <p className={styles.copyError}>复制失败，请手动选中文字复制。</p>}

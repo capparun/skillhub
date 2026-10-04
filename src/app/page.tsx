@@ -8,6 +8,7 @@ import { SiteHeader } from "./components/site-header";
 import { InstallModal, ModalProduct } from "./components/install-modal";
 import { BeginnerInstallFlow } from "./components/beginner-install-flow";
 import { api, SessionInfo } from "@/lib/client/api";
+import { releaseLabel, type ReleaseState } from "@/lib/product-release";
 import styles from "./page.module.css";
 
 interface ProductInfo {
@@ -26,7 +27,7 @@ const CARD_PRESENTATION: Record<string, { bullets: string[]; includes: string[] 
       "关键问题追问,厘清隐含条件",
       "产出人才画像与寻访任务书",
     ],
-    includes: ["1 个技能"],
+    includes: ["职位需求对齐", "本地 Agent"],
   },
   "soho-sourcing": {
     bullets: [
@@ -34,7 +35,7 @@ const CARD_PRESENTATION: Record<string, { bullets: string[]; includes: string[] 
       "AI 匹配打分与候选人排序",
       "候选人初评与寻访报告输出",
     ],
-    includes: ["3 个技能", "LinkedIn 插件", "OpenCLI 运行时"],
+    includes: ["LinkedIn 寻访工作流", "交付内容以安装包清单为准"],
   },
 };
 
@@ -68,6 +69,9 @@ function DistributionPage() {
   const [me, setMe] = useState<SessionInfo["user"] | null>(null);
   const [products, setProducts] = useState<ProductInfo[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [releaseState, setReleaseState] = useState<ReleaseState>("loading");
+  const [installSlug, setInstallSlug] = useState("soho-sourcing");
+  const [installPlatform, setInstallPlatform] = useState<"mac" | "windows">("mac");
   const [selected, setSelected] = useState<ProductInfo | null>(null);
 
   useEffect(() => {
@@ -79,9 +83,9 @@ function DistributionPage() {
       .catch(() => undefined);
     api<{ products: ProductInfo[] }>("/api/products")
       .then((data) => {
-        if (!cancelled && data.products.length > 0) setProducts(data.products);
+        if (!cancelled) { setProducts(data.products); setReleaseState("ready"); }
       })
-      .catch(() => undefined)
+      .catch(() => { if (!cancelled) setReleaseState("error"); })
       .finally(() => {
         if (!cancelled) setLoaded(true);
       });
@@ -90,27 +94,24 @@ function DistributionPage() {
     };
   }, []);
 
-  const list = products.length > 0 ? products : FALLBACK_PRODUCTS;
+  const list = releaseState === "ready" ? products : FALLBACK_PRODUCTS;
 
-  // 登录回跳：寻访产品进入新手向导，其余产品打开对应安装弹窗。
+  // 登录回跳进入对应产品向导。
   useEffect(() => {
     const slug = searchParams.get("install");
     if (!slug || !loaded) return;
     const target = list.find((p) => p.slug === slug);
     if (target) {
       const timer = window.setTimeout(() => {
-        if (target.slug === "soho-sourcing") {
-          document.getElementById("install-center")?.scrollIntoView({ behavior: "smooth" });
-        } else {
-          setSelected(target);
-        }
+        setInstallSlug(target.slug);
+        document.getElementById("install-center")?.scrollIntoView({ behavior: "smooth" });
       }, 0);
       return () => window.clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, loaded]);
 
-  const sourcing = list.find((p) => p.slug === "soho-sourcing");
+  const installationProduct = list.find((p) => p.slug === installSlug) ?? list[0];
 
   return (
     <main className={styles.page}>
@@ -128,17 +129,16 @@ function DistributionPage() {
           不懂命令也没关系。跟着页面一步一步操作，就能把猎策装进你的 AI
           助手；职位与候选人数据仍留在你的电脑中。
         </p>
-        <button className={styles.heroButton} onClick={() => document.getElementById("install-center")?.scrollIntoView({ behavior: "smooth" })}>
-          开始安装
+        <button className={styles.heroButton} onClick={() => document.querySelector('[aria-label="技能列表"]')?.scrollIntoView({ behavior: "smooth" })}>
+          选择产品
         </button>
       </section>
 
-      <BeginnerInstallFlow product={sourcing} />
 
       <section className={styles.list} aria-label="技能列表">
         <div className={styles.listHeading}>
-          <h2>可用技能</h2>
-          <span>{list.length} SKILLS</span>
+          <h2>选择要安装的产品</h2>
+          <span>{list.length} PRODUCTS</span>
         </div>
 
         <div className={styles.cardGrid}>
@@ -165,7 +165,7 @@ function DistributionPage() {
                     <div className={styles.cardMeta}>
                       <span>Hunter 官方</span>
                       <small>
-                        {product.latestRelease ? `v${product.latestRelease.version}` : "即将发布"}
+                        {releaseLabel(releaseState, product.latestRelease)}
                       </small>
                     </div>
                   </div>
@@ -189,14 +189,11 @@ function DistributionPage() {
                   <button
                     className={styles.installButton}
                     onClick={() => {
-                      if (product.slug === "soho-sourcing") {
-                        document.getElementById("install-center")?.scrollIntoView({ behavior: "smooth" });
-                      } else {
-                        setSelected(product);
-                      }
+                      setInstallSlug(product.slug);
+                      document.getElementById("install-center")?.scrollIntoView({ behavior: "smooth" });
                     }}
                   >
-                    {product.slug === "soho-sourcing" ? "开始安装" : "安装"}
+                    查看安装步骤
                   </button>
                 </div>
               </article>
@@ -204,6 +201,8 @@ function DistributionPage() {
           })}
         </div>
       </section>
+
+      <BeginnerInstallFlow key={installationProduct?.slug ?? "empty"} product={installationProduct} releaseState={releaseState} onInstall={(platform) => { setInstallPlatform(platform); if (installationProduct) setSelected(installationProduct); }} />
 
       <footer className={styles.footer}>
         <span>© 2026 猎策 Hunter Works</span>
@@ -214,6 +213,7 @@ function DistributionPage() {
         <InstallModal
           product={toModalProduct(selected)}
           me={me}
+          initialPlatform={installPlatform}
           onClose={() => setSelected(null)}
         />
       )}

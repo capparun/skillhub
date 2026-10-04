@@ -37,6 +37,7 @@ interface InstallModalProps {
   facts?: { label: string; value: string }[];
   /** 未登录时「去登录」的跳转地址(含回跳参数)。 */
   loginHref?: string;
+  initialPlatform?: "mac" | "windows";
   onClose: () => void;
 }
 
@@ -47,10 +48,11 @@ export function InstallModal({
   facts,
   loginHref,
   onClose,
+  initialPlatform,
 }: InstallModalProps) {
   const isFree = product.isPublic;
-  const [installMode, setInstallMode] = useState<"posix" | "windows" | "agent">("posix");
-  const [windowsEnvironment, setWindowsEnvironment] = useState(false);
+  const [installMode, setInstallMode] = useState<"posix" | "windows" | "agent">(initialPlatform === "windows" ? "windows" : "posix");
+  const [windowsEnvironment, setWindowsEnvironment] = useState(initialPlatform === "windows");
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState("");
   const [paidInstall, setPaidInstall] = useState<PaidInstall | null>(null);
@@ -59,6 +61,7 @@ export function InstallModal({
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
+    if (initialPlatform) return;
     const frame = window.requestAnimationFrame(() => {
       const platform = [navigator.userAgent, navigator.platform].join(" ").toLowerCase();
       if (platform.includes("win")) {
@@ -67,7 +70,7 @@ export function InstallModal({
       }
     });
     return () => window.cancelAnimationFrame(frame);
-  }, []);
+  }, [initialPlatform]);
 
   // 付费弹窗:登录后自动签发一次性安装令牌
   useEffect(() => {

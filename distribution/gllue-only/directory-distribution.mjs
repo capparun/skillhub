@@ -13,13 +13,18 @@ export function replaceDirectory(source, destination, io = fs) {
   try {
     // npm bin/workspace links must remain relative after the runtime moves.
     io.cpSync(source, stage, {recursive:true, errorOnExist:true, force:false, verbatimSymlinks:true});
-    relinkWorkspaces(stage, destination, io);
     if (io.existsSync(destination)) {
       io.renameSync(destination, backup);
       previous = backup;
     }
-    try { io.renameSync(stage, destination); }
+    try {
+      io.renameSync(stage, destination);
+      // Rebind after the destination exists; Windows cannot reliably rename a
+      // directory containing junctions aimed at its not-yet-existing new path.
+      relinkWorkspaces(destination, destination, io);
+    }
     catch (error) {
+      if (io.existsSync(destination)) io.renameSync(destination, stage);
       if (previous) io.renameSync(previous, destination);
       throw error;
     }

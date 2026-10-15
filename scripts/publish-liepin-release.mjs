@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import pg from 'pg';
+import {validateExpectedRelease, lockExpectedLiepinRelease} from './lib/liepin-release-guard.mjs';
 
 const args=process.argv.slice(2);
 const option=name=>{const index=args.indexOf(name);return index<0?null:args[index+1];};
@@ -22,6 +23,9 @@ if(args.includes('--check-only')){
  console.log(JSON.stringify({checked:true,published:false,...release}));
  process.exit(0);
 }
+const expectedId=option('--expected-current-release-id');
+const expectedSha=option('--expected-current-sha256');
+validateExpectedRelease(expectedId, expectedSha);
 const notesFile=option('--notes-file');
 const notes=notesFile?fs.readFileSync(path.resolve(notesFile),'utf8').trim():version==='0.1.1'
  ?'安装诊断修复：子进程启动失败标为未验证，不误报未安装；业务插件版本保持 0.1.0。':null;
@@ -41,14 +45,7 @@ try {
   await client.query('BEGIN');
   const { rows: admins } = await client.query("SELECT id FROM users WHERE role = 'admin' AND status = 'active' ORDER BY created_at LIMIT 1");
   if (!admins[0]) throw new Error('No active admin to record publication');
-  const { rows: products } = await client.query(
-    `INSERT INTO products (slug, name, description, is_public) VALUES ($1, $2, $3, true)
-     ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, updated_at = now()
-     RETURNING id, is_public`,
-    [release.product, '猎聘搜索', '猎聘猎头端筛选、单次搜索、结果读取与搜索方案管理。独立安装包，免登录获取。'],
-  );
-  if (!products[0].is_public) throw new Error('Existing product is private; refusing to change access');
-  const productId = products[0].id;
+  const productId = await lockExpectedLiepinRelease(client, expectedId, expectedSha);
   const { rows: previous } = await client.query('SELECT id, package_sha256, is_published FROM releases WHERE product_id = $1 AND version = $2 FOR UPDATE', [productId, release.version]);
   if (previous[0] && previous[0].package_sha256 !== sha) throw new Error('Version already exists with different contents');
   if (previous[0]?.is_published) {

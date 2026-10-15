@@ -18,6 +18,8 @@ jobs:
         with:
           node-version: '22'
           cache: npm
+      - name: Minimal directory relocation probe
+        run: node scripts/gllue-directory-probe.mjs
       - run: npm ci
       - name: Official bootstrap in Windows PowerShell 5.1
         if: matrix.shell == 'powershell'

@@ -13,6 +13,7 @@ export function replaceDirectory(source, destination, io = fs) {
   try {
     // npm bin/workspace links must remain relative after the runtime moves.
     io.cpSync(source, stage, {recursive:true, errorOnExist:true, force:false, verbatimSymlinks:true});
+    console.log('[DEBUG-gllue-directory]', JSON.stringify({stageExists:io.existsSync(stage),stageDirectory:io.lstatSync(stage).isDirectory(),destinationExists:io.existsSync(destination),parentExists:io.existsSync(path.dirname(destination)),entries:io.readdirSync(stage)}));
     if (io.existsSync(destination)) {
       io.renameSync(destination, backup);
       previous = backup;

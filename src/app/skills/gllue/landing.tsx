@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/client/api';
 import { freeCliCommand, windowsCliCommand } from '@/lib/prompts';
 import styles from './landing.module.css';
+import { ProductSectionNav } from '../../components/product-section-nav';
 import { UsageExamples } from './usage-examples';
 
 type Release = { product: { slug: string; isPublic: boolean }; version: string; sha256: string; downloadUrl: string };
@@ -53,7 +54,7 @@ ${command}
   }
   return <main className={styles.page}>
     <nav className={styles.topbar} aria-label="页面导航"><strong>猎策 <span>／ Gllue 人才库</span></strong><button onClick={() => copy('share', `${origin}/skills/gllue`)}>{copied === 'share' ? '链接已复制' : '分享此页面 ↗'}</button></nav>
-    <nav className={styles.sectionNav} aria-label="产品页导航"><a href="#overview">产品介绍</a><a href="#installation">安装</a><a href="#usage-examples">怎么用</a><a href="#commands">命令参考</a></nav>
+    <ProductSectionNav className={styles.sectionNav} sections={[{ id: 'overview', label: '产品介绍' }, { id: 'installation', label: '安装与连接' }, { id: 'usage-examples', label: '使用示例' }, { id: 'commands', label: '命令参考' }]} />
     <section id="overview" className={styles.hero}>
       <div><p className={styles.eyebrow}>人才库管理 · 谷露 Gllue</p><h1>已有的人，先用好。<br /><em>新找到的人，先查重。</em></h1><p className={styles.intro}>让 AI 助手查询谷露人才库、整理候选人证据，把 LinkedIn 等渠道找到的人与库内记录核对。维护资料前，先看差异，再由你确认。</p><a className={styles.primary} href="#installation">安装 Gllue Skill ↓</a><p><a className={styles.textLink} href="#usage-examples">已装好？查看使用问法与命令 →</a></p><p className={styles.caption}>独立交付 · Windows / macOS / Linux · Node.js 22+</p></div>
       <aside className={styles.flow} aria-label="谷露查重流程"><div className={styles.flowHeading}><span>找到人之后，接着做</span><span aria-hidden="true">谷</span></div><ol><li><span className={styles.number}>01</span><div><strong>提供候选人线索</strong><p>姓名、邮箱或 LinkedIn 个人链接</p></div></li><li><span className={styles.number}>02</span><div><strong>与谷露记录核对</strong><p>查重线索 → 人工确认身份 → 字段差异</p></div></li><li><span className={styles.number}>03</span><div><strong>审核后，再维护资料</strong><p>整批预览 → 逐人逐项授权 → 写后回读</p></div></li></ol><div className={styles.flowFoot}>查重命中需要复核身份；未命中不代表全库不存在。</div></aside>

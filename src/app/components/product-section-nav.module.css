@@ -1,0 +1,6 @@
+.nav { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 24px; padding: 10px 0 0; }
+.nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 0 10px; border-bottom: 2px solid transparent; border-radius: 0; color: var(--muted, #526b65); text-decoration: none; font-size: 16px; line-height: 1.5; white-space: nowrap; }
+.nav a:hover { color: var(--ink, #123b34); }
+.nav a[aria-current] { border-color: var(--ink, #123b34); color: var(--ink, #123b34); font-weight: 650; }
+.nav a:focus-visible { outline: 2px solid #16866b; outline-offset: 4px; }
+@media(max-width:600px) { .nav { gap: 2px 20px; padding-top: 8px; } }

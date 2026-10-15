@@ -1,5 +1,4 @@
-.sectionNav { display: flex; flex-wrap: wrap; gap: 24px; padding: 16px 0; border-bottom: 1px solid var(--line); }
-.sectionNav a, .usageHint a { text-decoration: underline; text-underline-offset: 5px; }
+.usageHint a { text-decoration: underline; text-underline-offset: 5px; }
 .usage { margin-top: 64px; scroll-margin-top: 24px; }
 .usageFlow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); list-style: none; padding: 0; margin: 24px 0; border-block: 1px solid var(--line); }
 .usageFlow li { padding: 16px 12px; font-size: 16px; }
@@ -37,3 +36,7 @@
 .sectionNav { width: min(1040px, calc(100% - 48px)); margin: auto; font-size: 16px; }
 .usageLink { display: inline-block; margin: 18px 0 0 20px; font-size: 16px; text-decoration: underline; text-underline-offset: 5px; }
 @media (max-width:600px) { .usage, .sectionNav { width: calc(100% - 32px); } .sectionHeading { align-items: start; flex-direction: column; } .usageLink { display: block; margin-left: 0; } }
+
+.headerWidth { width: min(1040px, calc(100% - 48px)); margin: auto; }
+.headerWidth > header { width: 100%; }
+@media(max-width:600px) { .headerWidth { width: calc(100% - 32px); } }

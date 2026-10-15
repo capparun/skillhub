@@ -8,6 +8,7 @@ import { BeginnerInstallFlow } from '../../components/beginner-install-flow';
 import { InstallModal, type ModalProduct } from '../../components/install-modal';
 import styles from '../../page.module.css';
 import usageStyles from './usage.module.css';
+import { ProductSectionNav } from '../../components/product-section-nav';
 import { LinkedInUsageExamples } from './usage-examples';
 
 const fallback: ModalProduct = {
@@ -40,9 +41,9 @@ export function LinkedInLanding() {
   }, []);
 
   return <main className={styles.page}>
-    <SiteHeader nav="none" brandLinked={false} />
-    <nav className={usageStyles.sectionNav} aria-label="产品页导航"><a href="#install-center">安装与连接</a><a href="#usage-examples">怎么用</a></nav>
-    <section className={styles.hero}>
+    <div className={usageStyles.headerWidth}><SiteHeader nav="none" brandLinked={false} /></div>
+    <ProductSectionNav className={usageStyles.sectionNav} sections={[{ id: 'overview', label: '产品介绍' }, { id: 'install-center', label: '安装与连接' }, { id: 'usage-examples', label: '使用示例' }]} />
+    <section id="overview" className={styles.hero}>
       <div className={styles.kicker}><span /> 猎策 · LinkedIn 人才寻访</div>
       <h1>在 LinkedIn 找人，<em>把筛选依据一起交付。</em></h1>
       <p>{fallback.description} 在 WorkBuddy、Codex 或 Claude Code 中使用，职位与候选人数据留在本机。</p>

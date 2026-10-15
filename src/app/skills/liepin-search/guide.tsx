@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { freeCliCommand, windowsCliCommand } from '@/lib/prompts';
 import { releaseLabel, type ReleaseState } from '@/lib/product-release';
 import styles from './guide.module.css';
+import { ProductSectionNav } from '../../components/product-section-nav';
 import { LiepinUsageExamples } from './usage-examples';
 
 const steps = ['准备环境', '安装猎聘', '连接猎聘', '首次搜索'];
@@ -64,9 +65,9 @@ export function LiepinInstallGuide({ release, releaseState, appUrl }: {
 
   return <main className={styles.page}>
     <nav className={styles.topbar} aria-label="页面导航"><span>猎策 · 猎聘搜索</span><button onClick={() => copy('share', url)}>{copied === 'share' ? '页面链接已复制' : '分享安装页 ↗'}</button></nav>
-    <nav className={styles.sectionNav} aria-label="产品页导航"><a href="#installation">安装与连接</a><a href="#usage-examples">怎么用</a></nav>
-    <header className={styles.hero}>
-      <div><p className={styles.eyebrow}>猎聘独立安装与使用</p><h1>从安装到第一次搜索，<br />跟着这一页做完。</h1><p className={styles.intro}>把职位要求交给你的 AI 助手，在猎聘准备筛选、搜索候选人、读取结果。无需安装其他猎策产品。</p><div className={styles.heroActions}><a className={styles.primary} href="#installation">开始安装 <span aria-hidden="true">↓</span></a><span className={styles.badge}>{releaseLabel(releaseState, release)}</span><a href="#usage-examples">已装好？查看使用示例 →</a></div></div>
+    <ProductSectionNav sections={[{ id: 'overview', label: '产品介绍' }, { id: 'installation', label: '安装与连接' }, ...(reportRelease ? [{ id: 'usage-examples', label: '使用示例' }] : [])]} />
+    <header id="overview" className={styles.hero}>
+      <div><p className={styles.eyebrow}>猎聘独立安装与使用</p><h1>从安装到第一次搜索，<br />跟着这一页做完。</h1><p className={styles.intro}>把职位要求交给你的 AI 助手，在猎聘准备筛选、搜索候选人、读取结果。无需安装其他猎策产品。</p><div className={styles.heroActions}><a className={styles.primary} href="#installation">开始安装 <span aria-hidden="true">↓</span></a><span className={styles.badge}>{releaseLabel(releaseState, release)}</span>{reportRelease && <a href="#usage-examples">已装好？查看使用示例 →</a>}</div></div>
       <aside className={styles.summary}><span className={styles.eyebrow}>安装后你会得到</span><ul><li><strong>按职位条件筛选</strong><span>关键词、城市、学历、工作经验等</span></li><li><strong>读取候选人结果</strong><span>单次搜索、读取当前页、保留实际摘要</span></li><li><strong>复用搜索方案</strong><span>按指令保存、应用和删除方案</span></li>{reportRelease && <li><strong>候选人报告与短名单</strong><span>可见详情、两阶段复核、比较筛选与四格式导出</span></li>}</ul><p>使用你自己的猎聘猎头账号。包内包含猎聘搜索 Skill 和对应插件。</p></aside>
     </header>
 

@@ -1,0 +1,12 @@
+{
+  "name": "gllue",
+  "version": "1.3.0",
+  "type": "module",
+  "description": "Gllue（谷露）猎头 ATS 自动化：查重、入库、检索",
+  "scripts": {
+    "test": "node test/run-tests.js"
+  },
+  "peerDependencies": {
+    "@jackwener/opencli": ">=1.8.0"
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "status": "draft_requires_user_confirmation",
+  "role": "International School Principal",
+  "summary": "国际学校校长：优先核验校长层级、国际学校或国际课程经历，并补充学校领导及课程认证证据。",
+  "version": "international-school-principal-draft-v1",
+  "scoring": {
+    "passScore": 70,
+    "criteria": [
+      {
+        "id": "principal_role",
+        "label": "校长或同等级学校负责人经历",
+        "weight": 35,
+        "required": true,
+        "evidenceTerms": [
+          "principal",
+          "head of school",
+          "school director",
+          "校长",
+          "执行校长"
+        ]
+      },
+      {
+        "id": "international_school",
+        "label": "国际学校或国际课程经历",
+        "weight": 25,
+        "required": true,
+        "evidenceTerms": [
+          "international school",
+          "国际学校",
+          "IB",
+          "IBDP",
+          "Cambridge",
+          "A-Level"
+        ]
+      },
+      {
+        "id": "school_leadership",
+        "label": "学校运营、学术或团队领导经验",
+        "weight": 25,
+        "required": false,
+        "evidenceTerms": [
+          "school leadership",
+          "academic leadership",
+          "curriculum leadership",
+          "学校管理",
+          "教学管理",
+          "团队管理"
+        ]
+      },
+      {
+        "id": "international_accreditation",
+        "label": "国际课程实施或认证经验",
+        "weight": 15,
+        "required": false,
+        "evidenceTerms": [
+          "PYP",
+          "MYP",
+          "Diploma Programme",
+          "CIS",
+          "WASC",
+          "accreditation",
+          "课程认证"
+        ]
+      }
+    ]
+  },
+  "decisionNotes": [
+    "未命中只表示当前网页简历未观察到证据，不等于候选人不具备。",
+    "评分建议不是最终短名单，必须人工审核。",
+    "用户确认前不得用于真实候选人评分。"
+  ]
+}

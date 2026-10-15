@@ -1,0 +1,5 @@
+{
+  "tenant": "your-tenant",
+  "domain": "your-tenant.gllue.com",
+  "protocol": "https"
+}

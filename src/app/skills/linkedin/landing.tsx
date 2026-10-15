@@ -7,6 +7,8 @@ import { SiteHeader } from '../../components/site-header';
 import { BeginnerInstallFlow } from '../../components/beginner-install-flow';
 import { InstallModal, type ModalProduct } from '../../components/install-modal';
 import styles from '../../page.module.css';
+import usageStyles from './usage.module.css';
+import { LinkedInUsageExamples } from './usage-examples';
 
 const fallback: ModalProduct = {
   slug: 'soho-sourcing',
@@ -39,11 +41,12 @@ export function LinkedInLanding() {
 
   return <main className={styles.page}>
     <SiteHeader nav="none" brandLinked={false} />
+    <nav className={usageStyles.sectionNav} aria-label="产品页导航"><a href="#install-center">安装与连接</a><a href="#usage-examples">怎么用</a></nav>
     <section className={styles.hero}>
       <div className={styles.kicker}><span /> 猎策 · LinkedIn 人才寻访</div>
       <h1>在 LinkedIn 找人，<em>把筛选依据一起交付。</em></h1>
       <p>{fallback.description} 在 WorkBuddy、Codex 或 Claude Code 中使用，职位与候选人数据留在本机。</p>
-      <button className={styles.heroButton} onClick={() => document.getElementById('install-center')?.scrollIntoView({ behavior: 'smooth' })}>查看 LinkedIn 安装步骤</button>
+      <button className={styles.heroButton} onClick={() => document.getElementById('install-center')?.scrollIntoView({ behavior: 'smooth' })}>查看 LinkedIn 安装步骤</button><a className={usageStyles.usageLink} href="#usage-examples">已装好？查看使用示例 →</a>
     </section>
     <section className={styles.list} aria-label="LinkedIn 产品介绍">
       <article className={styles.card}>
@@ -58,6 +61,7 @@ export function LinkedInLanding() {
       </article>
     </section>
     <BeginnerInstallFlow product={product} releaseState={releaseState} onInstall={setPlatform} />
+    <LinkedInUsageExamples />
     <footer className={styles.footer}><span>© 2026 猎策 · LinkedIn 人才寻访</span><span>LOCAL / PRIVATE</span></footer>
     {platform && <InstallModal product={product} me={me} initialPlatform={platform} loginHref="/login?next=%2Fskills%2Flinkedin" onClose={() => setPlatform(null)} />}
   </main>;

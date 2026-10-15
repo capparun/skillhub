@@ -1,0 +1,40 @@
+export const exampleGroups = ['全部', '连接与排错', '库内找人', '查重与回流', '评估与报告', '授权维护'] as const;
+export type ExampleGroup = typeof exampleGroups[number];
+export const usageExamples: { id: string; group: ExampleGroup; title: string; input: string; output: string; prompt: string }[] = [
+  {id:'connect',group:'连接与排错',title:'第一次连接我的谷露',input:'自己的谷露域名与租户；在 Chrome 手动登录',output:'连接结果、实际租户与可用能力',prompt:'请使用 cskh-gllue 检查我的谷露连接。先向我确认租户和完整 HTTPS 域名，在本次环境中配置；由我手动登录。运行 OpenCLI doctor 和 capability-probe，报告实际租户、登录状态及只读能力。本次不查人、不写入。'},
+  {id:'login',group:'连接与排错',title:'登录过期，重新登录',input:'目标租户与浏览器中的登录页面',output:'手动登录后的连接检查',prompt:'请使用 cskh-gllue 帮我恢复谷露登录。先核对目标租户，再打开登录页，由我手动输入账号密码。登录后检查连接，不把“页面看起来已登录”当作后台查询已经通过。遇到验证码或限制就停下。'},
+  {id:'session',group:'连接与排错',title:'操作时经常退登',input:'已登录的谷露标签页与大致出错时间',output:'45 秒观察窗口内的登录异常信号',prompt:'请使用 cskh-gllue，在当前已登录的谷露标签页观察 45 秒会话状态，使用 performance 模式，不刷新、不导航、不主动请求，也不读取响应正文。保留脱敏时间区间与异常信号；没有发现异常只说明本次窗口未发现，不能断定长期稳定。'},
+  {id:'name',group:'库内找人',title:'按姓名或邮箱查人',input:'姓名或邮箱；数量与我的／可访问范围',output:'候选人记录、ID 与可见基本信息',prompt:'请使用 cskh-gllue，在“我的候选人”范围按姓名【候选人姓名】搜索，最多 5 人，展示候选人 ID、公司和职位，只读不修改。如果我提供的是邮箱，就按邮箱查询；不把公司名当作姓名搜索词。'},
+  {id:'keyword',group:'库内找人',title:'按岗位或技能关键词找人',input:'单个全文关键词、范围、人数',output:'全文命中结果及后续待评估项',prompt:'请使用 cskh-gllue，在“我的候选人”中全文搜索【一个岗位或技能关键词】，最多 10 人。先复述搜索条件，再执行；关键词使用 full-text，不使用按姓名查询的 keyword。命中只是线索，不等于符合岗位要求。先不扩大到可访问范围。'},
+  {id:'detail',group:'库内找人',title:'读清楚一位候选人',input:'谷露候选人 ID',output:'标准简历摘要、经历、联系记录和信息缺口',prompt:'请使用 cskh-gllue，读取候选人【候选人ID】的可见资料，整理工作经历、教育、当前公司职位、归属及页面显示的联系记录。区分未观察、遮蔽和未验证的联系方式；不解锁联系方式、不读取 PDF、不触达。'},
+  {id:'jobs',group:'库内找人',title:'找一个已有职位',input:'职位或客户关键词与数量',output:'当前默认筛选范围内的职位线索',prompt:'请使用 cskh-gllue，在当前账号默认职位列表范围查找【职位名称或客户关键词】，最多 10 个，说明实际范围与分页情况。找到后让我选定职位 ID，再读取详情；没有找到不能当作全库不存在，也不要新建职位。'},
+  {id:'job-detail',group:'库内找人',title:'查看职位要求',input:'已有职位 ID',output:'职位说明、客户、地点、薪资和负责人',prompt:'请使用 cskh-gllue，读取职位【职位ID】的详情，整理客户、地点、薪资、职位说明、负责人和状态，列出未显示的字段。只读，不修改职位或关联候选人。'},
+  {id:'linkedin',group:'查重与回流',title:'LinkedIn 找到的人，谷露里有吗？',input:'候选人姓名、邮箱或 LinkedIn 主页链接；公司职位辅助',output:'疑似重复记录、匹配理由与身份待核实项',prompt:'请使用 cskh-gllue，为这位 LinkedIn 候选人查重：【粘贴姓名、LinkedIn主页链接、已知公司职位；有邮箱再提供】。先核对目标租户，用 check-exists 查询，展示命中 ID、匹配理由与查询范围，身份由我确认。链接标识只是辅助线索，不当作库内链接精确匹配；不新增、不更新、不触达。'},
+  {id:'batch-duplicates',group:'查重与回流',title:'给短名单逐人查重',input:'最终短名单文件与明确选中的人员',output:'每个人的查重状态与待复核记录',prompt:'请使用 cskh-gllue，对我选定的最终短名单【文件路径／人员名单】逐人查重，先确认实际人数和租户。每个人独立给出命中记录、理由、未核实项和失败情况，汇总成本地审核表。不要把一个 JSON 数组直接当成单人输入；逐人调用，不自动合并、入库或重试失败项。'},
+  {id:'compare',group:'查重与回流',title:'比较外部资料与库内资料',input:'人工确认的谷露 ID 与外部建议资料',output:'新增、冲突、删除风险、未知与无变化字段',prompt:'请使用 cskh-gllue。我已确认【谷露候选人ID】与这份外部资料是同一个人：【资料／文件路径】。先读取并保存当前观察，再比较字段差异，列出可补充字段、已有值冲突、清空风险和未验证联系方式。只生成本地更新预览，不覆盖或保存。'},
+  {id:'jbf',group:'评估与报告',title:'按确认的职位要求筛选库内人选',input:'已确认的 JBF／人才画像、关键词、范围与人数',output:'逐人证据、评分建议、待确认短名单',prompt:'请使用 cskh-gllue，按我已确认的 JBF【文件路径】筛选谷露候选人。先和我确认本轮关键词、范围和实际人数，建议先 10 人；逐人读详情后按本轮明确规则评估，缺证据标未知，不改写 JBF，不套用 LinkedIn 人脉加分。输出建议短名单，由我决定最终入选，不触达。'},
+  {id:'report',group:'评估与报告',title:'把本轮结果做成可读报告',input:'当前任务的详情、评分与完整检查点',output:'本地 HTML 审核报告与文件路径',prompt:'请使用 cskh-gllue，把当前任务的搜索条件、逐人资料、评分依据、归属、联系状态和失败项汇总为本地 HTML 审核报告。先确认检查点没有 pending 或 claimed 项，再使用随插件提供的 prepare-review 和 render-review 脚本。不上传候选人资料；未评分显示待评分，不补零冒充完成。'},
+  {id:'resume',group:'评估与报告',title:'上次中断了，接着做',input:'当前任务目录与已有检查点',output:'已完成／未完成清单及恢复方案',prompt:'请使用 cskh-gllue，检查这次中断的任务【任务目录／检查点路径】。先只读报告已完成、待处理、失败项及活跃 claimId，再和我确认恢复范围。复用本轮身份一致的详情文件，不重复打开已读人选；不重复查询、写入或自动重试 uncertain 操作。'},
+  {id:'create',group:'授权维护',title:'没查到重复，准备加入人才库',input:'选定人选、查重结果与准备写入的资料',output:'新增预演、字段清单与待确认项',prompt:'请使用 cskh-gllue，为【选定候选人】准备新增。先复核查重范围和身份，再展示准备写入的资料、租户与缺失字段；执行默认新增预演，允许填表但不点击保存。等我看完本人的精确预览并明确批准后，才生成本轮授权并保存一次，随后回读。uncertain 时停止，不换授权重试。'},
+  {id:'update',group:'授权维护',title:'只更新一个已核对字段',input:'候选人 ID、字段、新值与当前观察',output:'单字段差异预览；批准后才保存并回读',prompt:'请使用 cskh-gllue，为候选人【候选人ID】准备把【字段】更新为【新值】。先核对身份、读取当前值并生成该字段的差异预览，展示旧值和新值，暂不保存。等我批准本次字段和内容后再执行一次，并回读核验；不清空其他字段，不解锁遮蔽联系方式。'},
+  {id:'note',group:'授权维护',title:'给人选添加快捷备注',input:'候选人 ID；本租户实际配置的选项',output:'可用选项、单次备注预览与回读结果',prompt:'请使用 cskh-gllue，先只读列出候选人【候选人ID】当前可用的快捷备注选项，让我选择。不要把任意长文本当作快捷备注。选定后先预演，展示候选人和选项；等我明确批准这次写入再点击一次，并核对记录增量。'},
+  {id:'associate',group:'授权维护',title:'把已有人选加入已有职位',input:'候选人 ID、职位 ID 与职位名称关键词',output:'关联预览；批准后单次关联与回读',prompt:'请使用 cskh-gllue，为候选人【候选人ID】和已有职位【职位ID／职位名称关键词】准备关联预览。核对两个对象身份与已有项目，不先选中或提交。等我看完并明确批准后才执行一次，随后回读；找不到职位不新建，结果 uncertain 时停止并人工核对。'},
+];
+
+export const commandExamples = [
+  {name:'login', purpose:'打开登录页，由用户手动登录', code:'opencli gllue login --timeout 300'},
+  {name:'test-connection',purpose:'检查页面可见连接；不等于后台业务已验证',code:'opencli gllue test-connection -f json'},
+  {name:'capability-probe',purpose:'预检租户、登录和关键入口，不保存记录',code:'opencli gllue capability-probe -f json'},
+  {name:'session-watch',purpose:'只观察已登录页面的会话信号，不主动请求',code:'opencli gllue session-watch --seconds 45 --mode performance --site-session persistent -f json'},
+  {name:'search-candidates',purpose:'姓名／邮箱查询，或单关键词全文查询',code:'opencli gllue search-candidates --keyword "示例姓名" --scope mine --limit 5 -f json\nopencli gllue search-candidates --full-text "principal" --scope mine --limit 10 -f json'},
+  {name:'get-candidate',purpose:'读取可见资料，不读取 PDF 或解锁联系方式',code:'opencli gllue get-candidate --id CANDIDATE_ID -f json'},
+  {name:'check-exists',purpose:'单人查重；JSON 是一位候选人的资料',code:'opencli gllue check-exists --name "示例姓名" --company "示例公司" --limit 10 -f json\nopencli gllue check-exists --name "示例姓名" --linkedinUrl "https://www.linkedin.com/in/example-person" --limit 10 -f json\nopencli gllue check-exists --file candidate.json -f json'},
+  {name:'evaluate',purpose:'本地按输入内明确的 JBF 规则评分，不覆盖已有输出',code:'opencli gllue evaluate --input unscored-review.json --output new-scored-review.json'},
+  {name:'compare-candidate',purpose:'本地比较已观察资料与建议字段，生成差异预览',code:'opencli gllue compare-candidate --input candidate-update-input.json --output new-update-preview.json'},
+  {name:'search-jobs',purpose:'保留默认列表范围，分页后本地过滤关键词',code:'opencli gllue search-jobs --keyword "示例职位" --limit 10 -f json'},
+  {name:'get-job',purpose:'读取一个已知职位的详情',code:'opencli gllue get-job --id JOB_ID -f json'},
+  {name:'add-candidate',purpose:'默认填表预演不保存；第二条仅限精确预览获批后',code:'opencli gllue add-candidate --file candidate.json -f json\nopencli gllue add-candidate --file candidate.json --confirm --approval approval.json -f json'},
+  {name:'update-candidate',purpose:'默认本地预演；一次只更新一个字段，第二条须获批',code:'opencli gllue update-candidate --input update-preview.json --field wechat -f json\nopencli gllue update-candidate --input update-preview.json --field wechat --confirm --approval approval.json -f json'},
+  {name:'add-note',purpose:'先列运行时选项，再预演；NOTE_LABEL 替换为实际选项',code:'opencli gllue add-note --id CANDIDATE_ID --list -f json\nopencli gllue add-note --id CANDIDATE_ID --text "NOTE_LABEL" -f json\nopencli gllue add-note --id CANDIDATE_ID --text "NOTE_LABEL" --confirm --approval approval.json -f json'},
+  {name:'associate-job',purpose:'默认只预览；第二条仅限候选人与职位关联精确获批后',code:'opencli gllue associate-job --candidateId CANDIDATE_ID --jobId JOB_ID --jobKeyword "示例职位" --output new-job-preview.json -f json\nopencli gllue associate-job --candidateId CANDIDATE_ID --jobId JOB_ID --jobKeyword "示例职位" --confirm --input new-job-preview.json --approval approval.json -f json'},
+];

@@ -17,9 +17,12 @@ interface InstallProduct {
   latestRelease: { version: string; sha256: string } | null;
 }
 
-const steps = ["选择电脑", "安装 OpenCLI", "连接 Chrome", "确认 LinkedIn", "安装猎策", "完成验证"];
+
 
 export function BeginnerInstallFlow({ product, releaseState, onInstall }: { product?: InstallProduct; releaseState: ReleaseState; onInstall: (platform: "mac" | "windows") => void }) {
+  const isLiepin = product?.slug === "liepin-search";
+  const channel = isLiepin ? "猎聘" : "LinkedIn";
+  const steps = ["选择电脑", "安装 OpenCLI", "连接 Chrome", `确认 ${channel}`, "安装猎策", "完成验证"];
   const [step, setStep] = useState(0);
   const [os, setOs] = useState<"mac" | "windows" | null>(null);
   const [confirmed, setConfirmed] = useState(false);
@@ -86,7 +89,7 @@ export function BeginnerInstallFlow({ product, releaseState, onInstall }: { prod
 2. 根据真实输出确认 Chrome 扩展和浏览器连接是否正常，不要只回复“已连接”。
 3. 如果检查失败，请告诉我具体是哪一项失败，并一步一步指导我处理。
 4. 检查完成后，把 opencli doctor 的真实结果发给我。`;
-  const linkedinPrompt = "请执行 opencli linkedin whoami -f json，确认是否能真实读取我当前登录的 LinkedIn 账号。不要修改任何数据。如果失败，请判断是未登录、Chrome 扩展未启用，还是 OpenCLI 未连接浏览器。";
+  const linkedinPrompt = isLiepin ? "请先确认我在 Chrome 中已登录 h.liepin.com 猎聘猎头端，并打开找简历页面。运行 opencli liepin diagnose -f json，检查当前页面加载状态与筛选控件；不要点击或提交搜索。如果尚未安装插件，先完成下一步安装，再回来执行检查。" : "请执行 opencli linkedin whoami -f json，确认是否能真实读取我当前登录的 LinkedIn 账号。不要修改任何数据。如果失败，请判断是未登录、Chrome 扩展未启用，还是 OpenCLI 未连接浏览器。";
 
   if (product?.slug === "hunter-align") {
     const alignSteps = ["选择电脑", "安装职位对齐", "验证与开始使用"];
@@ -123,7 +126,7 @@ export function BeginnerInstallFlow({ product, releaseState, onInstall }: { prod
           <div className={styles.choices}><button className={os === "mac" ? styles.selected : ""} onClick={() => setOs("mac")}><strong>macOS</strong><span>苹果 MacBook、iMac 等</span></button><button className={os === "windows" ? styles.selected : ""} onClick={() => setOs("windows")}><strong>Windows</strong><span>Windows 10 或 Windows 11</span></button></div>
           <Info title="推荐交给 AI 助手安装">不用自己输入命令。WorkBuddy、Codex、Claude Code 都可以。</Info>
         </Step>}
-        {step === 1 && <Step tag="第 2 步，共 6 步" title="安装 OpenCLI" lead="OpenCLI 是猎策连接 LinkedIn 的基础工具；这一阶段必须先把它装好。">
+        {step === 1 && <Step tag="第 2 步，共 6 步" title="安装 OpenCLI" lead={`OpenCLI 是猎策连接${channel}的基础工具；这一阶段必须先把它装好。`}>
           <Info title="会安装什么？">先确认 Node.js 22 或更高版本，再执行 <code>npm install -g @jackwener/opencli</code> 安装 OpenCLI。</Info>
           <CopyBox text={opencliInstallPrompt} copied={copied === "opencli"} onCopy={() => copy("opencli", opencliInstallPrompt)} />
           <Check checked={confirmed} onChange={setConfirmed} title="AI 已返回 OpenCLI 的真实版本号">必须看到 <code>opencli --version</code> 的真实输出；只说“已安装”不算完成。</Check>
@@ -137,12 +140,12 @@ export function BeginnerInstallFlow({ product, releaseState, onInstall }: { prod
           <Check checked={confirmed} onChange={setConfirmed} title="AI 已告诉我浏览器连接正常">必须看到 AI 返回的真实检查结果；只说“应该可以”不算完成。</Check>
           <Help>没有 AI 助手时，才需要在终端运行 <code>opencli doctor</code>。如果 Chrome 商店打不开、扩展未启用或图标不见了，请先处理这些问题。</Help>
         </Step>}
-        {step === 3 && <Step tag="第 4 步，共 6 步" title="确认 LinkedIn 登录" lead="先在 Chrome 中登录 LinkedIn，再做一次真实账号读取。">
+        {step === 3 && <Step tag="第 4 步，共 6 步" title={`确认${channel}登录`} lead={isLiepin ? "在 Chrome 登录 h.liepin.com 猎头端，打开找简历页；安装插件后执行只读检查。" : "先在 Chrome 中登录 LinkedIn，再做一次真实账号读取。"}>
           <CopyBox text={linkedinPrompt} copied={copied === "linkedin"} onCopy={() => copy("linkedin", linkedinPrompt)} />
-          <Check checked={confirmed} onChange={setConfirmed} title="AI 已返回我的 LinkedIn 账号信息">必须显示真实账号信息，只有“命令执行成功”不算完成。</Check>
-          <Help>读取失败时，依次检查 LinkedIn 登录、Chrome 扩展和 OpenCLI 浏览器连接。</Help>
+          <Check checked={confirmed} onChange={setConfirmed} title={isLiepin ? "我已登录猎聘并打开找简历页" : "AI 已返回我的 LinkedIn 账号信息"}>{isLiepin ? "安装插件后还需执行 diagnose，确认页面可读；登录不等于搜索已通过验收。" : "必须显示真实账号信息，只有“命令执行成功”不算完成。"}</Check>
+          <Help>读取失败时，依次检查{channel}登录、Chrome 扩展和 OpenCLI 浏览器连接。</Help>
         </Step>}
-        {step === 4 && <Step tag="第 5 步，共 6 步" title="安装猎策寻访能力" lead={effectiveRelease ? "安装职位梳理、LinkedIn 寻访和候选人报告。" : releaseLabel(releaseState, effectiveRelease)}>
+        {step === 4 && <Step tag="第 5 步，共 6 步" title="安装猎策寻访能力" lead={effectiveRelease ? (isLiepin ? "安装独立猎聘搜索插件与猎聘搜索 Skill。" : "安装职位梳理、LinkedIn 寻访和候选人报告。") : releaseLabel(releaseState, effectiveRelease)}>
           {effectiveRelease ? <>
             {!product?.isPublic ? <button className={styles.next} onClick={() => onInstall(os ?? "mac")}>登录或校验授权，获取安装方式</button> : <>
             <CopyBox text={installPrompt} copied={copied === "hunter"} onCopy={() => copy("hunter", installPrompt)} />
@@ -153,9 +156,9 @@ export function BeginnerInstallFlow({ product, releaseState, onInstall }: { prod
             <Help>安装失败时，把完整报错交给 AI，不要跳过 doctor，也不要反复安装。</Help>
           </> : <Info title={releaseLabel(releaseState, effectiveRelease)}>请刷新页面获取发布信息。只有取得产品的正式发布记录后，才能继续安装。</Info>}
         </Step>}
-        {step === 5 && <Step tag="安装完成" title="猎策已经准备好了" lead="环境、浏览器、LinkedIn 和 Hunter Skill 均已完成验证。">
-          <ul className={styles.results}><li>✓ Node.js 22+</li><li>✓ OpenCLI 已安装并返回版本号</li><li>✓ Chrome 扩展与 opencli doctor</li><li>✓ LinkedIn 真实账号连接</li><li>✓ Hunter 插件和安装包清单内的 Skill</li></ul>
-          <p>现在把一份 JD 发给 AI，然后说：</p><CopyBox text="帮我梳理这个职位，并在 LinkedIn 上寻找合适的候选人。" copied={copied === "start"} onCopy={() => copy("start", "帮我梳理这个职位，并在 LinkedIn 上寻找合适的候选人。")} />
+        {step === 5 && <Step tag="安装完成" title="猎策已经准备好了" lead={isLiepin ? "本地安装检查通过后，执行猎聘页面检查与首次筛选验证。" : "环境、浏览器、LinkedIn 和 Hunter Skill 均已完成验证。"}>
+          <ul className={styles.results}><li>✓ Node.js 22+</li><li>✓ OpenCLI 已安装并返回版本号</li><li>✓ Chrome 扩展与 opencli doctor</li><li>{isLiepin ? "猎聘登录页面仍需 diagnose 验证" : "✓ LinkedIn 真实账号连接"}</li><li>✓ Hunter 插件和安装包清单内的 Skill</li></ul>
+          <p>现在把一份 JD 发给 AI，然后说：</p><CopyBox text={isLiepin ? "请使用猎聘搜索 Skill，先运行 diagnose 检查页面，再按这份 JD 准备筛选条件，暂不提交搜索。" : "帮我梳理这个职位，并在 LinkedIn 上寻找合适的候选人。"} copied={copied === "start"} onCopy={() => copy("start", isLiepin ? "请使用猎聘搜索 Skill，先运行 diagnose 检查页面，再按这份 JD 准备筛选条件，暂不提交搜索。" : "帮我梳理这个职位，并在 LinkedIn 上寻找合适的候选人。")} />
         </Step>}
         {copied === "error" && <p className={styles.copyError}>复制失败，请手动选中文字复制。</p>}
         <footer className={styles.actions}>{step > 0 && step < 5 && <button className={styles.back} onClick={() => go(step - 1)}>上一步</button>}{step < 5 && <button className={styles.next} disabled={(step === 0 && !os) || (step > 0 && !confirmed) || (step === 4 && !product?.latestRelease)} onClick={() => go(step + 1)}>{step === 0 ? "继续" : "我已完成，继续"}</button>}{step === 5 && <button className={styles.back} onClick={() => go(0)}>重新检查安装</button>}</footer>

@@ -69,7 +69,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <main className={styles.page}>
-      <SiteHeader />
+      <SiteHeader nav="none" brandLinked={false} />
       <Suspense>
         <LoginForm />
       </Suspense>

@@ -12,16 +12,14 @@ export function replaceDirectory(source, destination, io = fs) {
   io.mkdirSync(path.dirname(destination), {recursive:true});
   try {
     // npm bin/workspace links must remain relative after the runtime moves.
-    io.cpSync(source, stage, {recursive:true, errorOnExist:true, force:false, verbatimSymlinks:true});
-    console.log('[DEBUG-gllue-directory]', JSON.stringify({stageExists:io.existsSync(stage),stageDirectory:io.lstatSync(stage).isDirectory(),destinationExists:io.existsSync(destination),parentExists:io.existsSync(path.dirname(destination)),entries:io.readdirSync(stage)}));
+    copyTree(source, stage, io);
     if (io.existsSync(destination)) {
       io.renameSync(destination, backup);
       previous = backup;
     }
     try {
       io.renameSync(stage, destination);
-      // Rebind after the destination exists; Windows cannot reliably rename a
-      // directory containing junctions aimed at its not-yet-existing new path.
+      // Absolute workspace junctions must point into the persistent runtime.
       relinkWorkspaces(destination, destination, io);
     }
     catch (error) {
@@ -37,7 +35,7 @@ export function replaceDirectory(source, destination, io = fs) {
 }
 
 // Windows npm workspaces use absolute junctions. Rebind only links belonging to
-// this runtime before switching directories, so deleting extraction is safe.
+// this runtime after switching directories, so deleting extraction is safe.
 function relinkWorkspaces(stage, destination, io) {
   const packages = path.join(stage, 'packages');
   if (!io.existsSync(packages)) return;
@@ -54,4 +52,21 @@ function relinkWorkspaces(stage, destination, io) {
     const target = path.join(destination, 'packages', folder);
     io.symlinkSync(process.platform === 'win32' ? target : path.relative(path.dirname(link), path.join(stage,'packages',folder)), link, process.platform === 'win32' ? 'junction' : 'dir');
   }
+}
+
+// Explicit lstat/copy preserves junctions and Unicode paths on Windows; the
+// native recursive cp used by the old installer did neither in acceptance.
+function copyTree(source, destination, io) {
+  const info = io.lstatSync(source);
+  if (info.isSymbolicLink()) {
+    let directory = false;
+    try { directory = io.statSync(source).isDirectory(); } catch { /* retain dangling link */ }
+    io.symlinkSync(io.readlinkSync(source), destination, process.platform === 'win32' && directory ? 'junction' : 'file');
+  } else if (info.isDirectory()) {
+    io.mkdirSync(destination);
+    for (const entry of io.readdirSync(source)) copyTree(path.join(source,entry),path.join(destination,entry),io);
+  } else if (info.isFile()) {
+    io.copyFileSync(source,destination,io.constants.COPYFILE_EXCL);
+    io.chmodSync(destination,info.mode);
+  } else throw new Error('Unsupported runtime file type');
 }

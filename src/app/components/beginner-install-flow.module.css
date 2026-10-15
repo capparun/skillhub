@@ -133,6 +133,8 @@
 /* ── 右侧步骤内容 ─────────────────────────── */
 
 .content {
+  min-width: 0;
+  overflow-wrap: anywhere;
   display: flex;
   flex-direction: column;
   padding: 42px 48px;
@@ -235,6 +237,7 @@
 .copyBox p {
   margin: 0;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
   font-size: 14px;
   line-height: 1.7;
 }

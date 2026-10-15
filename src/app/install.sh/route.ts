@@ -19,16 +19,26 @@ if [ -z "\$PRODUCT" ]; then
   exit 1
 fi
 
+if [ "\$PRODUCT" = "maimai-only" ] && [ "\$(uname -s)" != "Darwin" ] && [ "\$(uname -s)" != "Linux" ]; then
+  echo "脉脉实际寻访仅支持 macOS / Linux" >&2
+  exit 1
+fi
+
 if ! command -v node >/dev/null 2>&1; then
   echo "未找到 Node.js,请先安装 Node.js 20 或更高版本: https://nodejs.org" >&2
   exit 1
 fi
 NODE_MAJOR="\$(node -p "process.versions.node.split('.')[0]")"
-if [ "\$NODE_MAJOR" -lt 20 ]; then
-  echo "Node.js 版本过低(\$(node --version)),请升级到 20 或更高版本" >&2
+MIN_NODE=20
+if [ "\$PRODUCT" = "gllue-only" ]; then MIN_NODE=22; fi
+if [ "\$NODE_MAJOR" -lt "\$MIN_NODE" ]; then
+  echo "Node.js 版本过低(\$(node --version)),请升级到 \$MIN_NODE 或更高版本" >&2
   exit 1
 fi
 
+if [ "\$PRODUCT" = "maimai-only" ]; then
+  node -e 'const v=process.versions.node.split(".").map(Number); if(v[0]<20 || (v[0]===20 && (v[1]<18 || (v[1]===18 && v[2]<1)))) { console.error("脉脉包需要 Node.js 20.18.1+");process.exit(1); }'
+fi
 WORKDIR="\$(mktemp -d)"
 cd "\$WORKDIR"
 echo "→ 工作目录: \$WORKDIR"
@@ -81,7 +91,12 @@ if [ "\$ACTUAL" != "\$SHA" ]; then
 fi
 
 tar -xzf pkg.tar.gz
-PKGDIR="\$(find . -maxdepth 1 -mindepth 1 -type d | head -1)"
+PKGDIR="\$(node -e '
+const fs = require("fs");
+const roots = fs.existsSync("install.mjs") ? ["."] : fs.readdirSync(".", {withFileTypes:true}).filter(e => e.isDirectory() && fs.existsSync(e.name + "/install.mjs")).map(e => e.name);
+if (roots.length !== 1 || !fs.existsSync(roots[0] + "/doctor.mjs")) { console.error("安装包内容不正确：需要唯一的安装和诊断脚本目录"); process.exit(1); }
+console.log(roots[0]);
+')"
 cd "\$PKGDIR"
 
 echo "→ 安装技能与插件 ..."

@@ -1,0 +1,14 @@
+{
+  "name": "liepin",
+  "version": "0.2.3",
+  "type": "module",
+  "description": "猎聘自动化筛选、单次搜索与当前页结果读取",
+  "author": "CSK",
+  "private": true,
+  "peerDependencies": {
+    "@jackwener/opencli": "1.8.8"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}

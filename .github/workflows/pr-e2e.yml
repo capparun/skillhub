@@ -15,6 +15,7 @@ on:
       - 'docker-compose.staging.yml'
       - 'Makefile'
       - '.github/workflows/pr-e2e.yml'
+      - '.github/docker/minio-ci.Dockerfile'
   workflow_dispatch:
 
 concurrency:
@@ -30,6 +31,8 @@ jobs:
     if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    env:
+      MINIO_IMAGE: skillhub-minio-ci:2025-10-15
 
     steps:
       - name: Check out repository
@@ -61,6 +64,9 @@ jobs:
 
       - name: Ensure Maven wrapper is executable
         run: chmod +x server/mvnw
+
+      - name: Build official MinIO source for CI
+        run: docker build -f .github/docker/minio-ci.Dockerfile -t "$MINIO_IMAGE" .
 
       - name: Start full dev stack
         run: make dev-all

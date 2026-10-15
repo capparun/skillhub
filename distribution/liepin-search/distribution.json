@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "customer": "liepin-search",
+  "version": "0.2.3",
+  "requirements": {
+    "opencli": "1.8.8",
+    "plugins": [
+      {
+        "name": "liepin",
+        "path": "packages/liepin"
+      }
+    ]
+  },
+  "skills": [
+    {
+      "id": "hunter-liepin-search",
+      "version": "0.2.3"
+    }
+  ],
+  "runtime": {
+    "packages": [
+      {
+        "name": "liepin",
+        "version": "0.2.3",
+        "path": "packages/liepin"
+      }
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+// Manual, opt-in browser acceptance on the owned localhost fixture only.
+// Not matched by test/*.test.js, not registered as a production CLI command.
+import assert from 'node:assert/strict';
+import {Page} from '@jackwener/opencli/browser/page';
+import {checkReadRuntime} from '../lib/current-detail.js';
+import {createNativeActionSequence} from '../lib/native-actions.js';
+const [targetId,expectedUrl]=process.argv.slice(2);
+const url=new URL(expectedUrl);
+assert.match(targetId,/^[A-Fa-f0-9]{16,128}$/);
+assert.equal(url.hostname,'127.0.0.1');assert.equal(url.protocol,'http:');
+assert.equal(url.pathname,'/native-input.html');assert.equal(url.search,'');assert.equal(url.hash,'');
+checkReadRuntime();
+const page=new Page('liepin-owned-fixture',undefined,undefined,'background','browser','persistent');
+page.setActivePage(targetId);
+const inspectTarget=({selector,expectedUrl,purpose})=>{
+ if(location.href!==expectedUrl || location.hostname!=='127.0.0.1' || document.title!=='Liepin 插件本地输入验收')return {status:'blocked',reason:'not_owned_fixture'};
+ if(purpose==='page')return {status:'ready',url:location.href,x:innerWidth/2,y:innerHeight/2};
+ const nodes=document.querySelectorAll(selector);if(nodes.length!==1)return {status:'blocked'};
+ const el=nodes[0],rect=el.getBoundingClientRect(),x=rect.x+rect.width/2,y=rect.y+rect.height/2;
+ if(purpose==='scroll')return {status:'ready',url:location.href,x,y,inViewport:x>=0 && y>=0 && x<innerWidth && y<innerHeight};
+ if(document.elementFromPoint(x,y)!==el)return {status:'blocked',reason:'covered'};
+ if(purpose==='fill' && document.activeElement!==el)return {status:'blocked',reason:'focus'};
+ return {status:'ready',url:location.href,x,y,value:el.value,inputType:el.type,selectionStart:el.selectionStart,selectionEnd:el.selectionEnd};
+};
+const actions=createNativeActionSequence(page,{expectedUrl,inspectTarget});
+await actions.click({actionId:'focus',selector:'#keyword'});
+await actions.fill({actionId:'fill',selector:'#keyword',value:'嵌入式开发'});
+await actions.scrollTo({actionId:'scroll-number',selector:'#numeric'});
+await actions.click({actionId:'focus-number',selector:'#numeric'});
+await actions.fill({actionId:'fill-number',selector:'#numeric',value:'42.5'});
+await actions.escape({actionId:'escape'});
+await actions.scrollTo({actionId:'scroll-submit',selector:'#submit'});
+await actions.click({actionId:'submit',selector:'#submit'});
+const result=await page.evaluate(()=>JSON.parse(document.querySelector('#result').textContent));
+assert.equal(result.clicks,1);assert.equal(result.value,'嵌入式开发');
+assert.equal(result.numeric,'42.5');
+assert.equal(result.events.filter(e=>e.type==='input' && e.field==='#keyword').length,1);
+assert.equal(result.events.filter(e=>e.type==='input' && e.field==='#numeric').length,2);
+assert.ok(result.events.every(e=>e.trusted));
+console.log(JSON.stringify({status:'passed',scope:'owned-localhost-native-input',...result}));

@@ -1,0 +1,12 @@
+{
+  "name": "hunter-liepin-search-runtime",
+  "private": true,
+  "version": "0.2.3",
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "@jackwener/opencli": "1.8.8",
+    "liepin": "0.2.3"
+  }
+}

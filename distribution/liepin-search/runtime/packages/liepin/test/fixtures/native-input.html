@@ -1,0 +1,18 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8">
+<title>Liepin 插件本地输入验收</title>
+<style>body{font:18px system-ui;margin:60px;line-height:1.8}input,button{font:inherit;padding:12px}output{display:block;margin-top:20px}</style>
+<h1>OpenCLI 原生输入测试</h1>
+<p>自有页面，合成文本，不请求任何外部服务。</p>
+<label>测试关键词 <input id="keyword" value="旧关键词"></label>
+<button id="submit" type="button">核对一次</button>
+<output id="result">尚未提交</output>
+<div style="height:1400px" aria-hidden="true"></div>
+<label>测试数字 <input id="numeric" type="number" step="0.1" value="123"></label>
+<script>
+let clicks=0;const events=[];
+for(const selector of ['#keyword','#numeric'])document.querySelector(selector).addEventListener('input',event=>events.push({type:'input',field:selector,trusted:event.isTrusted}));
+document.querySelector('#submit').addEventListener('click',event=>{
+ clicks++;events.push({type:'click',trusted:event.isTrusted});
+ document.querySelector('#result').textContent=JSON.stringify({clicks,value:document.querySelector('#keyword').value,numeric:document.querySelector('#numeric').value,events});
+});
+</script></html>

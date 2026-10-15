@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {createTask,readTask} from '../lib/task-store.js';
+import {createSiteScope,bindSiteScope} from '../lib/site-scope.js';
+import {authorizeTask} from '../lib/operation-gate.js';
+import {readCurrentResults} from '../results.js';
+test('current results save without a search action and replay from stored evidence',async t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'liepin-results-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const file=path.join(dir,'task.json'),scope=path.join(dir,'scope.json'),now=new Date().toISOString(),page='A'.repeat(32);
+ createTask(file);createSiteScope(scope,{label:'test',maxOperations:1,confirmedAt:now});bindSiteScope(file,scope);
+ authorizeTask(file,{allowedKinds:['inspect'],maxOperations:1,confirmedAt:now,scope:'首页一条',allowedRequests:[{kind:'inspect',payload:{page,limit:1}}]});
+ let reads=0,closed=0;
+ const options={openDriver:async()=>({evaluate:async()=>{reads++;return {count:2,rows:[{name:'匿名',summary:'合成卡片'},{name:'第二条'}],total:'2'};},close:async()=>{closed++;}})};
+ const args={file,page,limit:1,operationId:'read-one'};
+ await readCurrentResults(args,options);await readCurrentResults(args,options);
+ assert.equal(reads,1);assert.equal(closed,1);assert.equal(readTask(file).unlinkedObservations.length,1);
+});

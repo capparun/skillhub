@@ -1,0 +1,39 @@
+.sectionNav { display: flex; flex-wrap: wrap; gap: 24px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.sectionNav a, .usageHint a { text-decoration: underline; text-underline-offset: 5px; }
+.usage { margin-top: 64px; scroll-margin-top: 24px; }
+.usageFlow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); list-style: none; padding: 0; margin: 24px 0; border-block: 1px solid var(--line); }
+.usageFlow li { padding: 16px 12px; font-size: 16px; }
+.usageFlow li:not(:last-child)::after { content: ' →'; color: var(--muted); }
+.usageFilters { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0; }
+.usageFilters button { padding: 8px 14px; min-height: 44px; border: 1px solid var(--line); border-radius: 0; background: transparent; color: var(--ink); }
+.usageFilters button[aria-pressed='true'] { background: var(--ink); color: white; }
+.usageHint { font-size: 14px; color: var(--muted); margin: 20px 0; }
+.usageHint a { display: inline-block; margin-left: 12px; }
+.usageRow { border-top: 1px solid var(--line); padding: 22px 0; }
+.usageRow:last-child { border-bottom: 1px solid var(--line); }
+.usageTop { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: center; }
+.usageTop h3 { font-size: 20px; margin: 0 0 6px; }
+.usageTop h3 button { display: flex; width: 100%; gap: 16px; justify-content: space-between; align-items: center; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--ink); text-align: left; font-weight: 650; }
+.usageTop p { font-size: 16px; color: var(--muted); }
+.usageBody { padding-top: 24px; overflow-wrap: anywhere; }
+.usageBody dl { display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 12px; margin-bottom: 24px; }
+.usageBody dt { font-weight: 650; }
+.usageBody dd { margin: 0; color: var(--muted); }
+.usagePrompt { padding: 20px; background: #eef4f0; border-left: 3px solid #376c59; font-size: 16px; line-height: 1.8; }
+@media (max-width: 600px) { .usage { margin-top: 40px; } .usageFlow { grid-template-columns: 1fr; } .usageFlow li { padding: 8px 0; } .usageFlow li:not(:last-child)::after { content: ' ↓'; } .usageTop { grid-template-columns: minmax(0, 1fr); gap: 12px; } .usageTop > button { justify-self: start; } .usageHint a { display: block; margin: 8px 0 0; } .usagePrompt { padding: 16px; } }
+
+.usage { width: min(1040px, calc(100% - 48px)); margin: 56px auto; font-size: 16px; line-height: 1.8; }
+.usage button { font: inherit; cursor: pointer; }
+.usage :focus-visible { outline: 3px solid #16866b; outline-offset: 4px; }
+.usage h2, .usage h3, .usage button { border-radius: 0; }
+.sectionHeading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 24px; }
+.sectionHeading h2 { font-size: 28px; line-height: 1.5; }
+.eyebrow { font-size: 14px; color: var(--muted); margin-bottom: 12px; }
+.secondary { padding: 10px 16px; min-height: 44px; border: 1px solid var(--line); color: var(--ink); background: transparent; }
+.details { padding: 16px 0; border-block: 1px solid var(--line); }
+.details summary { font-weight: 650; cursor: pointer; }
+.details p { margin-top: 16px; }
+.error { color: #a13224; }
+.sectionNav { width: min(1040px, calc(100% - 48px)); margin: auto; font-size: 16px; }
+.usageLink { display: inline-block; margin: 18px 0 0 20px; font-size: 16px; text-decoration: underline; text-underline-offset: 5px; }
+@media (max-width:600px) { .usage, .sectionNav { width: calc(100% - 32px); } .sectionHeading { align-items: start; flex-direction: column; } .usageLink { display: block; margin-left: 0; } }

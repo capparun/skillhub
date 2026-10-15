@@ -74,12 +74,12 @@ $stage = 'install'
 $savedErrorPreference = $ErrorActionPreference
 try {
   $ErrorActionPreference = 'Continue'
-  $LASTEXITCODE = $null
+  $global:LASTEXITCODE = $null
   & node @args *> (Join-Path $logDir 'install.txt')
-  $installExit = $LASTEXITCODE
+  $installExit = $global:LASTEXITCODE
 } finally { $ErrorActionPreference = $savedErrorPreference }
 Get-Content (Join-Path $logDir 'install.txt')
-if ($installExit -ne 0) { throw '猎策安装失败，请保留上述报错，不要继续下一步。' }
+if ($installExit -ne 0) { throw "猎策安装未通过（退出码：$installExit），请保留上述报错，不要继续下一步。" }
 $stage = 'doctor'
 $doctorPath = Join-Path $packageDir.FullName 'doctor.mjs'
 $doctorCommand = "& node '" + $doctorPath.Replace("'", "''") + "'"
@@ -87,9 +87,9 @@ $doctorCommand | Set-Content (Join-Path $logDir 'doctor-command.txt') -Encoding 
 $savedErrorPreference = $ErrorActionPreference
 try {
   $ErrorActionPreference = 'Continue'
-  $LASTEXITCODE = $null
+  $global:LASTEXITCODE = $null
   & node doctor.mjs *> (Join-Path $logDir 'doctor.txt')
-  $doctorExit = $LASTEXITCODE
+  $doctorExit = $global:LASTEXITCODE
 } finally { $ErrorActionPreference = $savedErrorPreference }
 Get-Content (Join-Path $logDir 'doctor.txt')
 if ($doctorExit -eq 2) {

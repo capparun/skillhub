@@ -17,6 +17,20 @@ export function patchBackground(source) {
  patched=patched.replace(fallback,`      throw Object.assign(new Error('Hunter preview does not subscribe Runtime for iframe main-world evaluation'), {code:'hunter_frame_unsupported'});`);
  return patched;
 }
+// Avoid fs.cpSync: the Windows Node 22 runner terminated natively with
+// 0xC0000409 while copying this tree. Explicit I/O also rejects link escapes.
+export function copyExtensionTree(source,output) {
+ const stat=fs.lstatSync(source);
+ if(stat.isSymbolicLink()||!stat.isDirectory())throw Error('扩展来源必须是普通目录');
+ fs.mkdirSync(output); // Exclusive root: never merge or overwrite an old build.
+ for(const name of fs.readdirSync(source).sort()){
+  const from=path.join(source,name),to=path.join(output,name),entry=fs.lstatSync(from);
+  if(entry.isSymbolicLink())throw Error('扩展来源不允许符号链接');
+  if(entry.isDirectory())copyExtensionTree(from,to);
+  else if(entry.isFile())fs.writeFileSync(to,fs.readFileSync(from),{flag:'wx'});
+  else throw Error('扩展来源包含不支持的文件类型');
+ }
+}
 export function build(sourceDir,outputDir,{onProgress=()=>{}}={}) {
  const source=path.resolve(sourceDir),output=path.resolve(outputDir);
  if(fs.existsSync(output))throw Error('输出目录已存在，不覆盖');
@@ -28,7 +42,7 @@ export function build(sourceDir,outputDir,{onProgress=()=>{}}={}) {
  const patched=patchBackground(original);
  if(sha(patched)!==PATCHED_BACKGROUND_SHA256)throw Error('补丁输出不匹配已审核构建');
  onProgress('extension-copy');
- fs.cpSync(source,output,{recursive:true});
+ copyExtensionTree(source,output);
  onProgress('extension-write-background');
  fs.writeFileSync(path.join(output,'background.js'),patched);
  onProgress('extension-write-manifest');

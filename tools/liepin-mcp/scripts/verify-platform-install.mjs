@@ -12,12 +12,18 @@ const report=path.resolve(process.argv[2]??'adapter-platform-result.json');
 const releaseVersion=process.argv[3];
 const root=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'猎聘 安装验收-')));
 const result={platform:process.platform,node:process.version,root,browserVerified:false,globalConfigurationChanged:false};
+const checkpoint=phase=>{result.phase=phase;fs.writeFileSync(report,JSON.stringify(result,null,2));console.log('INSTALL_CHECKPOINT '+phase);};
+process.once('exit',code=>{if(!['passed','failed'].includes(result.status)){result.status='failed';result.error='Installation verifier exited before completion (exit '+code+', phase '+result.phase+')';fs.writeFileSync(report,JSON.stringify(result,null,2));}});
+checkpoint('starting');
 try{
+ checkpoint('build-package');
  const candidate=buildPackage(path.join(root,'候选 包'),{delivery:'site-adapter',releaseVersion});
  const candidateVersion=JSON.parse(fs.readFileSync(path.join(candidate.root,'manifest.json'))).version;result.version=candidateVersion;
+ checkpoint('stage-install');
  const installed=stageInstall({source:candidate.root,root:path.join(root,'安装 目录'),expected:candidate.sourceFingerprint});
  const selected=selectVersion({root:installed.root,id:installed.fingerprint});
  if(selected.mcpServers||!selected.localCommand)throw Error('Adapter 安装返回了错误服务入口');
+ checkpoint('local-conditions');
  const output=spawnSync(selected.localCommand.command,[...selected.localCommand.args,'conditions'],{encoding:'utf8',timeout:20000});
  if(output.error||output.status!==0)throw Error(output.error?.message??output.stderr);
  if(JSON.parse(output.stdout).length!==30)throw Error('筛选字段缺失');
@@ -28,6 +34,7 @@ try{
   if(response.error||response.status!==0)throw Error(response.error?.message??response.stderr);
   return JSON.parse(response.stdout);
  };
+ checkpoint('local-reports');
  invokeLocal('create',{file:taskFile,title:'安装验收合成任务'});
  const exported=invokeLocal('report',{file:taskFile,output:htmlFile,format:'html'});
  const html=fs.readFileSync(htmlFile,'utf8');
@@ -38,6 +45,7 @@ try{
  const evaluationHtml=fs.readFileSync(evaluationFile,'utf8'),rawEvaluation=JSON.parse(fs.readFileSync(evaluation.files.records,'utf8'));
  if(evaluationHtml.indexOf('class="report-snapshot"')<0||evaluationHtml.indexOf('class="report-snapshot"')>evaluationHtml.indexOf('<header>')||evaluationHtml.includes('<details class="audit-appendix"')||rawEvaluation.task.id!==JSON.parse(fs.readFileSync(taskFile)).id)throw Error('安装版评估快照或独立原始记录不一致');
  result.evaluationReport={files:3,statisticsFirst:true,rawSeparated:true};
+ checkpoint('prepare-adapter-runtime');
  const prepared=await prepareAdapterRuntime(installed.directory);
  verifyPreparedRuntime(installed.directory);
  if(prepared.adapters.length!==13)throw Error('Adapter 注册不完整');
@@ -45,6 +53,7 @@ try{
  const native=buildNativeLauncher(installed.directory,path.join(root,'通信 启动器'));
  // Exercise the shipped first-registration and upgrade/rollback entry on a
  // task-owned manifest only. Never touch the user's real Chrome configuration.
+ checkpoint('registration-cycle');
  const setup=await import(pathToFileURL(path.join(installed.directory,'tools/liepin-mcp/scripts/browser-setup.mjs')));
  const testManifest=path.join(root,'合成 Chrome 通信','com.opencli.mcp.json');
  let registryState={exists:false,hasDefault:false,value:null,kind:null,otherValues:[],subKeys:[]};
@@ -66,6 +75,7 @@ try{
  result.browserRegistration={manifestFileCycle:'passed-task-owned-path',windowsRegistry:process.platform==='win32'?'contract-only-injected-backend':'not-applicable',realChromeChanged:false};
  const {prepareBrowserAssets}=await import(pathToFileURL(path.join(installed.directory,'tools/liepin-mcp/scripts/prepare-browser.mjs')));
  const {verifyNativeLauncher}=await import(pathToFileURL(path.join(installed.directory,'tools/liepin-mcp/scripts/build-native-launcher.mjs')));
+ checkpoint('browser-assets');
  const browserRoot=path.join(root,'稳定 浏览器资产'),assets=prepareBrowserAssets(installed.directory,browserRoot),reusedAssets=prepareBrowserAssets(installed.directory,browserRoot);
  if(assets.extension!==reusedAssets.extension||assets.launcher!==reusedAssets.launcher||assets.expectedExtensionId!==reusedAssets.expectedExtensionId)throw Error('重复准备创建了不同扩展或宿主');
  const loadedManifest=JSON.parse(fs.readFileSync(path.join(assets.extension,'manifest.json')));
@@ -75,16 +85,19 @@ try{
  try{fs.appendFileSync(assets.launcher,'\nchanged');let rejected=false;try{prepareBrowserAssets(installed.directory,browserRoot);}catch(error){rejected=error.message.includes('启动器文件已变化');}if(!rejected)throw Error('重复准备没有拒绝已变化的启动器');}finally{fs.writeFileSync(assets.launcher,launcherBytes);}
  result.browserAssets={status:'prepared-and-reused',expectedExtensionId:assets.expectedExtensionId,extensionFiles:assets.extensionFiles.length,chromeLoaded:false,globalConfigurationChanged:false};
  const initialize=JSON.stringify({jsonrpc:'2.0',id:1,method:'initialize',params:{protocolVersion:'2024-11-05',capabilities:{},clientInfo:{name:'installer-probe',version:'1'}}})+'\n';
+ checkpoint('client-launcher');
  const clientLaunch=spawnSync(assets.mcpServer.command,[...assets.mcpServer.args],{input:initialize,encoding:'utf8',timeout:20000});
  if(clientLaunch.error||clientLaunch.status!==0||!clientLaunch.stdout.includes('opencli-mcp'))throw Error('生成的跨平台客户端配置未能完成协议初始化');
  const launch=()=>process.platform==='win32'
   ?spawnSync(process.env.ComSpec??'cmd.exe',['/d','/s','/c',`""${native.launcher}" stdio"`],{input:initialize,encoding:'utf8',timeout:20000,windowsVerbatimArguments:true})
   :spawnSync(native.launcher,['stdio'],{input:initialize,encoding:'utf8',timeout:20000});
+ checkpoint('native-launcher');
  const launchResult=launch();
  if(launchResult.error||launchResult.status!==0)throw Error(launchResult.error?.message??launchResult.stderr);
  const response=launchResult.stdout.trim().split(/\r?\n/).map(line=>JSON.parse(line)).find(item=>item.id===1);
  if(response?.result?.serverInfo?.name!=='opencli-mcp'||response.result.serverInfo.version!=='0.0.30')throw Error('正式启动器返回了错误的MCP运行时');
  // Exercise fail-closed startup against the installed artifact, then restore exactly.
+ checkpoint('runtime-integrity');
  const probeFile=path.join(installed.directory,'node_modules/opencli-mcp/adapters/liepin/tabs.js');
  const original=fs.readFileSync(probeFile);
  try{
@@ -95,6 +108,7 @@ try{
  verifyPreparedRuntime(installed.directory);
  // Verify the installed executor, not just descriptor loading or runtime context.
  const upstream=path.join(installed.directory,'node_modules/opencli-mcp');
+ checkpoint('installed-executor');
  const {Runtime}=await import(pathToFileURL(path.join(upstream,'dist/src/runtime/runtime.js')));
  const {runAdapter}=await import(pathToFileURL(path.join(upstream,'dist/src/sites/executor.js')));
  const runtime=new Runtime();
@@ -136,12 +150,14 @@ try{
  if(!restoredReceipt.ok||restoredReceipt.value?.snapshot?.status!=='completed'||restoredReceipt.value.snapshot.rows.length!==1||restoredReceipt.rows)throw Error('实际恢复Adapter单值回执契约失败：'+JSON.stringify(restoredReceipt));
  result.restorationContract={officialExecutor:true,cachedReceipt:true,originalTabClosed:true,browserCalls:0};
 
+ checkpoint('customer-install');
  const customerState=path.join(process.platform==='darwin'?root.replace(/^\/private\/var\//,'/var/'):root,'客户 状态'),customerSkills=path.join(root,'客户 Skills');
  const customerRun=spawnSync(process.execPath,[path.join(candidate.root,'install.mjs'),'--product','liepin-search','--version',candidateVersion,'--server','https://example.invalid','--state-dir',customerState,'--skills-dir',customerSkills,'--update-credential','synthetic-test-credential'],{cwd:candidate.root,encoding:'utf8',timeout:180000});
  if(customerRun.error||customerRun.status!==0)throw Error('客户入口安装失败：'+(customerRun.error?.message??customerRun.stderr));
  if(customerRun.stdout.includes('synthetic-test-credential'))throw Error('客户安装输出暴露更新凭据');
  const customer=JSON.parse(customerRun.stdout);if(customer.status!=='local-installed-browser-setup-required'||customer.browserVerified!==false||customer.businessVerified!==false)throw Error('客户安装冒充浏览器或业务通过');
  if(!fs.existsSync(path.join(customerSkills,'hunter-liepin-mcp/SKILL.md')))throw Error('客户Skill未安装');
+ checkpoint('customer-doctor');
  for(const target of [path.join(candidate.root,'doctor.mjs'),path.join(customer.directory,'doctor.mjs')]){
   const check=spawnSync(process.execPath,[target,...(target.startsWith(customer.directory)?['--root',customer.root]:[])],{cwd:root,encoding:'utf8',timeout:20000});
   if(check.status!==0||JSON.parse(check.stdout).localVerified!==true)throw Error('客户doctor入口失败：'+check.stderr);

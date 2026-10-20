@@ -6,7 +6,7 @@
   "author": "CSK",
   "private": true,
   "peerDependencies": {
-    "@jackwener/opencli": "1.8.8"
+    "@jackwener/opencli": "2.0.0"
   },
   "scripts": {
     "test": "node --test test/*.test.js"

@@ -29,36 +29,11 @@ checkProcess(versionResult,
   versionText || '未找到',
 );
 
-const pluginResult = spawn(opencli, ['plugin', 'list']);
-const pluginText = `${pluginResult.stdout || ''}${pluginResult.stderr || ''}`;
-const danglingPlugins = new Map(
-  findDanglingPluginRegistrations().map(problem => [problem.name, problem.reason]),
-);
-for (const { name } of receipt.requirements?.plugins ?? []) {
-  const listed = pluginResult.status === 0 && pluginText.includes(name);
-  checkProcess(pluginResult, `插件 ${name}`, listed, listed ? '已注册' : '未安装');
-  if (!listed) continue;
-  // 可达性自检:注册记录还在但软链目标被清理时,命令会以难懂的方式失败。
-  const pluginDir = path.join(os.homedir(), '.opencli', 'plugins', name);
-  let reachable = false;
-  let realDir = '';
-  try {
-    realDir = fs.realpathSync(pluginDir);
-    reachable = fs.statSync(realDir).isDirectory();
-  } catch {
-    reachable = false;
-  }
-  const danglingReason = danglingPlugins.get(name);
-  check(
-    `插件 ${name} 目标可达`,
-    reachable && !danglingReason,
-    danglingReason ?? (reachable ? realDir : '注册软链悬空'),
-  );
-  if (reachable) {
-    const loadResult = spawn(opencli, ['liepin', '--help']);
-    const output = `${loadResult.stdout || ''}${loadResult.stderr || ''}`;
-    checkProcess(loadResult, '猎聘命令加载', loadResult.status === 0 && ['conditions', 'connect', 'prepare', 'search', 'results', 'detail', 'open-detail', 'detail-batch', 'favorite', 'favorites', 'task', 'saved-searches', 'save-search', 'apply-saved-search', 'delete-saved-search'].every(name => output.includes(name)), loadResult.status === 0 ? '寻访、详情、收藏和任务命令可加载；浏览器业务尚需单独验收' : output.trim());
-  }
+for (const {name} of receipt.requirements?.plugins ?? []) {
+  const result=spawn(opencli,[name,'--help']);
+  const output=`${result.stdout||''}${result.stderr||''}`;
+  const loaded=result.status===0 && ['conditions', 'connect', 'prepare', 'search', 'results', 'detail', 'open-detail', 'detail-batch', 'favorite', 'favorites', 'task', 'saved-searches', 'save-search', 'apply-saved-search', 'delete-saved-search'].every(command=>output.includes(command));
+  checkProcess(result,`插件 ${name}`,loaded,loaded?'独立运行时命令加载通过；真实网站待验收':`${result.stdout||''}${result.stderr||''}`);
 }
 
 for (const { id } of receipt.skills ?? []) {

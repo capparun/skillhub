@@ -93,3 +93,10 @@ test('detail click uses the unique name text rather than the wide container or i
  names=[];assert.equal(run(),null);names=[name,name];assert.equal(run(),null);
  names=[name];name.textContent=' ';assert.equal(run(),null);name.textContent='合成姓名';name.parentElement={};assert.equal(run(),null);
 });
+test('saved card tolerates only the observed isolated read marker, not changed job content',async()=>{
+ const {inspectSavedCard}=await import('../lib/open-list-detail.js'),{runInNewContext}=await import('node:vm');
+ const check=actual=>{const target={matches:()=>true},card={innerText:actual,contains:x=>x===target};return runInNewContext('('+inspectSavedCard.toString()+')(args)',{args:{cardSelector:'#card',detailTarget:'#name',summary:'合成人选\n伺服软件工程师'},location:{origin:'https://h.liepin.com',pathname:'/search/getConditionItem'},document:{querySelectorAll:s=>s==='#card'?[card]:[target]},performance:{timeOrigin:1}});};
+ assert.equal(check('合成人选\n阅\n伺服软件工程师'),true);
+ assert.equal(check('合成人选\n阅\n硬件工程师'),false);
+ assert.equal(check('合成人选\n伺服软件工程师\n新增任职'),false);
+});

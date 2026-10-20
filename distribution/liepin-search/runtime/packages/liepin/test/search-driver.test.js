@@ -5,6 +5,11 @@ import {createSearchDriver,prepareResultObservation} from '../lib/search-driver.
 import {inspect} from '../lib/dom.js';
 import {run} from '../lib/engine.js';
 const expectedUrl='https://h.liepin.com/search/getConditionItem#session';
+test('unexpected blank is classified without asserting platform enforcement and stops inputs',async()=>{
+ const d=createSearchDriver({evaluate:async()=>({url:'about:blank',blocked:true})},{expectedUrl,actions:{click:()=>assert.fail('must not click')}});
+ await assert.rejects(d.evaluate(inspect),e=>e.code==='LIEPIN_UNEXPECTED_BLANK_PAGE');
+ await assert.rejects(d.click('#submit'),/驱动已停止/);
+});
 test('fixed DOM observer refuses wrong pages before reading their body',()=>{
  const context={location:{origin:'https://example.com',pathname:'/',href:'https://example.com/'},document:{get body(){assert.fail('must not read');}}};
  assert.equal(vm.runInNewContext(`(${inspect.toString()})({})`,context).blocked,true);
@@ -60,4 +65,11 @@ test('response observation expands the passive resource buffer only on the bound
  vm.runInNewContext(`(${prepareResultObservation.toString()})({expectedUrls:[${JSON.stringify(expectedUrl)}]})`,context);assert.equal(size,2000);
  context.location.href='https://example.com';size=undefined;
  assert.throws(()=>vm.runInNewContext(`(${prepareResultObservation.toString()})({expectedUrls:[${JSON.stringify(expectedUrl)}]})`,context));assert.equal(size,undefined);
+});
+test('observed pagination target is described as next-page button rather than an opaque selector',async()=>{
+ const clicked=[],reads=[];
+ const driver=createSearchDriver({evaluate:async()=>({url:expectedUrl,pagination:{current:1,next:'#observed-next'}})},{expectedUrl,onAction:event=>reads.push(event),actions:{click:async args=>clicked.push(args)}});
+ await driver.evaluate(inspect,{mode:'results'});assert.equal(clicked.length,0);
+ await driver.click('#observed-next');assert.equal(clicked[0].label,'下一页按钮');
+ assert.ok(reads.every(e=>!e.description.includes('已翻页')),'DOM observation alone must not claim successful pagination');
 });

@@ -56,7 +56,8 @@ test('local tags preserve audit history; reports escape HTML, Markdown and sprea
   const task = readTask(file);
   const html = renderReport(task, 'html');
   assert.ok(!html.includes('<script>alert(1)</script>'));
-  assert.match(html,/script-src 'sha256-/);
+  assert.match(html,/script-src 'none'/);
+  assert.ok(!html.includes('<script>'));
   assert.ok(!html.includes('<img'));
   assert.ok(html.includes('&lt;img'));
   assert.ok(html.includes('default-src'));
@@ -131,7 +132,7 @@ test('human-readable reports preserve requirement provenance, open questions and
  task.requirements.criteria[0].evidence=[{sourceId:'jd',quote:'需要JavaScript项目经验'}];
  task.requirements.openQuestions=['项目领域尚未确认<img>'];
  for(const format of ['html','markdown']){
- const content=renderReport(task,format);assert.ok(content.includes('需求与依据'));assert.ok(content.includes('需要JavaScript项目经验'));assert.ok(content.includes('项目领域尚未确认'));assert.equal((content.match(/<script>/g)??[]).length,format==='html'?1:0);assert.ok(content.includes('测试JD&lt;script&gt;'));assert.ok(!content.includes('<img>'));
+ const content=renderReport(task,format);assert.ok(content.includes('需求与依据'));assert.ok(content.includes('需要JavaScript项目经验'));assert.ok(content.includes('项目领域尚未确认'));assert.equal((content.match(/<script>/g)??[]).length,0);assert.ok(content.includes('测试JD&lt;script&gt;'));assert.ok(!content.includes('<img>'));
  }
  task.requirements={title:'无需求的采集记录'};
  for(const format of ['html','markdown'])assert.ok(renderReport(task,format).includes('尚未记录岗位条件'));
@@ -139,4 +140,49 @@ test('human-readable reports preserve requirement provenance, open questions and
 test('CSV keeps task purpose and criteria provenance alongside evidence rows',t=>{
  const {file}=fixture(t),task=readTask(file);task.requirements.title='开发验收样例，非招聘结论';task.requirements.openQuestions=['正式JD尚待确认'];
  const csv=renderReport(task,'csv');assert.ok(csv.includes('"taskTitle","requirements"'));assert.ok(csv.includes('开发验收样例，非招聘结论'));assert.ok(csv.includes('正式JD尚待确认'));
+});
+
+test('unlinked search observations stay intact in a visible separate table rather than candidate profiles',t=>{
+  const {file}=fixture(t);
+  importCandidates(file,[{name:'合成待关联甲',summary:'唯一保留内容甲'},{name:'合成待关联乙',summary:'唯一保留内容乙'}],{source:'liepin',roundId:'trial',stage:'list'});
+  const task=readTask(file),before=JSON.stringify(task),output=renderReport(task,'html');
+  const appendix=output.indexOf('<section class="unlinked-records">');
+  assert.ok(appendix>output.indexOf('id="profiles"'));
+  const profiles=output.slice(output.indexOf('id="profiles"'),appendix);
+  assert.equal((profiles.match(/class="candidate-profile"/g)||[]).length,1);
+  assert.equal((output.slice(appendix).match(/data-unlinked-row/g)||[]).length,2);
+  assert.match(output,/未关联的搜索记录 · 2 条/);
+  assert.match(output,/不代表新增候选人人数/);
+  const visibleRecords=output.slice(appendix,output.indexOf('<details class="audit-appendix">'));
+  assert.match(visibleRecords,/合成待关联甲/);assert.match(visibleRecords,/唯一保留内容甲/);assert.match(visibleRecords,/唯一保留内容乙/);
+  assert.equal(JSON.stringify(task),before);
+  assert.equal(JSON.parse(renderReport(task,'json')).task.unlinkedObservations.length,2);
+});
+
+test('report leads with evidence brief and keeps full candidate records in an optional appendix',t=>{
+ const {file}=fixture(t);
+ importCandidates(file,Array.from({length:24},(_,i)=>({resumeId:'visible-'+i,name:'合成人员'+i,currentTitle:'工程师'})),{source:'liepin',roundId:'trial',stage:'list'});
+ importCandidates(file,[{resumeId:'visible-0',status:'readable',sections:[{heading:'工作经历',text:'必须直接展示的工作内容'},{heading:'教育经历',text:'必须直接展示的教育内容'}]}],{source:'liepin',roundId:'trial',stage:'detail'});
+ const output=renderReport(readTask(file),'html');
+ assert.equal((output.match(/data-candidate-row/g)||[]).length,25);
+ assert.equal((output.match(/class="candidate-profile"/g)||[]).length,25);
+ assert.ok(!output.includes('candidate-next'));assert.ok(!output.includes('<script>'));
+ assert.equal((output.match(/<details/g)||[]).length,2);
+ assert.equal((output.match(/data-brief-row/g)||[]).length,0);
+ assert.match(output,/另有 25 位已识别人选尚未评估/);
+ const business=output.slice(0,output.indexOf('<details class="full-report-appendix">'));
+ assert.match(business,/先看结论/);assert.ok(!business.includes('必须直接展示的工作内容'));
+ assert.match(output,/必须直接展示的工作内容/);assert.match(output,/必须直接展示的教育内容/);
+ assert.ok(!business.includes('<details'));
+});
+
+test('brief uses current evidence without turning a supported condition into overall suitability',t=>{
+ const {file,input}=fixture(t);recordEvaluation(file,input);
+ const task=readTask(file),before=JSON.stringify(task),output=renderReport(task,'html');
+ const brief=output.slice(0,output.indexOf('<details class="full-report-appendix">'));
+ assert.match(brief,/1 位有至少一项条件的支持证据/);
+ assert.match(brief,/不代表全部条件通过/);
+ assert.match(brief,/使用 JavaScript 完成项目/);
+ assert.match(brief,/交付经历/);
+ assert.equal(JSON.stringify(task),before);
 });

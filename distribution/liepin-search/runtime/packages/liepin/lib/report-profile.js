@@ -1,0 +1,17 @@
+import {observedResumeUrl} from './report-links.js';
+/** Readable report sections; no hidden business data or executable candidate text. */
+const status=value=>({supported:'有证据支持',contradicted:'有相反证据',unknown:'待核实'}[value]??value);
+const source=value=>({liepin:'猎聘',linkedin:'LinkedIn',maimai:'脉脉'}[value]??value);
+export function candidateProfile(row,index,escape){
+ const p=row.presentation,platformUrl=observedResumeUrl(row);
+ const detail=row.observations.filter(o=>o.stage==='detail'&&['readable','partial'].includes(o.data?.status)).at(-1)?.data;
+ const fallback=typeof detail?.text==='string'?detail.text:typeof detail?.fullText==='string'?detail.fullText:'';
+ const info=`<tr><th scope="row">职位</th><td>${escape(p.position||'未记录')}</td><th scope="row">地点</th><td>${escape(p.city||'未记录')}</td></tr><tr><th scope="row">公司</th><td colspan="3">${escape(p.company||'未记录')}</td></tr><tr><th scope="row">来源</th><td>${escape(source(row.source))}</td><th scope="row">资料状态</th><td>${escape(p.detailStatus)}</td></tr>${row.tags?`<tr><th scope="row">标签</th><td colspan="3">${escape(row.tags)}</td></tr>`:''}${row.reviewOrder?`<tr><th scope="row">复核顺序</th><td colspan="3">${escape(row.reviewOrder)}；${escape(row.reviewReason||'尚未记录理由')}</td></tr>`:''}`;
+
+ return `<article class="candidate-profile" id="candidate-${index}"><h3>${escape(p.name)}</h3>${platformUrl?`<p class="resume-links"><a href="${escape(platformUrl)}" target="_blank" rel="noopener noreferrer">打开平台原简历（需登录）</a></p>`:''}<table class="profile-facts" aria-label="基本资料"><tbody>${info}</tbody></table>${p.summary?`<p class="profile-summary">${escape(p.summary)}</p>`:''}${row.findings.length?`<h4>评估依据</h4><div class="comparison-scroll"><table class="findings-table"><thead><tr><th scope="col">岗位条件</th><th scope="col">结论</th><th scope="col">判断依据</th><th scope="col">原文证据</th></tr></thead><tbody>${row.findings.map(f=>`<tr><th scope="row">${escape(f.label??f.criterionId)}${f.reviewFlag?`<br>${escape(f.reviewFlag)}`:''}</th><td>${escape(status(f.status))}</td><td>${escape(f.reason)}</td><td>${f.evidence.map(e=>`<blockquote>${escape(e.quote)}<small>快照：${escape(e.hash)}</small></blockquote>`).join('')||'未记录原文证据'}</td></tr>`).join('')}</tbody></table></div>`:`<p class="note">${row.evaluationStale?'历史评估已过期，需按当前需求和证据复评。':'评估状态：未评估。'}</p>`}<h4>已保存简历内容</h4>${p.sections.length?`<div class="resume-sections" aria-label="简历内容">${p.sections.map(section=>`<section class="resume-section"><h5>${escape(section.heading)}</h5><p>${escape(section.text)}</p></section>`).join('')}</div>`:fallback?`<p class="resume-text">${escape(fallback)}</p>`:'<p class="note">尚无可用的分段详情；不能据此认定简历没有相关经历。已采集原文保留在原始记录中。</p>'}</article>`;
+}
+export function unlinkedTable(entries,escape){
+ const records=entries.filter(row=>row.identityStatus==='unresolved');
+ if(!records.length)return '';
+ return `<section class="unlinked-records"><h2>采集附表：未关联的搜索记录 · ${records.length} 条</h2><p class="note">以下是尚未关联到具体简历的搜索卡片，可能跨轮次重复，不代表新增候选人人数，未参加评估或排序。无需逐条审核；需补齐采集与身份关联。</p><div class="comparison-scroll"><table class="unlinked-table"><thead><tr><th scope="col">记录</th><th scope="col">卡片姓名</th><th scope="col">职位 / 公司 / 地点</th><th scope="col">卡片摘要</th></tr></thead><tbody>${records.map((row,index)=>`<tr data-unlinked-row><td>${index+1}</td><td>${escape(row.presentation.name||'未记录')}</td><td>${escape([row.presentation.position,row.presentation.company,row.presentation.city].filter(Boolean).join(' · ')||'未记录')}</td><td>${escape(row.presentation.summary||'未记录摘要')}</td></tr>`).join('')}</tbody></table></div></section>`;
+}

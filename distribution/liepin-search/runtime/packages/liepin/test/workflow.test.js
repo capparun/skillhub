@@ -192,3 +192,22 @@ test('revision rejects reused IDs, repeated searches and stale evidence without 
  importCandidates(file,[{resumeId:'later'}],{source:'liepin',stage:'list',roundId:'trial'});
  assert.throws(()=>proposeRevision(file,{...base,rounds:[{id:'new',phase:'trial',filters:{keyword:'新词'}}]}),/当前试搜证据/);
 });
+test('a revised plan may replace unused trial rounds without executing obsolete searches',async t=>{
+ const {file,scopeFile}=fixture(t),now=new Date().toISOString();approveRound(file,'trial',{confirmedAt:now,scope:'synthetic'});
+ await runRound(file,'trial',async()=>({status:'completed',rows:[],evidence:{total:0}}));
+ updateTask(file,task=>{task.rounds.push({id:'unused-trial',phase:'trial',filters:{keyword:'old-keyword'},status:'planned'});return task;});
+ const before=readTask(file),scopeBefore=readTask(scopeFile);
+ assert.throws(()=>reviewTrial(file,{decision:'proceed',notes:'cannot skip validation',reviewedAt:now}),/试搜/);
+ reviewTrial(file,{decision:'revise',notes:'user changed filters before unused query',reviewedAt:now});
+ proposeRevision(file,{rounds:[{id:'filtered-trial',phase:'trial',filters:{keyword:'new-keyword',education:'硕士'}}],reason:'correct omitted filters',proposedBy:'reviewer',proposedAt:now});
+ const after=readTask(file);assert.equal(after.rounds.find(r=>r.id==='unused-trial').status,'superseded');assert.deepEqual(after.operations,before.operations);assert.deepEqual(after.policy,before.policy);assert.deepEqual(readTask(scopeFile),scopeBefore);
+});
+test('new workflows default to serial visible reading without carrying any job-specific filter',t=>{
+ const {file}=fixture(t),task=readTask(file);assert.equal(task.executionPreferences.readingMode,'content-led-visible-review');assert.equal(task.executionPreferences.detailIntervalMs,6000);assert.equal(task.executionPreferences.detailConcurrency,1);assert.equal(task.requirements.title,'测试岗位');assert.equal(task.requirements.rounds[0].filters.education,undefined);
+});
+
+test('revised round respects an explicit extended ceiling without resetting attempts',async t=>{
+ const {file}=fixture(t);const now=new Date().toISOString();approveRound(file,'trial',{confirmedAt:now,scope:'test'});await runRound(file,'trial',async()=>({status:'completed',rows:[],evidence:{total:0}}));reviewTrial(file,{decision:'revise',notes:'new bounded round',reviewedAt:now});proposeRevision(file,{rounds:[{id:'extension-round',phase:'trial',filters:{keyword:'new'}}],reason:'bounded test',proposedBy:'test',proposedAt:now});
+ updateTask(file,s=>{s.policy.maxOperations=100;return s;});assert.throws(()=>approveRound(file,'extension-round',{confirmedAt:now,scope:'test'}),/上限/);
+ updateTask(file,s=>{s.requirements.budgetExtension={limit:101,reviewer:'test-user',reason:'explicit authorization',confirmedAt:now};return s;});approveRound(file,'extension-round',{confirmedAt:now,scope:'test'});assert.equal(readTask(file).policy.maxOperations,101);assert.equal(readTask(file).operations.length,1);
+});

@@ -1,0 +1,56 @@
+import {closeSourcing,configureSourcing,recordSourcingDecision,recordListReview,sourcingProgress} from './sourcing-outcome.js';
+import {recordShortlist} from './shortlist.js';
+import {createDetailBatch} from './detail-batch.js';
+import {requirementBrief} from './requirements.js';
+import {detailTargets} from './detail-targets.js';
+import {trialQuality} from './trial-quality.js';
+import {restorationRequest} from './search-restoration.js';
+import {linkListObservation} from './identity-link.js';
+import {recordRanking} from './ranking.js';
+import { readTask } from './task-store.js';
+import { initializeWorkflow, importCandidates, approveRound, reviewTrial, proposeRevision } from './workflow.js';
+import { recordEvaluation, tagCandidate } from './evaluation.js';
+import { taskSummary, exportTask } from './report.js';
+import { resolveOperation, resumeTask, authorizeTask, grantOperations } from './operation-gate.js';
+import {createSiteScope,bindSiteScope,authorizeScopedRetry,preflightOperationBudget} from './site-scope.js';
+
+export const readOnlyTaskModes=['brief','detail-targets','show','stats','trial-quality','sourcing-progress','budget-preflight'];
+export const taskModes=[...readOnlyTaskModes,'sourcing-close','sourcing-configure','sourcing-decision','list-review','shortlist','restoration-request','detail-batch','init','import','approve','review','revise','evaluate','rank','link','tag','export','resolve','resume','authorize','grant','scope-init','scope-bind','retry'];
+
+export function runLocalTask(args) {
+  if (!args.file) throw new Error('必须明确指定本地任务文件');
+  if(args.mode==='budget-preflight')return preflightOperationBudget(args.file,args.input?.operations);
+  if(args.mode==='sourcing-progress')return sourcingProgress(readTask(args.file));
+  if(args.mode==='brief')return requirementBrief(readTask(args.file));
+  if(args.mode==='detail-targets')return detailTargets(readTask(args.file));
+  if(args.mode==='show')return readTask(args.file);
+  if(args.mode==='stats')return taskSummary(readTask(args.file));
+  if(args.mode==='trial-quality')return trialQuality(readTask(args.file));
+  if(!['sourcing-close','sourcing-configure','sourcing-decision','list-review','shortlist','restoration-request','detail-batch','init','import','approve','review','revise','evaluate','rank','link','tag','export','resolve','resume','authorize','grant','scope-init','scope-bind','retry'].includes(args.mode))throw new Error('不支持的本地任务 mode');
+  const input=args.input;
+  if(!input || typeof input!=='object')throw new Error('该操作需要结构化 JSON 输入');
+  if(args.mode==='sourcing-close')return closeSourcing(args.file,input);
+  if(args.mode==='sourcing-configure')return configureSourcing(args.file,input);
+  if(args.mode==='sourcing-decision')return recordSourcingDecision(args.file,input);
+  if(args.mode==='list-review')return recordListReview(args.file,input);
+  if(args.mode==='restoration-request')return {allowedRequests:[restorationRequest(readTask(args.file),input.roundId,input.page,input.operationId)]};
+  if(args.mode==='detail-batch')return createDetailBatch(args.file,input);
+  if(args.mode==='init')return initializeWorkflow(args.file,input);
+  if(args.mode==='approve')return approveRound(args.file,input.roundId,input);
+  if(args.mode==='review')return reviewTrial(args.file,input);
+  if(args.mode==='revise')return proposeRevision(args.file,input);
+  if(args.mode==='evaluate')return recordEvaluation(args.file,input);
+  if(args.mode==='link')return linkListObservation(args.file,input);
+  if(args.mode==='shortlist')return recordShortlist(args.file,input);
+  if(args.mode==='rank')return recordRanking(args.file,input);
+  if(args.mode==='tag')return tagCandidate(args.file,input);
+  if(args.mode==='export')return exportTask(args.file,input);
+  if(args.mode==='resolve')return resolveOperation(args.file,input);
+  if(args.mode==='resume')return resumeTask(args.file,input);
+  if(args.mode==='retry')return authorizeScopedRetry(args.file,input);
+  if(args.mode==='grant')return grantOperations(args.file,input);
+  if(args.mode==='authorize')return authorizeTask(args.file,input);
+  if(args.mode==='scope-init')return createSiteScope(args.file,input);
+  if(args.mode==='scope-bind')return bindSiteScope(args.file,input.scopeFile);
+  return importCandidates(args.file,input,{source:args.source,roundId:args.roundId,stage:args.stage});
+}

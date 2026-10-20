@@ -5,6 +5,7 @@ import {createNativeActions} from './native-actions.js';
 import {checkReadRuntime} from './current-detail.js';
 import {readBoundLocation} from './bound-page.js';
 import {allowedSearchUrls} from './search-url.js';
+import {BlankPageError} from './page-failure.js';
 
 // Preserve existing resource entries and allow new passive response timing on
 // long-lived tabs whose default 250-entry buffer is already full.
@@ -17,7 +18,13 @@ export function prepareResultObservation({expectedUrls}) {
 // Fixed capability adapter. No arbitrary evaluate, navigation, network replay,
 // capture fallback or access to the underlying OpenCLI Page escapes this object.
 // Caller must hold a persistent task/site reservation before opening the driver.
-export function createSearchDriver(page,{expectedUrl,actions=createNativeActions(page,{expectedUrl})}) {
+export function createSearchDriver(page,{expectedUrl,onAction,actions=createNativeActions(page,{expectedUrl,onAction:event=>{
+    process.stderr.write('[liepin-action] '+JSON.stringify(event)+'\n');
+    onAction?.(event);
+  }})}) {
+  const logRead=event=>{process.stderr.write('[liepin-action] '+JSON.stringify(event)+'\n');onAction?.(event);};
+  const labels=new Map();
+  const labelOf=selector=>labels.get(selector) ?? '当前已定位控件';
   const expectedUrls=allowedSearchUrls(expectedUrl);
   let sequence=0,stopped=false;
   const actionId=()=>`search-action-${++sequence}`;
@@ -28,20 +35,27 @@ export function createSearchDriver(page,{expectedUrl,actions=createNativeActions
   return Object.freeze({
     evaluate:(fn,request={})=>guarded(async()=>{
       if(fn!==inspect && fn!==inspectRecords)throw new Error('搜索驱动只允许固定的只读观察器');
+      logRead({at:new Date().toISOString(),phase:'reading',description:`读取${request.label ? '“'+request.label+'”控件状态' : ({controls:'搜索页按钮和输入框', 'selection-summary':'当前已选筛选条件',results:'当前结果列表'}[request.mode] ?? '当前搜索页状态')}，不移动鼠标或点击`});
       const state=await page.evaluate(fn,{...request,expectedUrl,expectedUrls});
+      if(state?.url==='about:blank')throw new BlankPageError();
       if(!state || !expectedUrls.includes(state.url) || state.blocked)throw new Error('搜索页已变化，停止当前任务');
       if(fn===inspectRecords && (state.blank || !Array.isArray(state.schemes)))throw new Error('搜索方案页面尚未确认');
       if(state.login || state.risk)throw new Error('出现登录失效或风控提示，停止当前任务');
+      for(const [key,label] of Object.entries({reset:'清空筛选条件按钮',submit:'搜索按钮',expand:'更多条件',dropdownDismissTarget:'筛选字段标题',target:request.label,choice:request.label?`${request.label}选项`:null,option:request.label?`${request.label}下拉选项`:null,confirm:request.label?`${request.label}确定按钮`:null})) {
+        if(typeof state[key]==='string' && label)labels.set(state[key],label);
+      }
+      if(request.mode==='results' && typeof state.pagination?.next==='string')labels.set(state.pagination.next,'下一页按钮');
       return state;
     }),
     prepareResultObservation:()=>guarded(async()=>{
       const state=await page.evaluate(prepareResultObservation,{expectedUrls});
+      if(state?.url==='about:blank')throw new BlankPageError();
       if(!expectedUrls.includes(state?.url))throw new Error('搜索响应观察未绑定当前页面');
     }),
-    click:selector=>guarded(()=>actions.click({actionId:actionId(),selector})),
-    fillText:(selector,value)=>guarded(()=>actions.fill({actionId:actionId(),selector,value})),
-    hover:selector=>guarded(()=>actions.hover({actionId:actionId(),selector})),
-    scrollTo:selector=>guarded(()=>actions.scrollTo({actionId:actionId(),selector})),
+    click:selector=>guarded(()=>actions.click({actionId:actionId(),selector,label:labelOf(selector)})),
+    fillText:(selector,value)=>guarded(()=>actions.fill({actionId:actionId(),selector,value,label:labelOf(selector)})),
+    hover:selector=>guarded(()=>actions.hover({actionId:actionId(),selector,label:labelOf(selector)})),
+    scrollTo:selector=>guarded(()=>actions.scrollTo({actionId:actionId(),selector,label:labelOf(selector)})),
     scroll:(direction,pixels)=>guarded(()=>actions.scroll({actionId:actionId(),direction,pixels})),
     pressKey:key=>guarded(()=>{
       if(key!=='Escape')throw new Error('搜索驱动仅允许 Escape 收起下拉框');
@@ -52,14 +66,14 @@ export function createSearchDriver(page,{expectedUrl,actions=createNativeActions
 
 // Factory used by the task-based search CLI. The version/hash check
 // proves the pinned transport files, not acceptance of all search behaviors.
-export async function openCurrentSearchDriver(pageId) {
+export async function openCurrentSearchDriver(pageId,{onAction}={}) {
   if(typeof pageId!=='string' || !/^[A-Fa-f0-9]{16,128}$/.test(pageId))throw new Error('需要已观察到的 targetId');
   checkReadRuntime();
   const page=await createLiepinPage();
   page.setActivePage(pageId);
   try {
     const expectedUrl=await readBoundLocation(page,pageId,'/search/getConditionItem',{requireConnection:true});
-    return Object.freeze({...createSearchDriver(page,{expectedUrl}),close:()=>page.closeWindow()});
+    return Object.freeze({...createSearchDriver(page,{expectedUrl,onAction}),close:()=>page.closeWindow()});
   } catch(error) {
     await page.closeWindow();
     throw error;

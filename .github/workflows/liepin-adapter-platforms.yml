@@ -1,0 +1,36 @@
+name: Liepin Adapter platform acceptance
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/liepin-ci-acceptance]
+    paths:
+      - '.github/workflows/liepin-adapter-platforms.yml'
+      - 'distribution/liepin-search/**'
+      - 'tools/liepin-mcp/**'
+permissions:
+  contents: read
+jobs:
+  adapter:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Independent source, core and adapter regression
+        run: node tools/liepin-mcp/scripts/verify-source-delivery.mjs source-delivery-result.json
+      - name: Real isolated package installation
+        run: node tools/liepin-mcp/scripts/verify-platform-install.mjs adapter-platform-result.json 0.3.0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: liepin-adapter-${{ matrix.os }}
+          path: |
+            adapter-platform-result.json
+            source-delivery-result.json
+          retention-days: 7

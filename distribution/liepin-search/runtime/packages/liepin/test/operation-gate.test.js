@@ -38,3 +38,11 @@ test('captcha and non-business success pause the workflow',async t=>{
  const file=fixture(t);await executeOperation(file,request,async()=>result).catch(()=>{});assert.equal(readTask(file).status,'paused');
  }
 });
+
+test('additional request grants honor explicit cumulative extension without resetting history',async t=>{
+ const {grantOperations}=await import('../lib/operation-gate.js');const {updateTask}=await import('../lib/task-store.js');const file=fixture(t,100);const extra={kind:'detail',payload:{resumeId:'next'}};
+ assert.throws(()=>grantOperations(file,{allowedRequests:[extra],confirmedAt:new Date().toISOString(),scope:'test'}),/上限100/);
+ updateTask(file,s=>{s.requirements.budgetExtension={limit:101,reviewer:'test-user',reason:'explicit test authorization',confirmedAt:new Date().toISOString()};return s;});
+ grantOperations(file,{allowedRequests:[extra],confirmedAt:new Date().toISOString(),scope:'test'});assert.equal(readTask(file).policy.maxOperations,101);assert.equal(readTask(file).operations.length,0);
+ assert.throws(()=>grantOperations(file,{allowedRequests:[{kind:'detail',payload:{resumeId:'beyond'}}],confirmedAt:new Date().toISOString(),scope:'test'}),/上限101/);
+});

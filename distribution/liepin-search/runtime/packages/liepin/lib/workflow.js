@@ -2,7 +2,7 @@ import {roundCollectionIds} from './round-sources.js';
 import {validateRequirementSources,requirementsFingerprint} from './requirements.js';
 import { plan as validateFilters } from './filters.js';
 import { createTask, readTask, updateTask, saveObservations, mergeListResults } from './task-store.js';
-import { requestFingerprint } from './operation-gate.js';
+import { requestFingerprint,cumulativeBudgetLimit } from './operation-gate.js';
 import { executeScopedOperation } from './site-scope.js';
 
 const categories = ['skills','experience','qualification','responsibilities'];
@@ -31,7 +31,8 @@ export function validatePlan(input) {
 }
 export function initializeWorkflow(file, input) {
   const requirements=validatePlan(input);
-  return createTask(file,requirements);
+  createTask(file,requirements);
+  return updateTask(file,task=>({...task,executionPreferences:{readingMode:'content-led-visible-review',detailIntervalMs:6000,detailConcurrency:1,source:'Skill default: visible content review; task may explicitly override within authorization'}}));
 }
 // A revision is a proposal, not execution permission. Keep completed rounds,
 // their observations and existing operation budgets; approval is still separate.
@@ -75,7 +76,7 @@ export function approveRound(file, roundId, {confirmedAt, scope}) {
     // An explicit approval of a newly proposed round grants one additional
     // task attempt. Shared site budgets are independent and remain unchanged.
     if(round.revisionId){
-      if(task.policy.maxOperations>=100)throw new Error('任务预算已达上限');
+      if(task.policy.maxOperations>=cumulativeBudgetLimit(task))throw new Error('任务预算已达已确认上限');
       task.policy.maxOperations++;
       task.events.push({type:'revision_round_approved',roundId,confirmedAt,scope,additionalAttempts:1});
     }
@@ -91,13 +92,16 @@ export function importCandidates(file, rows, {source,stage='list',roundId}) {
     if (!row || typeof row !== 'object' || (row.source && row.source!==source)) throw new Error('数据来源与声明不一致');
     return {...row,source};
   });
+  if(stage==='list')return updateTask(file,task=>mergeListResults(task,normalized,{roundId}));
   return saveObservations(file,normalized,{stage,roundId});
 }
 export function reviewTrial(file, {decision,notes,reviewedAt}) {
   if (!['proceed','revise','stop'].includes(decision) || !notes?.trim() || !Number.isFinite(Date.parse(reviewedAt))) throw new Error('需要有效的人工复核决定、说明和时间');
   return updateTask(file,task=>{
     const trials = task.rounds?.filter(r=>r.phase==='trial' && r.status!=='superseded') ?? [];
-    if (!trials.length || !trials.every(r=>r.status==='completed')) throw new Error('尚无完成全部试搜轮次的结果');
+    const canReviseUnused=decision==='revise'&&trials.some(r=>r.status==='completed')
+      &&trials.every(r=>['completed','planned','approved'].includes(r.status));
+    if (!trials.length || (!canReviseUnused&&!trials.every(r=>r.status==='completed'))) throw new Error('尚无完成全部试搜轮次的结果');
     if (task.operations?.some(op => ['started','unknown','blocked','failed'].includes(op.status))) throw new Error('先核对未确认操作，再复核试搜');
     task.reviews.push({decision,notes,reviewedAt,trialFingerprint:trialFingerprint(task)});
     if(decision==='stop')task.status='paused';

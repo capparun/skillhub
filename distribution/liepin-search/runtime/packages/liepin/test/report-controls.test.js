@@ -9,7 +9,7 @@ test('local search, detail filtering and paging reset coherently without network
   const elements=Object.fromEntries(['candidate-search','candidate-state','candidate-previous','candidate-next','candidate-count'].map(id=>[id,{
     value:id==='candidate-state'?'all':'',listeners:{},addEventListener(event,listener){this.listeners[event]=listener;},
   }]));
-  vm.runInNewContext(reportControls,{document:{querySelectorAll:()=>rows,getElementById:id=>elements[id]}});
+  vm.runInNewContext(reportControls,{document:{addEventListener(){},querySelectorAll:()=>rows,getElementById:id=>elements[id]}});
   const visible=()=>rows.filter(row=>!row.hidden).length;
   assert.equal(visible(),20);
   elements['candidate-next'].listeners.click();
@@ -22,4 +22,13 @@ test('local search, detail filtering and paging reset coherently without network
   assert.match(elements['candidate-count'].textContent,/符合条件 0 \/ 25/);
   assert.equal(elements['candidate-next'].disabled,true);
   assert.equal(reportScriptHash,createHash('sha256').update(reportControls).digest('base64'));
+});
+
+test('candidate comparison link opens the matching collapsed resume',()=>{
+ const profile={open:false};let click;
+ const link={getAttribute:()=> '#candidate-3'};
+ vm.runInNewContext(reportControls,{document:{addEventListener(type,listener){click=listener;},querySelectorAll:()=>[],getElementById:id=>id==='candidate-3'?{querySelector:()=>profile}:null}});
+ click({target:{closest:()=>link}});
+ assert.equal(profile.open,true);
+ click({target:{closest:()=>null}});
 });

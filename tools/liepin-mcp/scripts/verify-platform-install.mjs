@@ -162,7 +162,7 @@ try{
  checkpoint('customer-install');
  const customerState=path.join(process.platform==='darwin'?root.replace(/^\/private\/var\//,'/var/'):root,'客户 状态'),customerSkills=path.join(root,'客户 Skills');
  const customerRun=spawnSync(process.execPath,[path.join(candidate.root,'install.mjs'),'--product','liepin-search','--version',candidateVersion,'--server','https://example.invalid','--state-dir',customerState,'--skills-dir',customerSkills,'--update-credential','synthetic-test-credential'],{cwd:candidate.root,encoding:'utf8',timeout:180000});
- if(customerRun.error||customerRun.status!==0)throw Error('客户入口安装失败：'+(customerRun.error?.message??customerRun.stderr));
+ if(customerRun.error||customerRun.status!==0)throw Error('客户入口安装失败：'+JSON.stringify({error:customerRun.error?.message,status:customerRun.status,signal:customerRun.signal,stderr:customerRun.stderr,stdout:customerRun.stdout.replaceAll('synthetic-test-credential','[redacted]')}));
  if(customerRun.stdout.includes('synthetic-test-credential'))throw Error('客户安装输出暴露更新凭据');
  const customer=JSON.parse(customerRun.stdout);if(customer.status!=='local-installed-browser-setup-required'||customer.browserVerified!==false||customer.businessVerified!==false)throw Error('客户安装冒充浏览器或业务通过');
  if(!fs.existsSync(path.join(customerSkills,'hunter-liepin-mcp/SKILL.md')))throw Error('客户Skill未安装');

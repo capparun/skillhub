@@ -76,13 +76,18 @@ try{
  const {prepareBrowserAssets}=await import(pathToFileURL(path.join(installed.directory,'tools/liepin-mcp/scripts/prepare-browser.mjs')));
  const {verifyNativeLauncher}=await import(pathToFileURL(path.join(installed.directory,'tools/liepin-mcp/scripts/build-native-launcher.mjs')));
  checkpoint('browser-assets');
- const browserRoot=path.join(root,'稳定 浏览器资产'),assets=prepareBrowserAssets(installed.directory,browserRoot),reusedAssets=prepareBrowserAssets(installed.directory,browserRoot);
+ const browserRoot=path.join(root,'稳定 浏览器资产');
+ checkpoint('browser-assets-first');
+ const assets=prepareBrowserAssets(installed.directory,browserRoot);
+ checkpoint('browser-assets-reuse');
+ const reusedAssets=prepareBrowserAssets(installed.directory,browserRoot);
  if(assets.extension!==reusedAssets.extension||assets.launcher!==reusedAssets.launcher||assets.expectedExtensionId!==reusedAssets.expectedExtensionId)throw Error('重复准备创建了不同扩展或宿主');
  const loadedManifest=JSON.parse(fs.readFileSync(path.join(assets.extension,'manifest.json')));
  if(!loadedManifest.key||loadedManifest.name!=='Hunter MCP compatibility preview')throw Error('独立兼容扩展缺少固定公开身份');
  verifyNativeLauncher(path.dirname(assets.launcher));
+ checkpoint('browser-launcher-integrity');
  const launcherBytes=fs.readFileSync(assets.launcher);
- try{fs.appendFileSync(assets.launcher,'\nchanged');let rejected=false;try{prepareBrowserAssets(installed.directory,browserRoot);}catch(error){rejected=error.message.includes('启动器文件已变化');}if(!rejected)throw Error('重复准备没有拒绝已变化的启动器');}finally{fs.writeFileSync(assets.launcher,launcherBytes);}
+ try{fs.appendFileSync(assets.launcher,'\nchanged');checkpoint('browser-launcher-integrity-recheck');let rejected=false;try{prepareBrowserAssets(installed.directory,browserRoot);}catch(error){rejected=error.message.includes('启动器文件已变化');}if(!rejected)throw Error('重复准备没有拒绝已变化的启动器');}finally{fs.writeFileSync(assets.launcher,launcherBytes);}
  result.browserAssets={status:'prepared-and-reused',expectedExtensionId:assets.expectedExtensionId,extensionFiles:assets.extensionFiles.length,chromeLoaded:false,globalConfigurationChanged:false};
  const initialize=JSON.stringify({jsonrpc:'2.0',id:1,method:'initialize',params:{protocolVersion:'2024-11-05',capabilities:{},clientInfo:{name:'installer-probe',version:'1'}}})+'\n';
  checkpoint('client-launcher');

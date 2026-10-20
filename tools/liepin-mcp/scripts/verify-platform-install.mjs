@@ -78,7 +78,11 @@ try{
  checkpoint('browser-assets');
  const browserRoot=path.join(root,'稳定 浏览器资产');
  checkpoint('browser-assets-first');
- const assets=prepareBrowserAssets(installed.directory,browserRoot,{onProgress:checkpoint});
+ const assetProbe=spawnSync(process.execPath,['--input-type=module','-e',
+  `import fs from 'node:fs';import {prepareBrowserAssets} from ${JSON.stringify(pathToFileURL(path.join(installed.directory,'tools/liepin-mcp/scripts/prepare-browser.mjs')).href)};const assets=prepareBrowserAssets(${JSON.stringify(installed.directory)},${JSON.stringify(browserRoot)},{onProgress:phase=>process.stderr.write('ASSET_CHECKPOINT '+phase+'\\n')});fs.writeFileSync(${JSON.stringify(path.join(root,'asset-probe.json'))},JSON.stringify(assets),{flag:'wx'});`],{encoding:'utf8',timeout:30000});
+ console.log(assetProbe.stderr??'');
+ if(assetProbe.error||assetProbe.status!==0)throw Error('Browser asset subprocess failed: '+JSON.stringify({status:assetProbe.status,signal:assetProbe.signal,error:assetProbe.error?.message,stderr:assetProbe.stderr,stdout:assetProbe.stdout}));
+ const assets=JSON.parse(fs.readFileSync(path.join(root,'asset-probe.json')));
  checkpoint('browser-assets-reuse');
  const reusedAssets=prepareBrowserAssets(installed.directory,browserRoot);
  if(assets.extension!==reusedAssets.extension||assets.launcher!==reusedAssets.launcher||assets.expectedExtensionId!==reusedAssets.expectedExtensionId)throw Error('重复准备创建了不同扩展或宿主');

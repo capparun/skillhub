@@ -14,7 +14,7 @@ export function prepareBrowserAssets(directory,root,{onProgress=()=>{}}={}){
  try{
   temporary=fs.mkdtempSync(path.join(root,'extension-build-'));const generated=path.join(temporary,'extension');
   onProgress('asset-extension-build');
-  build(path.join(directory,'node_modules/opencli-mcp/extension/dist'),generated);
+  build(path.join(directory,'node_modules/opencli-mcp/extension/dist'),generated,{onProgress});
   onProgress('asset-extension-built');
   fs.copyFileSync(path.join(directory,'node_modules/opencli-mcp/LICENSE'),path.join(generated,'UPSTREAM-LICENSE.txt'),fs.constants.COPYFILE_EXCL);
   onProgress('asset-inventory');

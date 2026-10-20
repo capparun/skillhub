@@ -17,7 +17,7 @@ export function patchBackground(source) {
  patched=patched.replace(fallback,`      throw Object.assign(new Error('Hunter preview does not subscribe Runtime for iframe main-world evaluation'), {code:'hunter_frame_unsupported'});`);
  return patched;
 }
-export function build(sourceDir,outputDir) {
+export function build(sourceDir,outputDir,{onProgress=()=>{}}={}) {
  const source=path.resolve(sourceDir),output=path.resolve(outputDir);
  if(fs.existsSync(output))throw Error('输出目录已存在，不覆盖');
  const manifestBytes=fs.readFileSync(path.join(source,'manifest.json'));
@@ -27,10 +27,14 @@ export function build(sourceDir,outputDir) {
  const original=fs.readFileSync(path.join(source,'background.js'),'utf8');
  const patched=patchBackground(original);
  if(sha(patched)!==PATCHED_BACKGROUND_SHA256)throw Error('补丁输出不匹配已审核构建');
+ onProgress('extension-copy');
  fs.cpSync(source,output,{recursive:true});
+ onProgress('extension-write-background');
  fs.writeFileSync(path.join(output,'background.js'),patched);
+ onProgress('extension-write-manifest');
  manifest.key=COMPAT_PUBLIC_KEY;manifest.name=COMPAT_NAME;manifest.version_name=COMPAT_VERSION_NAME;
  fs.writeFileSync(path.join(output,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
+ onProgress('extension-write-receipt');
  fs.writeFileSync(path.join(output,'hunter-build.json'),JSON.stringify({version:'0.3.0-alpha.1',upstream:{npm:'0.0.30',extension:'0.0.22'},sourceSha256:sha(original),patchedSha256:sha(patched),changes:['omit automatic attach Runtime.enable','reject implicit iframe Runtime subscription','distinct preview identity'],limitations:['iframe main-world evaluation requiring Runtime subscription is unsupported','console/context events unavailable until explicitly enabled'],permissionsChanged:false},null,2));
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){if(process.argv.length!==4)throw Error('用法: node build-extension.mjs <官方extension/dist> <新输出目录>');build(process.argv[2],process.argv[3]);}

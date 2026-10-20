@@ -78,7 +78,7 @@ try{
  checkpoint('browser-assets');
  const browserRoot=path.join(root,'稳定 浏览器资产');
  checkpoint('browser-assets-first');
- const assets=prepareBrowserAssets(installed.directory,browserRoot);
+ const assets=prepareBrowserAssets(installed.directory,browserRoot,{onProgress:checkpoint});
  checkpoint('browser-assets-reuse');
  const reusedAssets=prepareBrowserAssets(installed.directory,browserRoot);
  if(assets.extension!==reusedAssets.extension||assets.launcher!==reusedAssets.launcher||assets.expectedExtensionId!==reusedAssets.expectedExtensionId)throw Error('重复准备创建了不同扩展或宿主');

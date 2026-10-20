@@ -26,6 +26,15 @@ jobs:
         run: node tools/liepin-mcp/scripts/verify-source-delivery.mjs source-delivery-result.json
       - name: Real isolated package installation
         run: node tools/liepin-mcp/scripts/verify-platform-install.mjs adapter-platform-result.json 0.3.0
+      - name: Windows failure diagnostics
+        if: failure() && runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $since = (Get-Date).AddMinutes(-10)
+          $crashes = @(Get-WinEvent -FilterHashtable @{LogName='Application'; StartTime=$since} -ErrorAction SilentlyContinue | Where-Object { $_.ProviderName -in @('Application Error', 'Windows Error Reporting') -and $_.Message -match 'node.exe' } | Select-Object -First 5 TimeCreated, Id, ProviderName, Message)
+          $defender = @(Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-Windows Defender/Operational'; StartTime=$since; Id=1116,1117} -ErrorAction SilentlyContinue | Select-Object -First 5 TimeCreated, Id, Message)
+          @{nodeCrashes=$crashes; defenderDetections=$defender} | ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8 windows-diagnostics.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -33,4 +42,5 @@ jobs:
           path: |
             adapter-platform-result.json
             source-delivery-result.json
+            windows-diagnostics.json
           retention-days: 7

@@ -23,17 +23,24 @@ export async function createFavoriteGroup(args,{execute,openDriver,pause=ms=>new
   const read=async()=>{for(let i=0;i<15;i++){state=await driver.inspect();if(state.blocked)throw Error('分组页面不可用');if(state.known)return state;await pause(200);}throw Error('分组控件未就绪');};
   try{
    await read();if(!state.popup){if(state.saved||!state.favorite)return {status:'blocked',evidence:{reason:'group_management_unavailable',createSubmitted:false}};await driver.act('click',state.favorite);}
-   for(let i=0;i<15&&!state.popup;i++){await pause(200);await read();}
+   for(let i=0;i<25&&!state.popup;i++){await pause(200);await read();}
    if(!state.popup||state.ambiguous)return {status:'blocked',evidence:{reason:'group_dialog_not_unique',createSubmitted:false}};
-   if(state.exists)return {status:'completed',evidence:{name:args.name,parent:'我的收藏',groupVerified:true,created:false}};
-   if(!state.input&&!state.add&&state.root){await driver.act('hover',state.root);await read();}
+   if(state.exists)return {status:'completed',evidence:{name:args.name,parent:'我的收藏',groupVerified:true,created:false,availableGroups:state.groups}};
+   // "添加子节点" only appears while the root row itself is hovered, and the
+   // tree re-renders as the popup settles. Hover, then observe before deciding
+   // the control is absent; repeat the hover at most twice, never clicking an
+   // unobserved control.
+   for(let attempt=0;attempt<3&&!state.input&&!state.add&&state.root;attempt++){
+    await driver.act('hover',state.root);
+    for(let i=0;i<10&&!state.add&&!state.input;i++){await pause(200);await read();}
+   }
    if(!state.input){if(!state.add)return {status:'blocked',evidence:{reason:'root_group_add_missing',createSubmitted:false,inspection:state}};await driver.act('click',state.add);}
-   for(let i=0;i<10&&!state.input;i++){await pause(200);await read();}
+   for(let i=0;i<15&&!state.input;i++){await pause(200);await read();}
    if(!state.input)return {status:'blocked',evidence:{reason:'group_editor_unrecognized',createSubmitted:false,inspection:state}};
    await driver.act('fill',state.input,args.name);await read();
    if(state.value!==args.name||!state.save)return {status:'blocked',evidence:{reason:'group_save_unrecognized',createSubmitted:false,inspection:state}};
    submitted=true;await driver.act('click',state.save);
-   for(let i=0;i<15;i++){await read();if(state.exists&&!state.input&&!state.ambiguous)return {status:'completed',evidence:{name:args.name,parent:'我的收藏',groupVerified:true,created:true}};await pause(200);}
+   for(let i=0;i<15;i++){await read();if(state.exists&&!state.input&&!state.ambiguous)return {status:'completed',evidence:{name:args.name,parent:'我的收藏',groupVerified:true,created:true,availableGroups:state.groups}};await pause(200);}
    return {status:'unknown',evidence:{reason:'group_creation_not_confirmed',name:args.name,createSubmitted:true}};
   }catch(error){if(!submitted)return {status:'blocked',evidence:{reason:'group_preflight_failed',createSubmitted:false,error:error.message}};throw error;}
  });

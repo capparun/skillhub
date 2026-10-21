@@ -60,7 +60,7 @@ for(const scenario of ['navigate','already-ready','ambiguous','blocked','never-r
  const result=await readFavoritesView(page,2,{click:async()=>{clicks++;},pause:async()=>{}});
  assert.equal(clicks,['navigate','never-ready'].includes(scenario)?1:0);
  assert.equal(result.status,['navigate','already-ready'].includes(scenario)?'ready':scenario==='blocked'?'blocked':'not_favorites');
- assert.ok(reads<=13);
+ assert.ok(reads<=33);
 });
 test('favorites waits for a delayed navigation tree and clicks only after it appears',async()=>{
  const {readFavoritesView,inspectFavoritesEntry}=await import('../lib/favorites-list.js');let entries=0,clicks=0,pauses=0;
@@ -102,4 +102,23 @@ test('group reread requires a completed same-group mutation and binds it into th
  updateTask(file,s=>{s.operations=[{operationId:'write-one',kind:'favorite',status:'unknown',payload:{group:'组A'},evidence:{saved:true}}];return s;});await assert.rejects(readFavorites(args,deps),/同组/);
  updateTask(file,s=>{s.operations[0].status='completed';return s;});await assert.rejects(readFavorites({...args,group:'组B'},deps),/同组/);
  await readFavorites(args,deps);assert.equal(opened,1);assert.equal(request.payload.afterOperationId,'write-one');assert.equal(request.payload.limit,10);
+});
+
+test('favorites navigation waits beyond three seconds for the collection before selecting the group, without another navigation click',async()=>{
+ const {readFavoritesView,inspectFavoritesEntry,inspectFavoriteGroupEntry}=await import('../lib/favorites-list.js');let reads=0,navigationClicks=0,groupClicks=0;
+ const page={evaluate:async fn=>{if(fn===inspectFavoritesEntry)return '#favorites';if(fn===inspectFavoriteGroupEntry)return '#group';reads++;if(!navigationClicks)return {status:'not_favorites'};if(reads<18)return {status:'loading'};return {status:'ready',total:0,rows:[],groupReadback:true,selectedGroup:groupClicks?'目标组':'我的收藏'};}};
+ const r=await readFavoritesView(page,10,{group:'目标组',pause:async()=>{},click:async s=>{if(s==='#favorites')navigationClicks++;else if(s==='#group')groupClicks++;else assert.fail('unexpected click');}});
+ assert.equal(r.status,'ready');assert.equal(r.selectedGroup,'目标组');assert.equal(navigationClicks,1);assert.equal(groupClicks,1);assert.ok(reads<=34);
+});
+test('loading timeout preserves its stage in the durable failure evidence',async t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'favorite-timeout-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));const file=path.join(dir,'task.json');createTask(file);let outcome;
+ await assert.rejects(readFavorites({file,page:'1',group:'目标组',limit:10,operationId:'timeout'}, {validatePage:()=>true,execute:async(f,r,work)=>{outcome=await work();return outcome.evidence;},openDriver:async()=>({read:async()=>({status:'loading',readbackFailure:{stage:'favorites-entry',polls:32}}),close:async()=>{}})}),/loading/);
+ assert.equal(outcome.status,'blocked');assert.equal(outcome.evidence.reason,'loading');assert.deepEqual(outcome.evidence.readbackFailure,{stage:'favorites-entry',polls:32});
+});
+
+test('stale root collection count does not prevent selecting the requested group; target group still requires its own readback',async()=>{
+ const {readFavoritesView,inspectFavoriteGroupEntry}=await import('../lib/favorites-list.js');let clicks=0,pauses=0;
+ const page={evaluate:async fn=>fn===inspectFavoriteGroupEntry?'#observed-group':clicks?{status:'ready',selectedGroup:'目标组',groupReadback:true,total:11,rows:[]}:{status:'loading',reason:'selected_count_mismatch',selectedGroup:'我的收藏',selectedCount:10,total:11}};
+ const r=await readFavoritesView(page,20,{group:'目标组',pause:async()=>{pauses++;},click:async selector=>{assert.equal(selector,'#observed-group');clicks++;}});
+ assert.equal(r.status,'ready');assert.equal(r.selectedGroup,'目标组');assert.equal(r.total,11);assert.equal(clicks,1);assert.equal(pauses,1);assert.deepEqual(r.navigationEvidence,{reason:'selected_count_mismatch',fromGroup:'我的收藏',selectedCount:10,total:11});
 });

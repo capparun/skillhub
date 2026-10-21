@@ -1,0 +1,47 @@
+{
+  "status": "partial-acceptance-with-restoration-confirmed",
+  "candidateFingerprint": "7a7a39339fc1b97452f0c5f7cf9483b88c46d42442809449c2142e719511d734",
+  "version": "0.3.0",
+  "authorization": "User confirmed no backup and allowed rerun; not a reconstruction of lost task",
+  "search": {
+    "keyword": "伺服驱动",
+    "pages": 1,
+    "listRows": 10,
+    "completed": true
+  },
+  "details": {
+    "saved": 2,
+    "statuses": [
+      "partial",
+      "partial"
+    ],
+    "visibleTextLengths": [
+      4215,
+      3945
+    ],
+    "completeResumesClaimed": false
+  },
+  "favorite": {
+    "baselineTotal": 10,
+    "originallyUnsavedConfirmed": true,
+    "temporaryAddConfirmed": true,
+    "postAddGroupRead": "blocked: requested_group_not_verified; preserved, not passed",
+    "temporaryRemoveConfirmed": true,
+    "finalGroupTotal": 10,
+    "originalMembersPreserved": true,
+    "testPersonAbsent": true
+  },
+  "operations": {
+    "task": 12,
+    "sharedScope": 12,
+    "maximumThisRun": 12,
+    "closedReadFailurePreserved": true
+  },
+  "remaining": [
+    "Diagnose post-add group read failure; no successful intermediate membership proof",
+    "Windows live browser and deferred client gates remain unverified",
+    "No production publication or Git push performed"
+  ],
+  "privateDataLocation": "/Users/shawnruan/coding-proj/hunter-works/.liepin-install-state/rerun-acceptance",
+  "published": false
+}

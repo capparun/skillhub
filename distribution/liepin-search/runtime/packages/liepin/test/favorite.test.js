@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
-import {createTask,readTask} from '../lib/task-store.js';
+import {createTask,readTask,updateTask} from '../lib/task-store.js';
 import {createSiteScope,bindSiteScope} from '../lib/site-scope.js';
 import {authorizeTask} from '../lib/operation-gate.js';
 import {setFavorite} from '../lib/favorite.js';
@@ -55,4 +55,17 @@ test('unrecognized detail times out before any click with explicit not-dispatche
 test('waits for radio selection and enabled save after one group click',async t=>{
  const args=fixture(t),d=driver([{saved:false,button:'#favorite'},{saved:false,addDialog:true,groupSelector:'#group'},{saved:false,addDialog:true,groupSelected:false},{saved:false,addDialog:true,groupSelected:true},{saved:false,addDialog:true,groupSelected:true,save:'#save'},{saved:true}]);
  const r=await setFavorite(args,d.options);assert.equal(r.groupVerified,false);assert.equal(r.groupSelectedBeforeSave,true);assert.deepEqual(d.clicks,['#favorite','#group','#save']);
+});
+
+test('historical group absence does not reject a group now present in the live dialog',async t=>{
+ const args=fixture(t);
+ updateTask(args.file,task=>{task.policy.maxOperations=2;task.operations=[{operationId:'old-groups',kind:'inspect',status:'completed',finishedAt:'2026-01-01T00:00:00Z',evidence:{availableGroups:['过期的其他分组']}}];return task;});
+ const d=driver([{saved:false,button:'#favorite'},{saved:false,addDialog:true,groups:['未分组'],groupSelector:'#group'},{saved:false,addDialog:true,groups:['未分组'],groupSelected:true,save:'#save'},{saved:true}]);
+ const result=await setFavorite(args,d.options);
+ assert.equal(result.saved,true);assert.deepEqual(d.clicks,['#favorite','#group','#save']);
+});
+test('unselected live group never submits save after bounded selection attempts',async t=>{
+ const args=fixture(t),d=driver([{saved:false,button:'#favorite'},{saved:false,addDialog:true,groups:['未分组'],groupSelector:'#group',groupSelected:false}]);
+ const result=await setFavorite(args,d.options);
+ assert.equal(result.reason,'favorite_group_not_selected');assert.equal(d.clicks.includes('#save'),false);assert.ok(d.clicks.length<=3);
 });

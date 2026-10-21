@@ -1,0 +1,21 @@
+{
+  "status": "favorite-cycle-verified-from-persisted-live-receipts",
+  "candidateFingerprint": "fbd2d537b08447aebf08586d333dd73aa824563e9fc3459204d614a8408dc2e8",
+  "postAdd": {
+    "total": 11,
+    "visibleRows": 10,
+    "groupConfirmed": true,
+    "testPersonPresent": true
+  },
+  "postRemove": {
+    "total": 10,
+    "originalTenPreserved": true,
+    "testPersonAbsent": true
+  },
+  "testCorrection": "Original retest assertion incorrectly required all 11 rows on a 10-row page; preserved raw partial summary, audited membership and final baseline separately. No additional browser actions.",
+  "pastFailuresPreserved": true,
+  "testDetailClosed": true,
+  "newSearchesThisFix": 0,
+  "operationsPreserved": 20,
+  "published": false
+}

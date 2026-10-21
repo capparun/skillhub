@@ -23,7 +23,7 @@ export function inspectFavorites({limit}) {
  const groupMatch=selected.length===1?selected[0].match(/^(.*?)\s*[（(]([\d,]+)[）)]$/):null;
  const selectedCount=groupMatch?Number(groupMatch[2].replace(/,/g,'')):null;
  const selectedGroup=groupMatch?groupMatch[1].trim():null;
- if(selectedCount!==null&&selectedCount!==total)return {status:'loading'};
+ if(selectedCount!==null&&selectedCount!==total)return {status:'loading',reason:'selected_count_mismatch',selectedGroup,selectedCount,total};
  const cards=[...document.querySelectorAll('dl')].filter(el=>visible(el) && /收藏时间[：:]/.test(el.innerText));
  const rows=cards.slice(0,limit).map(el=>({
   source:'liepin',collection:'favorites',summary:el.innerText.trim(),
@@ -59,25 +59,32 @@ export function inspectFavoriteGroupEntry({group}) {
  return 'html > '+parts.join(' > ');
 }
 export async function readFavoritesView(page,limit,{click,group,pause=ms=>new Promise(r=>setTimeout(r,ms))}={}) {
- let result=await page.evaluate(inspectFavorites,{limit}),clicked=false;
- for(let attempt=0;attempt<12&&['not_favorites','loading'].includes(result.status);attempt++){
+ let result=await page.evaluate(inspectFavorites,{limit}),clicked=false,polls=0;
+ // Collection navigation may finish after the first three seconds. Poll state
+ // without replaying the navigation click; return as soon as it is ready.
+ // A stale count on another collection is not a prerequisite for navigating
+ // to the requested group. Its own count and rows must still pass readback.
+ const canSelectRequestedGroup=state=>!!group&&state.status==='loading'&&state.reason==='selected_count_mismatch'&&!!state.selectedGroup&&state.selectedGroup!==group;
+ for(let attempt=0;attempt<32&&['not_favorites','loading'].includes(result.status)&&!canSelectRequestedGroup(result);attempt++){
   if(result.status==='not_favorites'&&!clicked&&click){
    const selector=await page.evaluate(inspectFavoritesEntry,{});
    if(selector){await click(selector);clicked=true;}
   }
-  await pause(250);result=await page.evaluate(inspectFavorites,{limit});
+  await pause(250);result=await page.evaluate(inspectFavorites,{limit});polls++;
  }
- if(!group||result.status!=='ready')return result;
+ if(['not_favorites','loading'].includes(result.status)&&!canSelectRequestedGroup(result))return {...result,readbackFailure:{stage:'favorites-entry',polls,lastReason:result.reason??null,selectedGroup:result.selectedGroup??null,selectedCount:result.selectedCount??null,total:result.total??null}};
+ if(!group||(result.status!=='ready'&&!canSelectRequestedGroup(result)))return result;
  if(result.groupReadback&&result.selectedGroup===group)return result;
+ const navigationEvidence=canSelectRequestedGroup(result)?{reason:result.reason,fromGroup:result.selectedGroup,selectedCount:result.selectedCount,total:result.total}:null;
  const selector=await page.evaluate(inspectFavoriteGroupEntry,{group});
  if(!selector||!click)return {status:'group_not_found_or_ambiguous'};
  await click(selector,group);
  for(let i=0;i<12;i++){
   await pause(250);result=await page.evaluate(inspectFavorites,{limit});
   if(result.status==='blocked'||result.status==='wrong_page')return result;
-  if(result.status==='ready'&&result.groupReadback&&result.selectedGroup===group)return result;
+  if(result.status==='ready'&&result.groupReadback&&result.selectedGroup===group)return {...result,...(navigationEvidence?{navigationEvidence}:{})};
  }
- return {status:'group_selection_not_confirmed'};
+ return {status:'group_selection_not_confirmed',readbackFailure:{stage:'target-group',lastStatus:result.status,lastReason:result.reason??null,selectedCount:result.selectedCount??null,total:result.total??null,lastSelectedGroup:result.selectedGroup??null,groupReadback:result.groupReadback===true}};
 }
 export async function openFavoritesDriver(pageId,{checkRuntime=checkReadRuntime,createPage}={}) {
  checkRuntime();
@@ -105,9 +112,9 @@ export async function readFavorites(args,{openDriver=openFavoritesDriver,validat
   const driver=await openDriver(args.page);
   try {
    const result=await driver.read(limit,args.group);
-   if(args.group&&(result.selectedGroup!==args.group||result.groupReadback!==true))return {status:'blocked',evidence:{reason:'requested_group_not_verified'}};
-   if(result.status!=='ready' || !Array.isArray(result.rows) || !Number.isSafeInteger(result.total) || result.total<0)return {status:'blocked',evidence:{reason:result.status ?? 'favorites_not_ready'}};
-   return {status:'completed',evidence:{collection:'favorites',total:result.total,selectedGroup:result.selectedGroup??null,groupReadback:result.groupReadback===true,verification:'favorites-list-readback',rows:result.rows.slice(0,limit).map(row=>({...identifyListRow(row),source:'liepin',collection:'favorites'}))}};
+   if(result.status!=='ready' || !Array.isArray(result.rows) || !Number.isSafeInteger(result.total) || result.total<0)return {status:'blocked',evidence:{reason:result.status ?? 'favorites_not_ready',...(result.readbackFailure?{readbackFailure:result.readbackFailure}:{})}};
+   if(args.group&&(result.selectedGroup!==args.group||result.groupReadback!==true))return {status:'blocked',evidence:{reason:'requested_group_not_verified',selectedGroup:result.selectedGroup??null,groupReadback:result.groupReadback===true}};
+   return {status:'completed',evidence:{collection:'favorites',total:result.total,selectedGroup:result.selectedGroup??null,groupReadback:result.groupReadback===true,verification:'favorites-list-readback',...(result.navigationEvidence?{navigationEvidence:result.navigationEvidence}:{}),rows:result.rows.slice(0,limit).map(row=>({...identifyListRow(row),source:'liepin',collection:'favorites'}))}};
   }finally{await driver.close();}
  });
  if(!evidence.rows)throw new Error('收藏列表未确认：'+evidence.reason);

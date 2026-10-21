@@ -1,5 +1,5 @@
 // Rebuild and test a clean, task-owned source snapshot without private evidence.
-import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import crypto from 'node:crypto';import{fileURLToPath}from 'node:url';import{spawnSync}from 'node:child_process';import{buildPackage}from './build-package.mjs';import{npmCommand}from './install-package.mjs';
+import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import crypto from 'node:crypto';import{fileURLToPath}from 'node:url';import{spawnSync}from 'node:child_process';import{buildPackage}from './build-package.mjs';import{npmCommand,NPM_INSTALL_TIMEOUT_MS}from './install-package.mjs';
 const sourceRoot=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../..');
 export function snapshotSource(root){
  if(fs.existsSync(root))throw Error('源码快照目录已存在，不覆盖');fs.mkdirSync(root,{recursive:true,mode:0o700});const files=[];
@@ -13,7 +13,7 @@ export function snapshotSource(root){
 }
 export function verifySourceDelivery(report){
  const root=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'liepin-source-delivery-'))),source=path.join(root,'source'),files=snapshotSource(source),result={root,source,files,privateEvidenceCopied:false,status:'started'};
- const run=(command,args,cwd,label)=>{const r=spawnSync(command,args,{cwd,encoding:'utf8',timeout:180000,maxBuffer:20*1024*1024});fs.writeFileSync(path.join(root,label+'.log'),(r.stdout??'')+(r.stderr??''),{mode:0o600});if(r.error||r.status!==0)throw Error(label+'失败：'+(r.error?.message??'详见任务日志'));return r.stdout;};
+ const run=(command,args,cwd,label)=>{const r=spawnSync(command,args,{cwd,encoding:'utf8',timeout:NPM_INSTALL_TIMEOUT_MS,maxBuffer:20*1024*1024});fs.writeFileSync(path.join(root,label+'.log'),(r.stdout??'')+(r.stderr??''),{mode:0o600});if(r.error||r.status!==0)throw Error(label+'失败：'+(r.error?.message??'详见任务日志'));return r.stdout;};
  try{
   const original=buildPackage(path.join(root,'original-package'),{delivery:'site-adapter'});
   const output=run(process.execPath,[path.join(source,'tools/liepin-mcp/scripts/build-package.mjs'),path.join(root,'rebuilt-package'),'site-adapter'],source,'rebuild');

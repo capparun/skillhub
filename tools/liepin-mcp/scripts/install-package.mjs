@@ -31,6 +31,23 @@ export function npmCommand({execPath=process.execPath,platform=process.platform,
  if(platform==='win32')throw Error('未找到Node配套npm-cli.js；请修复Node安装，不通过shell猜测执行');
  return {command:'npm',prefix:[]};
 }
+// Windows npm ci measured ~106s on a cold CI cache versus ~8s on macOS for the
+// same 20-package tree, so the old 120s guard failed on environment speed, not
+// on a defect. Keep one shared, generous ceiling and record the measured time in
+// the failure so the next report carries the number instead of a bare ETIMEDOUT.
+// --no-audit/--no-fund drop an extra registry round-trip that stalls a cold
+// cache; the fetch flags replace a single retryable socket read with a bounded
+// retry. Neither changes which packages land in node_modules.
+export const NPM_INSTALL_TIMEOUT_MS=300000;
+const NPM_INSTALL_FLAGS=['ci','--ignore-scripts','--no-audit','--no-fund','--no-progress','--fetch-retries=5','--fetch-retry-mintimeout=20000','--fetch-retry-maxtimeout=120000','--fetch-timeout=600000'];
+export function npmCi({directory,root,registry='https://registry.npmjs.org',extra=[],label='依赖安装'}={}){
+ const npm=npmCommand(),started=Date.now();
+ const result=spawnSync(npm.command,[...npm.prefix,...NPM_INSTALL_FLAGS,'--registry='+registry,'--cache='+path.join(root,'npm-cache'),...extra],{cwd:directory,encoding:'utf8',timeout:NPM_INSTALL_TIMEOUT_MS});
+ const elapsedMs=Date.now()-started;
+ if(!result.error&&result.status===0)return {elapsedMs,cached:path.join(root,'npm-cache')};
+ const tail=(result.stderr??'').trim().split(/\r?\n/).filter(Boolean).slice(-8).join(' | ');
+ throw Error(label+'失败（'+(result.error?.code??('exit '+result.status))+'，耗时'+elapsedMs+'ms，上限'+NPM_INSTALL_TIMEOUT_MS+'ms）：'+(result.error?.message??tail??'请检查npm配置和缓存'));
+}
 function probe(directory){
  const adapter=JSON.parse(fs.readFileSync(path.join(directory,'manifest.json'))).delivery==='site-adapter';
  const request={jsonrpc:'2.0',id:1,method:'tools/call',params:{name:'liepin_doctor',arguments:{}}};
@@ -52,11 +69,7 @@ function stageUnlocked({source,root,expected},{installDependencies}={}){
   fs.copyFileSync(path.join(verified.root,'manifest.json'),path.join(directory,'manifest.json'),fs.constants.COPYFILE_EXCL);
   verifyPackage(directory,expected);
   if(installDependencies)installDependencies(directory);
-  else{
-   const npm=npmCommand();
-   const result=spawnSync(npm.command,[...npm.prefix,'ci','--ignore-scripts','--registry=https://registry.npmjs.org','--cache='+path.join(root,'npm-cache')],{cwd:directory,encoding:'utf8',timeout:120000});
-   if(result.error||result.status!==0)throw Error('依赖安装失败：'+(result.error?.message??result.stderr));
-  }
+  else npmCi({directory,root});
   const diagnosis=probe(directory);atomicJson(path.join(directory,'install-receipt.json'),{fingerprint:expected,status:'ready',node:process.execPath,diagnosis,installedAt:new Date().toISOString()});
   return {root,directory,fingerprint:expected,status:'ready',activated:false};
  }catch(error){atomicJson(path.join(directory,'install-receipt.json'),{fingerprint:expected,status:'failed',error:error.message});throw error;}

@@ -14,7 +14,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest]
+        # ARM64 hosted capacity exhausted in run 39462777443; local ARM64
+        # acceptance is recorded separately. Keep cloud macOS coverage on Intel.
+        os: [macos-15-intel, windows-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     steps:

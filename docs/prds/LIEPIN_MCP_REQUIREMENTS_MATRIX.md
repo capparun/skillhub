@@ -1,5 +1,10 @@
 # 猎聘 MCP 版需求覆盖清单
 
+## 2026-10-21 收藏补丁增量
+
+M12/M17/M19/M20：最终候选fbd2d537真实核验临时收藏入指定组、取消恢复原10位及日志；完整来源核心391/MCP200通过。仅本轮受影响路径增量，不把历史其他功能写成全部同版重验。Windows/客户端/远端门仍未完成。证据：tools/liepin-mcp/evidence/2026-10-21-favorite-cycle-final-audit.json；当前版本以products/liepin/STATUS.md为准。
+
+
 核对日期：2026-10-20。状态：开发中，未完成全量开发或上线验收。
 
 依据：PRD-2026-Hunter-猎聘寻访能力.md 的能力规格、LIEPIN_DEVELOPMENT_PLAN.md 的 R1–R12、猎聘报告与短名单补齐记录，以及当前源码。原 PRD 中版本/完成状态为历史快照，不作为 MCP 版已完成证据。按业务能力迁移，不机械复制旧 CLI 命令数。

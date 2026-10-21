@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "3d7863cf",
+  "fingerprint": "9e997157fd22250db76bdecedd0b7711c639ce4f207e96efe393ef2d1fb138db",
+  "tests": {
+    "core": 382,
+    "mcp": 194,
+    "isolatedMacInstall": 22
+  },
+  "independentSourceFiles": 281,
+  "independentFormalFingerprintMatched": true,
+  "live": {
+    "transport": "official opencli-mcp Site Adapter",
+    "extensionReplaced": false,
+    "oldOwnedTabVerifiedAbsent": "chrome-tabs-get-not-found",
+    "fixedSearchWorkspaceCreated": true,
+    "priorCandidatesPreserved": 48,
+    "oldQueueReplayed": false,
+    "searchRestoration": "completed-original-filters-new-collection",
+    "restoredListRows": 20,
+    "detailsAcceptance": "passed-four-continuous-detail-reads",
+    "detailsCompleted": 4,
+    "unknownOperations": 0,
+    "taskOperations": 110,
+    "taskAllocated": 114
+  },
+  "notProven": [
+    "Windows real machine",
+    "Deferred Claude Code client",
+    "Production release",
+    "Search results do not prove candidate identity without detail"
+  ],
+  "privateDataIncluded": false
+}

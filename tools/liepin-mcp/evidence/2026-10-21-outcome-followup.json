@@ -1,0 +1,27 @@
+{
+  "sourceCommit": "3d7863cf",
+  "fingerprint": "9e997157fd22250db76bdecedd0b7711c639ce4f207e96efe393ef2d1fb138db",
+  "identified": 52,
+  "evaluated": 52,
+  "restoredFourDecisions": {
+    "follow_up": 1,
+    "clarify": 2,
+    "not_pursued": 1
+  },
+  "followUp": 10,
+  "groupConfirmed": 10,
+  "exactGroupReadback": true,
+  "stableVisibleLinks": 10,
+  "membershipReadAfterLatestMutation": true,
+  "newFavoriteSaved": true,
+  "newFavoriteChanged": true,
+  "unknownOperations": 0,
+  "operationsUsed": 113,
+  "operationsAllocated": 117,
+  "authorizedCeiling": 120,
+  "privateDataIncluded": false,
+  "reportFiles": 3,
+  "reportVisualUserReview": "pending",
+  "unlinkedObservations": 44,
+  "complete": false
+}

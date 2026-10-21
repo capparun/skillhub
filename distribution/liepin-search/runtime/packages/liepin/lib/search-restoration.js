@@ -2,7 +2,7 @@ import {requestFingerprint} from './operation-gate.js';
 import {requirementsFingerprint} from './requirements.js';
 
 export function restorationRequest(task,roundId,page,operationId) {
- if(!/^[A-Fa-f0-9]{16,128}$/.test(page??''))throw new Error('恢复需要当前已观察到的搜索目标');
+ if(typeof page!=='string'||!(/^[A-Fa-f0-9]{16,128}$/.test(page)||/^[1-9]\d*$/.test(page)&&Number.isSafeInteger(Number(page))))throw new Error('恢复需要当前已观察到的搜索目标');
  const round=task.rounds?.find(r=>r.id===roundId),original=task.operations?.find(o=>o.operationId===round?.operationId);
  if(!round || round.status!=='completed' || original?.kind!=='search' || original.status!=='completed'
   || original.fingerprint!==requestFingerprint({kind:'search',payload:round.filters}))throw new Error('仅恢复已完成且条件未变的原搜索');
@@ -26,4 +26,3 @@ export function isEmptyRecoveryScene({controls,selected,results},previousFinishe
   && Array.isArray(selected.selected) && selected.selected.length===0
   && results.count===0 && Array.isArray(results.rows) && results.rows.length===0;
 }
-

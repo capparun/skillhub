@@ -1,0 +1,19 @@
+{
+  "registeredAt": "2026-10-20T16:18:49.906532+00:00",
+  "timeMeaning": "登记收到用户明确回复的时刻",
+  "reviewer": "用户",
+  "userConfirmation": "展示通过",
+  "file": "/private/tmp/liepin-yinshi-servo-20261020/手机阅读-寻访摘要-定稿.html",
+  "scope": [
+    "手机适配",
+    "顶部统计快照",
+    "重点表格",
+    "本地与平台简历链接",
+    "原始记录独立文件"
+  ],
+  "candidateWhenExported": "c5d975c4a325f926c278dcf673730a482cbe10003dd329d190ebacc9a39ca433",
+  "currentCandidate": "2b7808b35f77f708cf2949dcd78af994d1a25131f6b0eb4fcd3f1fbd94ce5913",
+  "laterCodeChange": "仅分页按钮日志标签，未改报告渲染",
+  "deploymentApproved": false,
+  "privateDataIncluded": false
+}

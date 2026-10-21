@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-10-20T16:17:50.204039+00:00",
+  "fingerprint": "2b7808b35f77f708cf2949dcd78af994d1a25131f6b0eb4fcd3f1fbd94ce5913",
+  "nativeHostMatchesInstalledCandidate": true,
+  "taskStatus": "ready",
+  "taskOperations": 115,
+  "unknownOperations": 0,
+  "isolatedBranchCleanBeforeRecord": true,
+  "availableLocalWindowsEntrypoints": [],
+  "windowsChecks": [
+    "pwsh",
+    "powershell",
+    "wine",
+    "wine64",
+    "docker"
+  ],
+  "desktopAppsPresent": [
+    "WorkBuddy.app",
+    "Claude.app"
+  ],
+  "workbuddyShellCommandIsTargetDesktopClient": false,
+  "aiClientStarted": false,
+  "globalConfigurationChanged": false,
+  "productionAccessAttempted": false,
+  "result": "external-acceptance-conditions-not-satisfied",
+  "privateDataIncluded": false
+}

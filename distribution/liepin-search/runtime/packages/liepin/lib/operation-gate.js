@@ -1,7 +1,11 @@
 import crypto from 'node:crypto';
 import { updateTask } from './task-store.js';
 
-const kinds = ['apply-search','prepare','inspect','search','restore-search','detail','detail-open','favorite','unfavorite','save-search','delete-search'];
+const kinds = ['apply-search','prepare','inspect','search','restore-search','detail','detail-open','favorite-open','favorite-group-create','favorite','unfavorite','save-search','delete-search'];
+export function cumulativeBudgetLimit(task){
+ const extension=task.requirements?.budgetExtension;
+ return extension&&Number.isSafeInteger(extension.limit)&&extension.limit>=100&&extension.reviewer?.trim()&&extension.reason?.trim()&&Number.isFinite(Date.parse(extension.confirmedAt))?extension.limit:100;
+}
 export function authorizeTask(file, {allowedKinds, maxOperations, confirmedAt, scope, allowedRequests}) {
   if (!Array.isArray(allowedKinds) || !allowedKinds.length || allowedKinds.some(k => !kinds.includes(k))) throw new Error('操作授权类型不受支持');
   if (!Number.isSafeInteger(maxOperations) || maxOperations < 1 || maxOperations > 100) throw new Error('操作预算必须为 1–100 的整数；这不是平台安全频率');
@@ -38,7 +42,7 @@ export function beginOperation(file, {operationId, kind, payload}) {
     if (task.status === 'paused' || task.operations.some(op => op.status==='started' || op.status==='unknown')) throw new Error('任务已暂停或有未确认操作；新调用不能绕过');
     if (task.operations.length >= task.policy.maxOperations) throw new Error('任务操作预算已用完，不自动扩大');
     if (task.operations.some(op => op.fingerprint === fingerprint) && !isVerifiedRetry(task,operationId,fingerprint)) throw new Error('相同请求已有操作记录，请使用原 operationId 核对结果，不以新 ID 重发');
-    const operation={operationId,kind,fingerprint,status:'started',startedAt:new Date().toISOString()};
+    const operation={operationId,kind,payload:structuredClone(payload),fingerprint,status:'started',startedAt:new Date().toISOString()};
     task.operations.push(operation);result={execute:true,operation};return task;
   });
   return result;
@@ -121,7 +125,8 @@ export function grantOperations(file,{allowedRequests,confirmedAt,scope}) {
   if(!task.policy || task.status==='paused' || task.operations.some(o=>['started','unknown','blocked','failed'].includes(o.status)))throw new Error('任务尚未授权或有待核对操作，不能追加');
   const hashes=allowedRequests.map(requestFingerprint);
   if(new Set(hashes).size!==hashes.length || hashes.some(h=>task.policy.requestHashes.includes(h)))throw new Error('重复请求不能追加预算');
-  if(task.policy.maxOperations+hashes.length>100)throw new Error('任务累计预算超过100');
+  const limit=cumulativeBudgetLimit(task);
+  if(task.policy.maxOperations+hashes.length>limit)throw new Error('任务累计预算超过已确认上限'+limit);
   task.policy.requestHashes.push(...hashes);task.policy.maxOperations+=hashes.length;
   task.policy.allowedKinds=[...new Set([...task.policy.allowedKinds,...allowedRequests.map(r=>r.kind)])];
   task.events.push({type:'operations_granted',requestHashes:hashes,confirmedAt,scope});return task;

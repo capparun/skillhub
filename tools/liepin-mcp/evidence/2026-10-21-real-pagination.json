@@ -1,0 +1,67 @@
+{
+  "sourceCommit": "eddde4b9",
+  "fingerprint": "2b7808b35f77f708cf2949dcd78af994d1a25131f6b0eb4fcd3f1fbd94ce5913",
+  "platform": "macOS Chrome",
+  "transport": "official opencli-mcp Site Adapter",
+  "approvedScope": {
+    "searches": 1,
+    "nextPageClicks": 1,
+    "pages": 2,
+    "cardsPerPage": 10,
+    "details": 0,
+    "favorites": 0,
+    "contact": false,
+    "unlock": false
+  },
+  "checks": {
+    "operationCompleted": true,
+    "filtersReadBack": [
+      {
+        "field": "keyword",
+        "value": "伺服算法"
+      },
+      {
+        "field": "experience",
+        "value": "10年以上"
+      },
+      {
+        "field": "education",
+        "value": "硕士"
+      },
+      {
+        "field": "fullTime",
+        "value": "统招本科"
+      }
+    ],
+    "actualNextPageClicks": 1,
+    "savedPages": [
+      1,
+      2
+    ],
+    "savedCards": 20,
+    "currentBoundPage": 2,
+    "currentBoundCards": 10,
+    "priorHistoryPreserved": true,
+    "unknownOperations": 0
+  },
+  "budget": {
+    "used": 115,
+    "allocated": 119,
+    "ceiling": 120
+  },
+  "tests": {
+    "core": 386,
+    "mcp": 194,
+    "isolatedMacInstall": 22
+  },
+  "independentSourceFiles": 281,
+  "independentFormalRebuildMatched": true,
+  "extensionChanged": false,
+  "privateDataIncluded": false,
+  "archive": {
+    "sha256": "7a799a4efe72e326511c4385398f03f9b39386191a4704a8e02607bfe75bf6b1",
+    "bytes": 206927,
+    "approved": false,
+    "published": false
+  }
+}

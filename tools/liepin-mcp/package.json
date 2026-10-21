@@ -1,0 +1,12 @@
+{
+  "name": "hunter-liepin-mcp",
+  "version": "0.3.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node scripts/test.mjs"
+  },
+  "peerDependencies": {
+    "opencli-mcp": "0.0.30"
+  }
+}

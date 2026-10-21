@@ -19,10 +19,10 @@ test('real CLI argument parsing reaches offline task handler with the correct si
   fs.writeFileSync(input,JSON.stringify({title:'合成岗位',criteria:[{id:'skill',label:'项目经历',category:'experience',kind:'required',weight:1}],rounds:[{id:'trial',phase:'trial',filters:{keyword:'合成关键词',pages:1,limit:1}}]}));
   const initialized=run('liepin','task','init','--file',file,'--input',input,'-f','json');
   assert.equal(initialized.status,0,initialized.stderr);
-  assert.equal(JSON.parse(initialized.stdout)[0].status,'draft');
+  assert.equal(JSON.parse(initialized.stdout).data[0].status,'draft');
   const shown=run('liepin','task','show','--file',file,'-f','json');
   assert.equal(shown.status,0,shown.stderr);
-  assert.equal(JSON.parse(shown.stdout)[0].requirements.title,'合成岗位');
+  assert.equal(JSON.parse(shown.stdout).data[0].requirements.title,'合成岗位');
   const scope=path.join(dir,'scope.json');
   fs.writeFileSync(input,JSON.stringify({label:'合成账号',maxOperations:1,confirmedAt:new Date().toISOString()}));
   const created=run('liepin','task','scope-init','--file',scope,'--input',input,'-f','json');
@@ -30,7 +30,7 @@ test('real CLI argument parsing reaches offline task handler with the correct si
   fs.writeFileSync(input,JSON.stringify({scopeFile:scope}));
   const bound=run('liepin','task','scope-bind','--file',file,'--input',input,'-f','json');
   assert.equal(bound.status,0,bound.stderr);
-  assert.equal(JSON.parse(bound.stdout)[0].siteScope.id,JSON.parse(created.stdout)[0].id);
+  assert.equal(JSON.parse(bound.stdout).data[0].siteScope.id,JSON.parse(created.stdout).data[0].id);
 });
 test('detail CLI rejects an invalid explicit page before runtime loading',t=>{
   const {dir,run}=fixture(t);
@@ -59,7 +59,7 @@ test('actual CLI revise creates unapproved rounds without browser access',async 
  fs.writeFileSync(input,JSON.stringify({reason:'试搜空结果',proposedBy:'测试',proposedAt:now,rounds:[{id:'trial-2',phase:'trial',filters:{keyword:'嵌入式开发',pages:1,limit:1}}]}));
  const result=run('liepin','task','revise','--file',file,'--input',input,'-f','json');
  assert.equal(result.status,0,result.stderr);
- const task=JSON.parse(result.stdout)[0];
+ const task=JSON.parse(result.stdout).data[0];
  assert.equal(task.rounds.at(-1).status,'planned');assert.equal(task.operations.length,1);
  assert.equal(task.revisions.length,1);
 });

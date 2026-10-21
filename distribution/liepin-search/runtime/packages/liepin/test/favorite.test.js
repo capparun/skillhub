@@ -13,15 +13,15 @@ function fixture(t,action='add') {
  const kind=action==='add'?'favorite':'unfavorite',payload={resumeId:args.resumeId,page:args.page,action,...(action==='add'?{group:args.group}:{})};
  authorizeTask(file,{allowedKinds:[kind],maxOperations:1,confirmedAt:now,scope:'测试指定收藏操作',allowedRequests:[{kind,payload}]});return args;
 }
-function driver(states){let i=0;const clicks=[];let closed=0;return {clicks,get closed(){return closed;},options:{pause:async()=>{},openDriver:async()=>({inspect:async()=>({known:true,blocked:false,...states[Math.min(i++,states.length-1)]}),click:async s=>{assert.ok(s);clicks.push(s);},close:async()=>{closed++;}})}};}
+function driver(states){let i=0;const clicks=[];const labels=[];let closed=0;return {clicks,labels,get closed(){return closed;},options:{pause:async()=>{},openDriver:async()=>({inspect:async()=>({known:true,blocked:false,...states[Math.min(i++,states.length-1)]}),click:async (s,label)=>{assert.ok(s);clicks.push(s);labels.push(label);},close:async()=>{closed++;}})}};}
 test('favorite selects group and saves exactly once, then reuses result',async t=>{
  const args=fixture(t),d=driver([{saved:false,button:'#favorite'},{saved:false,addDialog:true,groupSelector:'#group'},{saved:false,addDialog:true,groupSelected:true,save:'#save'},{saved:true}]);
  assert.equal((await setFavorite(args,d.options)).saved,true);await setFavorite(args,d.options);
- assert.deepEqual(d.clicks,['#favorite','#group','#save']);assert.equal(d.closed,1);
+ assert.deepEqual(d.clicks,['#favorite','#group','#save']);assert.deepEqual(d.labels,['收藏','指定收藏分组','保存收藏']);assert.equal(d.closed,1);
 });
 test('unfavorite confirms once and verifies the restored state',async t=>{
  const args=fixture(t,'remove'),d=driver([{saved:true,button:'#saved'},{saved:true,removeDialog:true,confirm:'#confirm'},{saved:false}]);
- assert.equal((await setFavorite(args,d.options)).saved,false);assert.deepEqual(d.clicks,['#saved','#confirm']);
+ assert.equal((await setFavorite(args,d.options)).saved,false);assert.deepEqual(d.clicks,['#saved','#confirm']);assert.deepEqual(d.labels,['已收藏','确认取消收藏']);
 });
 test('already desired state is a verified no-op',async t=>{
  const args=fixture(t),d=driver([{saved:true}]);assert.equal((await setFavorite(args,d.options)).changed,false);assert.equal(d.clicks.length,0);
@@ -43,4 +43,16 @@ test('already open add dialog is reused without toggling it closed',async t=>{
   {saved:false,addDialog:true,groupSelected:true,save:'#save'},{saved:true}]);
  assert.equal((await setFavorite(args,d.options)).saved,true);
  assert.deepEqual(d.clicks,['#group','#save']);
+});
+test('new detail waits for recognizable favorite UI without another navigation or duplicate click',async t=>{
+ const args=fixture(t),d=driver([{known:false},{known:false},{saved:false,button:'#favorite'},{saved:false,addDialog:true,groupSelector:'#group'},{saved:false,addDialog:true,groupSelected:true,save:'#save'},{saved:true}]);
+ const result=await setFavorite(args,d.options);assert.equal(result.saved,true);assert.deepEqual(d.clicks,['#favorite','#group','#save']);
+});
+test('unrecognized detail times out before any click with explicit not-dispatched evidence',async t=>{
+ const args=fixture(t),d=driver([{known:false}]);const result=await setFavorite(args,d.options);
+ assert.equal(result.favoriteActionDispatched,false);assert.equal(result.reason,'favorite_preflight_unavailable');assert.equal(readTask(args.file).operations[0].status,'blocked');assert.equal(d.clicks.length,0);
+});
+test('waits for radio selection and enabled save after one group click',async t=>{
+ const args=fixture(t),d=driver([{saved:false,button:'#favorite'},{saved:false,addDialog:true,groupSelector:'#group'},{saved:false,addDialog:true,groupSelected:false},{saved:false,addDialog:true,groupSelected:true},{saved:false,addDialog:true,groupSelected:true,save:'#save'},{saved:true}]);
+ const r=await setFavorite(args,d.options);assert.equal(r.groupVerified,false);assert.equal(r.groupSelectedBeforeSave,true);assert.deepEqual(d.clicks,['#favorite','#group','#save']);
 });

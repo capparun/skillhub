@@ -47,6 +47,19 @@ export async function run(page, args, { pause = wait, submit = true, capture = f
     if(lastState?.loading)throw new SearchError('LOADING','猎聘筛选自动查询仍在加载；停止后续动作，请核对已执行部分，不重复提交');
     throw new SearchError('BLANK', '猎聘页面持续空白；停止后续动作，请核对已执行部分');
   };
+  // Poll the page until it reports the condition we actually need, instead of
+  // sleeping a fixed estimate. The cap is the previous constant, so a slow page
+  // still gets the same budget; a fast page stops as soon as it is ready.
+  const settleFor = async (request, predicate, {timeoutMs, intervalMs=150}={}) => {
+    const deadline=Date.now()+timeoutMs;
+    let state=await read(request);
+    for(;;){
+      if(predicate(state))return state;
+      if(Date.now()>=deadline)return state;
+      await pause(intervalMs);
+      state=await read(request);
+    }
+  };
   await onProgress?.('preparing_filters');
   const current = await page.evaluate(inspect, {});
   if (!isSearchPage(current.url)) {
@@ -57,7 +70,13 @@ export async function run(page, args, { pause = wait, submit = true, capture = f
     const actions = controls.visibleActions?.slice(0, 12).join('、') || '无';
     throw new SearchError('CONTROL', `未找到搜索控件（搜索候选 ${controls.submitCount ?? 0}；可见操作：${actions}）`);
   }
-  if (controls.reset) {
+  // Resetting is only needed when a committed filter pill is present. A fresh
+  // page still renders the reset button, and the filter rows keep a default
+  // "active" tab, so neither the button nor row classes prove an applied
+  // filter. One summary read costs far less than a reset click plus the reload
+  // read that follows it.
+  const appliedSummary = await read({ mode: 'selection-summary' });
+  if (controls.reset && (appliedSummary.selected?.length ?? 0) > 0) {
     if(page.scrollTo){await page.scrollTo(controls.reset);await pause(250);}
     const resetState=await read({mode:'controls'});
     if(!resetState.reset)throw new SearchError('CONTROL','滚动后清空条件控件不再唯一，未点击');
@@ -270,8 +289,9 @@ export async function run(page, args, { pause = wait, submit = true, capture = f
         }
         await page.fillText(state.target, step.value);
       }
-      await pause(step.kind === 'autocomplete' ? 1600 : 900);
-      state = await read(step);
+      // 自定义联想组件(search-component 等)要先聚焦出候选面板,查询有防抖;等到候选
+      // 真实出现再继续,上限仍取原来的 1600ms+400ms 余量,不再无条件睡满。
+      state = await settleFor(step, s => !!s.option, {timeoutMs: 2000});
       if (step.kind === 'select' || step.kind === 'autocomplete') {
         // A missing dropdown after a click is uncertain, not proof the click
         // did not execute. Stop below rather than clicking the control again.
@@ -284,7 +304,8 @@ export async function run(page, args, { pause = wait, submit = true, capture = f
         if (state.optionMeta) {
           step.expectedPills = [state.optionMeta.jobTitle, state.optionMeta.thirdJobName, state.optionMeta.secondtJobName, state.optionMeta.secondJobName, state.optionMeta.firstJobName].filter(Boolean);
         }
-        await pause(700);
+        // 等提交回显真正出现再继续,上限仍取原来的 700ms;下面的校验读取照样要过。
+        state = await settleFor(step, s => s.committed === true, {timeoutMs: 1200});
       }
     }
     const okOf = v => step.kind === 'choice' ? v.selected : step.kind === 'check' ? v.checked === (step.value === 'true') : ['select', 'autocomplete'].includes(step.kind) ? v.committed : v.value === step.value;

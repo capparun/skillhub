@@ -15,8 +15,8 @@ export function adapterFavoriteDriver(tab,{resumeId,signal,onAction=()=>{}}){
   }catch(error){stopped=true;throw error;}
  };
  return {
-  inspect:group=>guard(async()=>{
-   last=await tab.evaluate(inspectFavorite,{arg:{resumeId,group}});
+  inspect:(group,options)=>guard(async()=>{
+   last=await tab.evaluate(inspectFavorite,{arg:{resumeId,group,includeHtml:options?.includeHtml===true}});
    onAction({phase:'observed',description:'读取收藏按钮、目标分组选中状态及保存按钮，不点击',favoriteState:{known:last.known===true,blocked:last.blocked===true,saved:last.saved===true,addDialog:last.addDialog===true,groupFound:!!last.groupSelector,groupSelected:last.groupSelected===true,saveReady:!!last.save,readyState:last.readyState??null}});
    return last;
   }),
@@ -25,7 +25,7 @@ export function adapterFavoriteDriver(tab,{resumeId,signal,onAction=()=>{}}){
    const label=selector===last.groupSelector?'指定收藏分组':selector===last.save?'保存收藏':selector===last.confirm?'确认取消收藏':last.saved?'已收藏按钮':'收藏按钮';
    last=undefined; // A dispatched target cannot be reused without observing again.
    onAction({phase:'dispatching',description:`点击${label}`});
-   const result=await tab.act({action:'click',target:{selector}});
+   const result=await tab.act({action:'click',target:{selector},settleMs:150});
    onAction({phase:'returned',description:'收藏点击已返回，等待页面回读确认'});return result;
   }),
   close:async()=>{},

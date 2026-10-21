@@ -1,12 +1,25 @@
 # 猎聘 MCP 0.3 候选交付检查
 
+## 2026-10-22 双平台CI转绿（覆盖下文"尚未推送/未跑CI"）
+
+run [39632999182](https://github.com/capparun/skillhub/actions/runs/39632999182) @ `58bc563f`：**macOS与Windows均success**。
+
+| 平台 | 安装验收 | 用例 | 包指纹 |
+| --- | --- | --- | --- |
+| macOS 15 Intel | 22项、13适配器 | 核心391 / MCP200 | `42c749b1…`，与本机283份源码逐文件哈希一致 |
+| Windows latest | 22项、13适配器 | 核心391 / MCP195 | `80b3205e…`（CRLF检出，按平台分列） |
+
+本轮唯一改动是把依赖安装上限从120s提到300s（先一轮Windows在123s被120s上限杀掉，同runner上180s的那条通过）。指纹`fbd2d537`→`42c749b1`，128份清单逐文件比对只有`install-package.mjs`与`customer-install.mjs`变化，业务文件哈希全等，历史真机搜索与收藏回执仍对应同一份业务代码。
+
+未变：PR #5仍`9a970a71`未合并；Windows真实Chrome/Native Messaging、目标客户端首次调用、Zeabur只读核对三项仍未验；CI为注入式契约验证，`browserVerified:false`未被改写。**仍不具备上线条件。** 详见`docs/LIEPIN_HANDOFF_2026-10-21_FINAL.md`的2026-10-22节。
+
 ## 2026-10-21 最终收藏补丁收口（覆盖下文旧候选与计数）
 
 最新候选0.3.0，指纹`fbd2d537b08447aebf08586d333dd73aa824563e9fc3459204d614a8408dc2e8`；来源本地提交e271bc77（Git9a970a71＋6文件修复）。核心391/MCP200实际通过。当前本机宿主已采用该候选，兼容扩展身份/权限保持不变。
 
 真实结果：一次搜索首页10条、两份partial详情；目标组添加后总数11且测试身份出现，取消后原10位全保留、测试身份不在组内。添加前的第一次读取失败及后续修复过程均保留；验收脚本曾误要求一页显示11人，已依据持久回执审计修正，未重放写操作。最终证据：`tools/liepin-mcp/evidence/2026-10-21-favorite-cycle-final-audit.json`。
 
-新补丁尚未推送/跑双平台CI；Windows真机、目标客户端及Zeabur维护门仍未完成，不能建议上线。旧CI、旧包指纹和下文旧“当前宿主2b”等仅为历史。详见`products/liepin/STATUS.md`和`docs/LIEPIN_HANDOFF_2026-10-21_FINAL.md`。
+新补丁已于2026-10-22推送到CI专用分支并双平台通过（见顶部节），PR #5未更新；Windows真机、目标客户端及Zeabur维护门仍未完成，不能建议上线。旧CI、旧包指纹和下文旧“当前宿主2b”等仅为历史。详见`products/liepin/STATUS.md`和`docs/LIEPIN_HANDOFF_2026-10-21_FINAL.md`。
 
 
 ## 2026-10-21 CI恢复核验

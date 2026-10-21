@@ -1,5 +1,9 @@
 # 猎聘 MCP 版需求覆盖清单
 
+## 2026-10-22 CI 增量
+
+run 39632999182 @ `58bc563f`：macOS与Windows均pass。macOS核心391/MCP200、指纹`42c749b1`；Windows核心391/MCP195、指纹`80b3205e`（CRLF）。Windows MCP少5项为既有平台差异（历史`0e614b18`同为195），**这5项是哪5项未定位**，不据此认定Windows功能等价。指纹变化仅来自两个安装脚本，业务文件哈希与`fbd2d537`全等，M12/M17/M19/M20的真机回执不受影响。Windows真机Chrome、目标客户端、Zeabur三门仍未验。
+
 ## 2026-10-21 收藏补丁增量
 
 M12/M17/M19/M20：最终候选fbd2d537真实核验临时收藏入指定组、取消恢复原10位及日志；完整来源核心391/MCP200通过。仅本轮受影响路径增量，不把历史其他功能写成全部同版重验。Windows/客户端/远端门仍未完成。证据：tools/liepin-mcp/evidence/2026-10-21-favorite-cycle-final-audit.json；当前版本以products/liepin/STATUS.md为准。
@@ -84,7 +88,7 @@ M05已在用户单独批准后真实通过：一次搜索、一次下一页、�
 1. M03 已由28c09f17真实验收补齐已有Chrome标签绑定、后续搜索及10份详情证据。
 2. 旧候选通过真实合成页公开API，但发现 executor 漏传兼容接口；修复后的 68f993da 候选已通过实际安装及执行器接线验证，真实猎聘一次搜索、3条列表与2份详情已通过；全功能验收仍未完成。
 3. 首页10条和连续10份详情已通过；真实30筛选分组回读已通过；当前候选一次新搜索10条、两份详情和关闭返回通过；历史搜索只作来源对照。保存数据两轮去重、方案/收藏闭环已有独立证据；正式试搜复核与全可见字段对账仍未完成。
-4. Windows CI 尚未执行；即使CI通过，也不覆盖 Chrome/Native Messaging 真机、Claude Code/WorkBuddy 首次业务。
+4. Windows CI 已于2026-10-22双平台通过（39632999182），但CI只覆盖注入式注册表契约与隔离安装，不覆盖 Chrome/Native Messaging 真机、Claude Code/WorkBuddy 首次业务。
 5. 最终用户安装指南、独立页面、固定版本源码进Git和发布申请尚未闭环；不建议上线。
 
 当前直接证据：tools/liepin-mcp/evidence/2026-10-20-macos-adapter-install.json、2026-10-20-official-site-entries.json、2026-10-20-adapter-runtime-integration.json。后者明确模拟浏览器传输；不得写为真实Chrome通过。

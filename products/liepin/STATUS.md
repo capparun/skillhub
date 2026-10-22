@@ -73,3 +73,9 @@
 ## 最新收藏真机补充
 
 [最终审计](../../tools/liepin-mcp/evidence/2026-10-21-favorite-cycle-final-audit.json)：添加后目标组总数11且测试身份出现；取消后原10位完整保留，测试身份不在组内。旧失败及原partial脚本输出保留；不能要求网站10条分页在一页显示11人。旧临时任务丢失，经用户允许独立重跑，未伪造恢复原计数。完整交接见[收尾交接](../../docs/LIEPIN_HANDOFF_2026-10-21_FINAL.md)。
+
+## 2026-10-23 最终CI与实际外部门核对
+
+CI专用分支已同步`a5b72905`，运行[39811057372](https://github.com/capparun/skillhub/actions/runs/39811057372)整体success：macOS核心398/MCP236、Windows核心398/MCP231（另5项明确skip），两平台22项安装、15入口。指纹分别仍330d6c47/65894f01。此轮包含最新安装页与归档审查提交；网站另有本机生产构建/44项测试证据，不能把Adapter CI说成已在云端测试网站。详细脱敏回执见`docs/releases/LIEPIN_MCP_20261023_CI_RECEIPT.json`。
+
+生产只读复核：现有Zeabur CLI认证返回`401 Unauthorized`，未发起登录或改配置，生产维护/回滚门仍阻塞。当前会话也没有暴露opencli-mcp工具，脚本BrowserClient真机通路不替代桌面目标客户端首次调用；Windows暂无真机。以上沿用用户暂缓决定，不重复请求授权，不宣称上线就绪。

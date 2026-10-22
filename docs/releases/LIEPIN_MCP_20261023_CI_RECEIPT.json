@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-23",
+  "commit": "a5b7290536b0cbab6788a5b600431c936c883772",
+  "runId": 39811057372,
+  "conclusion": "success",
+  "url": "https://github.com/capparun/skillhub/actions/runs/39811057372",
+  "platforms": {
+    "liepin-adapter-windows-latest": {
+      "sourceStatus": "passed",
+      "tests": {
+        "mcp": 231,
+        "core": 398
+      },
+      "installStatus": "passed",
+      "installChecks": 22,
+      "adapterCount": 15,
+      "packageFingerprint": "65894f0198ad658266b2837fc3a2f2dbd9552e5c189d24cdf37e6b293344b8c2",
+      "browserVerified": false
+    },
+    "liepin-adapter-macos-15-intel": {
+      "sourceStatus": "passed",
+      "tests": {
+        "mcp": 236,
+        "core": 398
+      },
+      "installStatus": "passed",
+      "installChecks": 22,
+      "adapterCount": 15,
+      "packageFingerprint": "330d6c47691870f2a475b686660203171a007775624e1a510bcd1809c0ce1ba6",
+      "browserVerified": false
+    }
+  },
+  "productionReadOnlyCheck": {
+    "command": "zeabur auth status --interactive=false --auto_check_update=false",
+    "exitCode": 1,
+    "error": "401 Unauthorized",
+    "loginStarted": false,
+    "configurationChanged": false,
+    "deployed": false
+  }
+}

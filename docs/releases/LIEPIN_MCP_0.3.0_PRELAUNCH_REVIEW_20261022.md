@@ -50,3 +50,9 @@
 | 发布状态 | approved=false，published=false |
 
 已对7份真实保存详情做离线一致性审计：48个分段的源行范围和HTML内容一致；独立原始JSON与完整任务对象一致，无静默截断标记。此证明“保存和展示没有丢已采集内容”，不证明平台未展示或受限字段也已取得。证据`tools/liepin-mcp/evidence/2026-10-23-final-archive-audit.json`。
+
+## 2026-10-23 最终CI与实际外部门核对
+
+CI专用分支已同步`a5b72905`，运行[39811057372](https://github.com/capparun/skillhub/actions/runs/39811057372)整体success：macOS核心398/MCP236、Windows核心398/MCP231（另5项明确skip），两平台22项安装、15入口。指纹分别仍330d6c47/65894f01。此轮包含最新安装页与归档审查提交；网站另有本机生产构建/44项测试证据，不能把Adapter CI说成已在云端测试网站。详细脱敏回执见`docs/releases/LIEPIN_MCP_20261023_CI_RECEIPT.json`。
+
+生产只读复核：现有Zeabur CLI认证返回`401 Unauthorized`，未发起登录或改配置，生产维护/回滚门仍阻塞。当前会话也没有暴露opencli-mcp工具，脚本BrowserClient真机通路不替代桌面目标客户端首次调用；Windows暂无真机。以上沿用用户暂缓决定，不重复请求授权，不宣称上线就绪。

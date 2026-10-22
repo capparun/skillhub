@@ -239,3 +239,9 @@ source-click原dry-run按新增收藏数停止，dry-run永不新增，因此tar
 ### 2026-10-23 归档已固定
 
 当前业务与网站提交301f8894。私有发布候选位于主工作区`.liepin-install-state/release-candidate-20261023/`，tar.gz SHA256为fdbf3ee612e2370adc36b09856c22db2ee6a09c0e8ba66f733c967f57a67f88d，222040字节；指纹330d6c47与CI/已安装候选一致。7份真实保存详情的48个分段及独立原始JSON一致性已核实。这是离线保真核查，无新增浏览器/账号动作，不外推平台全部字段可见。下一步仍是已暂缓的Windows/助手/生产维护交付门；不重跑寻访来替代它们。
+
+## 2026-10-23 最终CI与实际外部门核对
+
+CI专用分支已同步`a5b72905`，运行[39811057372](https://github.com/capparun/skillhub/actions/runs/39811057372)整体success：macOS核心398/MCP236、Windows核心398/MCP231（另5项明确skip），两平台22项安装、15入口。指纹分别仍330d6c47/65894f01。此轮包含最新安装页与归档审查提交；网站另有本机生产构建/44项测试证据，不能把Adapter CI说成已在云端测试网站。详细脱敏回执见`docs/releases/LIEPIN_MCP_20261023_CI_RECEIPT.json`。
+
+生产只读复核：现有Zeabur CLI认证返回`401 Unauthorized`，未发起登录或改配置，生产维护/回滚门仍阻塞。当前会话也没有暴露opencli-mcp工具，脚本BrowserClient真机通路不替代桌面目标客户端首次调用；Windows暂无真机。以上沿用用户暂缓决定，不重复请求授权，不宣称上线就绪。

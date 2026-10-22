@@ -27,7 +27,11 @@ export async function prepareAdapterFilters({args,tab,signal},{apply,createDrive
      if(!state.dropdownOptions?.length)throw Error('下拉选项尚未确认，不选择任何值');
      fields.push({field:step.key,options:state.dropdownOptions,currentValue:state.value??null});
      await driver.pressKey('Escape');
-    }else fields.push({field:step.key,options:state.choiceOptions??[],currentValue:state.value??null});
+    }else{
+     for(let i=0;i<6&&!state.choiceOptions?.length;i++){await pause(200);check();state=await driver.evaluate(inspect,step);}
+     if(state.loading||!state.choiceOptions?.length)throw Error('筛选选项尚未就绪；未选择或提交搜索');
+     fields.push({field:step.key,options:state.choiceOptions,currentValue:state.value??null});
+    }
    }
    return {status:'completed',evidence:{fields,selectionChanged:false,searchSubmitted:false,description:'仅打开并收起下拉查看选项，没有选择值或点击搜索'}};
   },{signal});

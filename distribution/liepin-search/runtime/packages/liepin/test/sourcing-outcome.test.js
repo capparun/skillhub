@@ -64,3 +64,13 @@ test('closure distinguishes partial and complete and expires when evidence chang
  updateTask(f,t=>{t.operations=[{status:'unknown'}];return t;});
  assert.equal(sourcingProgress(readTask(f)).complete,false);assert.equal(sourcingProgress(readTask(f)).closureStale,true);
 });
+
+test('directly identified list rows use canonical IDs for review and completion blockers',async t=>{
+ const {detailTargets}=await import('../lib/detail-targets.js');const {recordListReview}=await import('../lib/sourcing-outcome.js');
+ const f=fixture(t);updateTask(f,task=>{task.candidates[0].observations.push({stage:'list',roundId:'direct',hash:'direct-row',data:{summary:'合成列表',cardSelector:'.card',detailTarget:'.name'}});return task;});
+ const [target]=detailTargets(readTask(f));assert.match(target.id,/^[a-f0-9]{64}$/);
+ assert.ok(sourcingProgress(readTask(f)).blockers.includes('列表存在未复核或未补齐详情的条目'));
+ recordListReview(f,{observationId:target.id,disposition:'reuse_detail',reason:'同一稳定身份已有可见详情，复用原文'});
+ assert.equal(sourcingProgress(readTask(f)).blockers.includes('列表存在未复核或未补齐详情的条目'),false);
+ assert.equal(readTask(f).sourcing.listReviews[0].hash,'direct-row');
+});

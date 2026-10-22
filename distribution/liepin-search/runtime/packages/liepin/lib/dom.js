@@ -102,7 +102,8 @@ export function inspect(request = {}) {
         const read = selector => card.querySelector(selector)?.textContent?.trim() || null;
         // 姓名节点可能混入"阅""名片简历"等徽标文本,只取节点自身的文本节点
         const nameEl = card.querySelector('.new-resume-personal-name');
-        const ownText = nameEl ? [...nameEl.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim() : '';
+        const ownTextOf = el => [...(el?.childNodes ?? [])].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim();
+        const ownText = ownTextOf(nameEl?.querySelector?.(':scope > em')) || ownTextOf(nameEl);
         // Observed card layout: personal block, then work/education groups.
         // Read explicit company · title and period spans only from the first
         // work group. Do not infer employment from the free-form summary.

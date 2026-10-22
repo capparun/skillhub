@@ -1,3 +1,4 @@
+import {listObservationTargets} from './detail-targets.js';
 import {updateTask} from './task-store.js';
 import {currentEvaluation,evaluationFingerprint} from './evaluation.js';
 import {createHash} from 'node:crypto';
@@ -62,7 +63,7 @@ export function recordListReview(file,input){
  const reason=text(input.reason,'列表处理理由');
  if(!['needs_detail','reuse_detail','skip_unrelated'].includes(input.disposition))throw Error('列表处理状态无效');
  return updateTask(file,task=>{
-  const observation=(task.unlinkedObservations??[]).find(o=>o.id===input.observationId);
+  const observation=listObservationTargets(task).find(o=>o.id===input.observationId);
   if(!observation)throw Error('列表观察不存在');
   task.sourcing??={contracts:[],decisions:[],listReviews:[]};
   task.sourcing.listReviews.push({observationId:observation.id,hash:observation.hash,disposition:input.disposition,reason,at:new Date().toISOString()});return task;
@@ -90,8 +91,8 @@ export function sourcingProgress(task){
  if(people.some(p=>p.decision?.decision==='clarify'))blockers.push('存在待校准人选');
  if(contract?.goal==='favorites'&&people.some(p=>p.decision?.decision==='follow_up'&&p.favorite!=='confirmed'))blockers.push('跟进人选目标分组尚未全部核实');
  const reviews=new Map((task.sourcing?.listReviews??[]).map(r=>[r.observationId,r]));
- if((task.unlinkedObservations??[]).filter(o=>o.data?.collection!=='favorites').some(o=>{
-  const review=reviews.get(o.id);return !review||review.hash!==o.hash||(review.disposition!=='skip_unrelated'&&!task.candidates.find(c=>c.key===o.link?.candidateKey)?.observations.some(d=>d.stage==='detail'&&['readable','partial'].includes(d.data.status)));
+ if(listObservationTargets(task).filter(o=>o.data?.collection!=='favorites').some(o=>{
+  const review=reviews.get(o.id);return !review||review.hash!==o.hash||(review.disposition!=='skip_unrelated'&&!task.candidates.find(c=>c.key===(o.candidateKey??o.link?.candidateKey))?.observations.some(d=>d.stage==='detail'&&['readable','partial'].includes(d.data.status)));
  }))blockers.push('列表存在未复核或未补齐详情的条目');
  const closure=task.sourcing?.closures?.at(-1),closureStale=!!closure&&closure.evidenceFingerprint!==closureFingerprint(task);
  return {contract:contract??null,contractStale:!!contract&&contract.standardHash!==standard(task),people,counts:{identified:people.length,reviewed:people.filter(p=>p.decision).length,followUp:people.filter(p=>p.decision?.decision==='follow_up').length,favoriteConfirmed:people.filter(p=>p.decision?.decision==='follow_up'&&p.favorite==='confirmed').length},blockers,closure:closureStale?null:closure??null,closureStale,complete:!!closure&&!closureStale&&closure.status==='complete'&&!blockers.length,note:'收口由核对人确认覆盖并绑定当前证据；不表示市场人才已找全，也不授予额外浏览器操作权限'};

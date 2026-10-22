@@ -70,3 +70,10 @@ test('option discovery without matching authorization never opens a menu',async 
  const args={...fixture(t),filters:{full_time:'统招'},options_only:true};let calls=0;
  await assert.rejects(prepareAdapterFilters({args,tab:{id:'123',url:async()=>{calls++;return '';}}},{createDriver:()=>{calls++;}}));assert.equal(calls,0);
 });
+
+test('choice discovery waits for ready options instead of recording empty success',async t=>{
+ const args={...fixture(t,false),filters:{education:'硕士'},options_only:true};
+ authorizeTask(args.file,{allowedKinds:['inspect'],maxOperations:1,confirmedAt:new Date().toISOString(),scope:'synthetic',allowedRequests:[{kind:'inspect',payload:{view:'filter-options',page:'123',filters:{education:'硕士'}}}]});
+ let reads=0;const result=await prepareAdapterFilters({args,tab:{id:'123',url:async()=> 'https://h.liepin.com/search/getConditionItem'}},{pause:async()=>{},createDriver:()=>({evaluate:async()=>({choiceOptions:++reads===1?[]:['本科','硕士']})})});
+ assert.equal(reads,2);assert.deepEqual(result.fields[0].options,['本科','硕士']);
+});

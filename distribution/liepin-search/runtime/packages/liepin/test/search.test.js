@@ -84,7 +84,7 @@ test('accepts OpenCLI option provenance metadata but rejects other unknown keys'
 });
 function fake({ mismatch = false, risk = false, pending = false, blankReads = 0, reset = '#reset' } = {}) {
   const clicks = []; let value = ''; let reads = 0;
-  return { clicks, async click(s) { clicks.push(s); }, async fillText(s,v) { value = v; }, async evaluate(fn, request) {
+  return { clicks, async click(s) { assert.ok(reads>blankReads, "no action before blank rendering clears");clicks.push(s); }, async fillText(s,v) { value = v; }, async evaluate(fn, request) {
     const base = { url, risk, riskSignals: risk ? ['安全验证'] : [], blank: reads++ < blankReads, login: false };
     if (request.mode === 'controls') return { ...base, reset, submit: '#submit' };
     if (request.mode === 'results') return { ...base, count: pending ? 0 : 1, total: '3000+', rows: [{ name: '测试**' }] };
@@ -105,7 +105,8 @@ test('prepare applies and verifies filters without submitting', async () => {
 test('waits through a short blank render before touching controls', async () => {
   const page = fake({ blankReads: 2 });
   await run(page, { keyword: '机械' }, { requireFresh: false, pause: async () => {}, submit: false });
-  assert.equal(page.clicks[0], '#reset');
+  assert.equal(page.clicks[0], '#keyword');
+  assert.equal(page.clicks.includes('#reset'),false,'clean page does not need reset after rendering');
 });
 test('does not require a reset control on a clean search page', async () => {
   const page = fake({ reset: null });

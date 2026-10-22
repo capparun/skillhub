@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-22",
+  "candidate": "4806fe261391b67d90830f411c921ce1457eb9b02f37e4e8716cb278b27ac313",
+  "releaseStatus": "development-not-approved",
+  "tests": {
+    "core": {
+      "passed": 398,
+      "failed": 0
+    },
+    "mcp": {
+      "passed": 228,
+      "failed": 0
+    }
+  },
+  "realFlow": {
+    "runtimeCandidate": "b1a56c2e175dfa865ad70444bfe26266e6ba15ea4cf634e4d5e5806df67e57d1",
+    "searches": 1,
+    "rows": 5,
+    "details": [
+      {
+        "status": "partial",
+        "characters": 3407
+      },
+      {
+        "status": "readable",
+        "characters": 1592
+      }
+    ],
+    "criteriaPerPerson": 9,
+    "clarify": 2,
+    "pendingDetails": 3,
+    "newFavorites": 0,
+    "unknownOperations": 0,
+    "reviewsLeftOpen": 0,
+    "groupReadback": {
+      "exactNameVerified": true,
+      "total": 30,
+      "visibleRows": 10
+    }
+  },
+  "finalCandidate": {
+    "installed": true,
+    "hostUpdated": true,
+    "existingFiltersReadback": true,
+    "localEvaluationRead": true
+  },
+  "nativeWindowEvidence": [
+    "Observed detail content, then retained detail after read returned",
+    "Observed return to search after separate close call",
+    "Observed local report, corrected masked-name read badge",
+    "Closed only owned search tabs; original user pages preserved"
+  ],
+  "notVerified": [
+    "Live favorite action through the new retained-detail wrapper",
+    "Live missing-click-reply recovery branch",
+    "Current-source Windows and macOS CI",
+    "Windows real Chrome",
+    "Previously deferred target-client acceptance",
+    "Previously deferred Zeabur maintenance access"
+  ],
+  "privateDataIncluded": false
+}

@@ -10,7 +10,7 @@ export function candidatePresentation(row) {
     ['readable', 'partial'].includes(item.data?.status)).at(-1)?.data;
   const text = value => typeof value === 'string' ? value.trim() : '';
   return {
-    name: text(latest.name) || '姓名待确认',
+    name: text(latest.name).replace(/([*＊]+)\s*阅$/u,'$1') || '姓名待确认',
     position: text(latest.currentTitle) || text(latest.position),
     company: text(latest.currentCompany) || text(latest.company),
     city: text(latest.city),

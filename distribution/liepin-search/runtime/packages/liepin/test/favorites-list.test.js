@@ -60,7 +60,8 @@ for(const scenario of ['navigate','already-ready','ambiguous','blocked','never-r
  const result=await readFavoritesView(page,2,{click:async()=>{clicks++;},pause:async()=>{}});
  assert.equal(clicks,['navigate','never-ready'].includes(scenario)?1:0);
  assert.equal(result.status,['navigate','already-ready'].includes(scenario)?'ready':scenario==='blocked'?'blocked':'not_favorites');
- assert.ok(reads<=33);
+ assert.equal(reads,1+result.timings.entryPolls);
+ assert.ok(result.timings.entryPolls<=40);
 });
 test('favorites waits for a delayed navigation tree and clicks only after it appears',async()=>{
  const {readFavoritesView,inspectFavoritesEntry}=await import('../lib/favorites-list.js');let entries=0,clicks=0,pauses=0;
@@ -82,7 +83,8 @@ for(const scenario of ['already-selected','switch','missing','wrong-readback','b
  const r=await readFavoritesView(page,2,{group:'目标组',pause:async()=>{},click:async(selector,label)=>{assert.equal(selector,'#observed-group');assert.equal(label,'目标组');clicks++;}});
  assert.equal(clicks,['already-selected','missing'].includes(scenario)?0:1);
  assert.equal(r.status,['already-selected','switch'].includes(scenario)?'ready':scenario==='missing'?'group_not_found_or_ambiguous':scenario==='blocked'?'blocked':'group_selection_not_confirmed');
- assert.ok(reads<=13);
+ assert.equal(reads,1+r.timings.entryPolls+r.timings.groupPolls);
+ assert.ok(r.timings.groupPolls<=16);
 });
 test('exact group verification preserves candidate evidence and stores the membership receipt',async t=>{
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'favorite-membership-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));

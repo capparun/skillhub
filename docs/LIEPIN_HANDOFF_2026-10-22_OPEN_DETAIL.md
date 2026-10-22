@@ -162,3 +162,19 @@ source-click原dry-run按新增收藏数停止，dry-run永不新增，因此tar
 - 私有证据：主工作区 .liepin-install-state/detail-review-acceptance/{task.json,detail.json,close.json,summary.json}。Native备份 .liepin-install-state/detail-review-20261022e/setup-backup.json。
 - 最后补充严格URL身份防护与流程文档后构建候选b1a56c2e175dfa865ad70444bfe26266e6ba15ea4cf634e4d5e5806df67e57d1（output/liepin-detail-review-20261022f，133文件）。此最终候选尚未安装或真机验收；当前浏览器仍17a550dd，不混同两者。
 - 未完成：新审阅收藏分支真实回读、缺失回执恢复现场验证、最终候选双平台CI与安装、整体PRD逐项收口。未推送/合并/上线。
+
+## 12. 按真实JD的最终流程验收与额外修复
+
+统一候选4806fe261391b67d90830f411c921ce1457eb9b02f37e4e8716cb278b27ac313（output/liepin-final-flow-20261022g，133文件）已隔离安装并接入；回滚收据主工作区 .liepin-install-state/final-flow-20261022g/setup-backup.json。未改扩展权限，未推送/上线。
+
+本轮在b1a56c2e现场落实关键词伺服算法＋10年以上＋硕士＋统招本科，一次搜索5条，按直接伺服线索选择2份详情（partial3407字/readable1592字），均在同一页保存后评估再关闭返回。两人均按9项标准保存逐字引用和具体缺口，结论clarify；没有为测试强行收藏。其余3位保留needs_detail，不能宣称整页寻访完成。准确目标组只读回读total30/当前10条，本轮新增0。两份评估的姓名徽标通过CUA实际报告检查纠正；原始记录保持不变。
+
+真实执行暴露并修复：
+- options_only早期choice未就绪时返回空列表却记成功；现短暂有界观察，仍空则明确失败，不选择或搜索。
+- 直接识别ID后的linked列表不能recordListReview：统一listObservationTargets入口，列表复核及完成阻塞检查同时覆盖linked/unlinked。
+- 姓名em内“阅”徽标污染：DOM取实际姓名文字节点；旧快照仅展示层清理masked-name尾部阅，原记录不改，真实姓名“张阅”保留。
+- 前任轮询与按需reset改动遗留4个过期测试断言：调整到现行有界计数，并补渲染空白阶段不得派发断言。
+
+回归核心398/398、MCP228/228。4806候选安装后使用该包自己的MCP与local工具，现有筛选和评估账本只读核对通过；没有重复真实搜索来假装全链路同版重验。当前产品状态入口已更新，旧基线保留作追溯。
+
+私有证据主工作区 .liepin-install-state/servo-final-acceptance/；报告evaluation-v2.html、evaluation-v2.details.html、evaluation-v2.records.json；summary.json明确partial及剩余队列。无未确认操作、无打开的审阅。搜索工作页已用CUA关闭，保留本地报告供用户查看及原有窗口。

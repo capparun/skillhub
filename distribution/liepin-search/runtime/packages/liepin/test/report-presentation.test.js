@@ -31,3 +31,9 @@ test('new search profile supersedes earlier profile and favorites-only records r
  assert.equal(result.company,'');
  assert.equal(candidatePresentation({observations:[{stage:'list',data:{collection:'favorites',name:'仅收藏样本'}}]}).name,'仅收藏样本');
 });
+
+test('legacy masked names omit the read badge only in presentation and retain original facts',()=>{
+ const data={name:'刘**阅'},row={observations:[{stage:'list',data}]};
+ assert.equal(candidatePresentation(row).name,'刘**');assert.equal(data.name,'刘**阅');
+ assert.equal(candidatePresentation({observations:[{stage:'list',data:{name:'张阅'}}]}).name,'张阅');
+});

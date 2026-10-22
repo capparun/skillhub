@@ -1,10 +1,10 @@
 import test from 'node:test';import assert from 'node:assert/strict';import vm from 'node:vm';import {inspect} from '../lib/dom.js';
-function snapshot(records,{icon='M9.883 4.31 synthetic work icon'}={}){
+function snapshot(records,{icon='M9.883 4.31 synthetic work icon',nameElement=null}={}){
  const shown={getClientRects:()=>[{}]};
  const row=([text,period])=>({...shown,children:[{...shown,tagName:'SPAN',textContent:text,getAttribute:()=>null},{...shown,tagName:'SPAN',textContent:period,getAttribute:()=>null}]});
  const group={querySelector:()=>({getAttribute:()=>icon}),querySelectorAll:()=>records.map(row)};
- const card={...shown,id:'card',innerText:'unstructured summary is not a field source',querySelector:s=>s==='.new-resume-personal'?{nextElementSibling:{firstElementChild:group}}:null,querySelectorAll:()=>[]};
- const document={body:{innerText:'猎聘搜索结果'},readyState:'complete',querySelector:()=>null,querySelectorAll:s=>s==='.detail-resume-card-wrap .tlog-common-resume-card'||s==='#card'?[card]:[]};
+ const card={...shown,id:'card',innerText:'unstructured summary is not a field source',querySelector:s=>s==='.new-resume-personal-name'?nameElement:s==='.new-resume-personal'?{nextElementSibling:{firstElementChild:group}}:null,querySelectorAll:()=>[]};
+ const document={body:{innerText:'猎聘搜索结果'},readyState:'complete',querySelector:()=>null,querySelectorAll:s=>s==='#name'&&nameElement?[nameElement]:s==='.detail-resume-card-wrap .tlog-common-resume-card'||s==='#card'?[card]:[]};
  return vm.runInNewContext(`(${inspect.toString()})({mode:'results',limit:1})`,{document,location:{origin:'https://h.liepin.com',pathname:'/search/getConditionItem',href:'https://h.liepin.com/search/getConditionItem'},getComputedStyle:()=>({visibility:'visible'}),CSS:{escape:s=>s},performance:{getEntriesByType:()=>[]}}).rows[0];
 }
 test('explicit current employment is separated from historical work records',()=>{
@@ -16,4 +16,9 @@ test('past-only, ambiguous current, malformed fields and an education icon never
   assert.equal(row.currentCompany,null);assert.equal(row.currentTitle,null);
  }
  assert.equal(snapshot([['公司 · 岗位','未知时间']]).employment.length,0);
+});
+
+test('name text comes from the clickable em without its read badge',()=>{
+ const name={id:'name',getClientRects:()=>[{}],textContent:'刘**阅',childNodes:[],querySelector:()=>({childNodes:[{nodeType:3,textContent:'刘**'},{nodeType:1,textContent:'阅'}]})};
+ assert.equal(snapshot([],{nameElement:name}).name,'刘**');
 });

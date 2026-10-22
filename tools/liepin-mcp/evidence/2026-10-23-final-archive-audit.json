@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-23",
+  "sourceCommit": "301f8894169e7c176301dcb090d056bdf4fc5d11",
+  "archive": {
+    "product": "liepin-search",
+    "version": "0.3.0",
+    "file": "liepin-search-v0.3.0.tar.gz",
+    "sha256": "fdbf3ee612e2370adc36b09856c22db2ee6a09c0e8ba66f733c967f57a67f88d",
+    "sizeBytes": 222040,
+    "sourceFingerprint": "330d6c47691870f2a475b686660203171a007775624e1a510bcd1809c0ce1ba6",
+    "transport": "opencli-mcp-site-adapter",
+    "channel": "release-candidate",
+    "approved": false,
+    "published": false
+  },
+  "archiveFiles": 134,
+  "declaredFiles": 133,
+  "sourceFilesMatchedGit": 129,
+  "generatedEntrypointsAndMetadata": [
+    "doctor.mjs",
+    "install.mjs",
+    "package-lock.json",
+    "package.json"
+  ],
+  "undeclaredArchiveFiles": 0,
+  "archiveLinks": 0,
+  "savedDetailAudit": {
+    "observations": 7,
+    "sectionRangesVerified": 48,
+    "allSavedSectionsPresentInLocalDetailHtml": true,
+    "rawSidecarMatchesWholeTask": true,
+    "truncated": false,
+    "scope": "Saved real-data consistency only; does not prove unobserved or restricted page fields were accessible."
+  },
+  "liveAccountActions": 0,
+  "privateCandidateDataIncluded": false
+}

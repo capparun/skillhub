@@ -1,6 +1,6 @@
 # 猎聘 MCP 命令说明
 
-2026-10-21。根据当前 adapters/liepin 源码核对。共有13个浏览器业务命令，使用官方opencli-mcp的Site Adapter框架；猎聘命令由本项目实现，并非官方内置猎聘功能。兼容扩展负责连接，不负责招聘判断。本文不执行任何浏览器动作。
+2026-10-22。根据当前 adapters/liepin 源码核对。共有15个浏览器业务命令，使用官方opencli-mcp的Site Adapter框架；猎聘命令由本项目实现，并非官方内置猎聘功能。兼容扩展负责连接，不负责招聘判断。本文不执行任何浏览器动作。
 
 ## 如何调用
 
@@ -28,7 +28,9 @@ file为已有本机任务JSON绝对路径；operation_id为已登记授权的稳
 | prepare | 设置筛选并回读；不点搜索，但站点可能自动查询 | file、operation_id、tab_id、filters | verify_only只读；options_only查看选项后收起 |
 | search | 按任务中已批准轮次提交搜索，逐页保存 | file、round_id、tab_id | restore=false；恢复时另需operation_id、reason |
 | results | 保存当前页列表；不重新搜索、不翻页 | file、operation_id、tab_id | limit=3，范围1–30 |
-| open-detail | 从已保存卡片点击姓名、展开并保存详情，关闭本次详情返回列表 | file、operation_id、tab_id、observation_id | 无 |
+| next-page | 在当前搜索结果上点击一次下一页，回读页码/首行并保存；不重新提交查询 | file、operation_id、tab_id | 无；须有对应翻页授权 |
+| open-detail | 从已保存卡片点击姓名、展开并保存详情；默认关闭返回，可保留同页评估 | file、operation_id、tab_id、observation_id | keep_open=false；true时返回review.token |
+| detail-review | 在本运行时保留的详情上按证据收藏，或关闭返回；不重开 | file、parent_tab_id、review_token、action | action=add/close；add另需operation_id、group |
 | current-detail | 保存当前已绑定详情；不新建或关闭标签 | file、operation_id、tab_id、resume_id | expand=false，可展开已识别经历 |
 | detail-batch | 执行已有持久详情队列，跳过完成项，未知项暂停 | file、id（批次ID）、tab_id | interval_ms=6000，范围1000–60000 |
 | saved-search | 搜索方案管理 | file、operation_id、tab_id、action | action=list/save/apply/delete；name、current、filters、limit=3（1–30）；附加要求随action变化 |
@@ -90,4 +92,11 @@ node tools/liepin-mcp/local.mjs doctor
 
 需求与标准确认、收藏分组确认 → 关键词探索 → tabs/bind（无工作页时connect）→ prepare及条件回读 → search → results及逐条复核 → open-detail/detail-batch按需核实 → 本地task记录证据与判断 → favorite/favorite-list → favorites独立确认分组 → report交付。
 
-没有独立next-page命令：分页由search按已批准轮次控制。没有群发、联系、解锁或下载付费附件命令。saved-search的apply可能触发查询；favorite的remove和新建组需对应授权。resume_id和observation_id必须来自已观察数据，不猜ID或URL。白屏、验证或未知效果停止依赖动作，不重放未知写入。
+分页可由search按已批准轮次执行，也可在独立授权下用next-page前进一页；next-page只适用于搜索结果，不用于收藏列表。没有群发、联系、解锁或下载付费附件命令。saved-search的apply可能触发查询；favorite的remove和新建组需对应授权。resume_id和observation_id必须来自已观察数据，不猜ID或URL。白屏、验证或未知效果停止依赖动作，不重放未知写入。
+
+
+## 同页评估后继续
+
+需要读完再判断是否收藏时，open-detail传keep_open:true。保存返回后，Agent用本地证据完成标准对照和follow_up/clarify/not_pursued决定，再将review.token传给detail-review。add仍须准确人选、目标组和操作授权；页面已收藏时可返回saved:true、changed:false，不等于目标组已核实。完成后action:close关闭自己的详情并返回。不要重开同一详情，也不要以旧token跨宿主重启或刷新继续操作。
+
+favorites的limit是当前可见数据返回上限，不保证一页显示该数量。total30而rows10时只核实了当前10条；目标未出现不证明不在组，不得自动重复收藏。完整组归属仍需独立的可见身份依据。

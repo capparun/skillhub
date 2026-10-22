@@ -1,0 +1,47 @@
+{
+  "platform": "darwin",
+  "node": "v22.23.2",
+  "root": "[private local path omitted]",
+  "browserVerified": false,
+  "globalConfigurationChanged": false,
+  "browserRegistration": {
+    "manifestFileCycle": "passed-task-owned-path",
+    "windowsRegistry": "not-applicable",
+    "realChromeChanged": false
+  },
+  "browserAssets": {
+    "status": "prepared-and-reused",
+    "expectedExtensionId": "ebhhcfiikojppnmkimkhcajpieelbglb",
+    "extensionFiles": 12,
+    "chromeLoaded": false,
+    "globalConfigurationChanged": false
+  },
+  "status": "passed",
+  "fingerprint": "6e1a7943b80fdfba8a7e764705ff90fece7570587a8e896ec5d5f37fc600ca11",
+  "adapterCount": 12,
+  "checks": [
+    "npm-ci",
+    "fixed-local-launch",
+    "unicode-space-path",
+    "installed-platform-report",
+    "twelve-adapter-registry",
+    "isolated-runtime-patch",
+    "generated-launcher-initialize",
+    "installed-first-browser-registration",
+    "installed-registration-upgrade-rollback",
+    "stable-compatible-extension-assets",
+    "generated-client-config-initialize",
+    "reject-modified-native-launcher",
+    "launcher-rejects-modified-runtime",
+    "installed-executor-context",
+    "installed-tabs-result-contract",
+    "other-sites-unchanged"
+  ],
+  "_provenance": {
+    "kind": "recovered-historical-summary",
+    "originalSha256": "bcd9e6aba70caffc10b393ef684426011a1d37edde330bd28b88a3f3d3c7cec7",
+    "privatePathsOmitted": true,
+    "originalRawEvidenceRevalidated": false,
+    "note": "Recovered existing historical summary; not a new live run or current-build acceptance."
+  }
+}

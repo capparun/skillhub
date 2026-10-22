@@ -1,0 +1,24 @@
+{
+  "platform": "darwin",
+  "node": "v22.23.2",
+  "root": "[private local path omitted]",
+  "browserVerified": false,
+  "globalConfigurationChanged": false,
+  "status": "passed",
+  "fingerprint": "cf466d6d1d70e9585e8e244c835654a858aa5e29687e576337012bdb51e4b30f",
+  "adapterCount": 10,
+  "checks": [
+    "npm-ci",
+    "fixed-local-launch",
+    "unicode-space-path",
+    "ten-adapter-registry",
+    "isolated-runtime-patch"
+  ],
+  "_provenance": {
+    "kind": "recovered-historical-summary",
+    "originalSha256": "9ba0857820cad75daa80fc66af21bee01981e99d9910aeafed8b129bdfc3e49e",
+    "privatePathsOmitted": true,
+    "originalRawEvidenceRevalidated": false,
+    "note": "Recovered existing historical summary; not a new live run or current-build acceptance."
+  }
+}

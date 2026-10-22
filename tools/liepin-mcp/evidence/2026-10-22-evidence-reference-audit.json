@@ -1,0 +1,21 @@
+{
+  "references": 17,
+  "historicalSummariesRecovered": [
+    "2026-10-20-adapter-runtime-integration.json",
+    "2026-10-20-approved-synthetic-live.json",
+    "2026-10-20-current-live-summary.json",
+    "2026-10-20-favorite-closed-loop.json",
+    "2026-10-20-filter-controls-completed.json",
+    "2026-10-20-independent-browser-setup-install-fixed.json",
+    "2026-10-20-live-adapter-summary.json",
+    "2026-10-20-live-ten-adapter-summary.json",
+    "2026-10-20-macos-adapter-executor-fixed.json",
+    "2026-10-20-macos-adapter-install.json",
+    "2026-10-20-official-site-entries.json",
+    "2026-10-20-real-report-data-audit.json",
+    "2026-10-20-scheme-closed-loop.json"
+  ],
+  "missingReferences": [],
+  "privateResumeDataCopied": false,
+  "rawEvidenceRevalidated": false
+}

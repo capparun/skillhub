@@ -1,0 +1,86 @@
+{
+  "upstream": "0.0.30",
+  "browserAccessed": false,
+  "checks": [
+    {
+      "name": "bind",
+      "access": "write",
+      "loaded": true,
+      "missingCompatibilityRejected": true
+    },
+    {
+      "name": "connect",
+      "access": "write",
+      "loaded": true,
+      "missingTaskRejectedBeforeRead": true
+    },
+    {
+      "name": "current-detail",
+      "access": "write",
+      "loaded": true,
+      "wrongTabRejectedBeforeRead": true
+    },
+    {
+      "name": "detail-batch",
+      "access": "write",
+      "loaded": true,
+      "wrongTabRejectedBeforeRead": true
+    },
+    {
+      "name": "favorite",
+      "access": "write",
+      "loaded": true,
+      "wrongTabRejectedBeforeRead": true
+    },
+    {
+      "name": "favorites",
+      "access": "read",
+      "loaded": true,
+      "wrongTabRejectedBeforeRead": true
+    },
+    {
+      "name": "open-detail",
+      "access": "write",
+      "loaded": true,
+      "wrongTabRejectedBeforeRead": true
+    },
+    {
+      "name": "prepare",
+      "access": "write",
+      "loaded": true,
+      "wrongTabRejectedBeforeRead": true,
+      "filterCount": 30
+    },
+    {
+      "name": "results",
+      "access": "read",
+      "loaded": true,
+      "wrongTabRejectedBeforeRead": true
+    },
+    {
+      "name": "saved-search",
+      "access": "write",
+      "loaded": true,
+      "wrongTabRejectedBeforeRead": true
+    },
+    {
+      "name": "search",
+      "access": "write",
+      "loaded": true,
+      "wrongTabRejectedBeforeRead": true
+    },
+    {
+      "name": "tabs",
+      "access": "read",
+      "loaded": true,
+      "missingCompatibilityRejected": true
+    }
+  ],
+  "_provenance": {
+    "kind": "recovered-historical-summary",
+    "originalSha256": "0dfa59b334eb6c34c1f1707b579e8a860d0298875b7717b5afcbab6f18502d44",
+    "privatePathsOmitted": true,
+    "originalRawEvidenceRevalidated": false,
+    "note": "Recovered existing historical summary; not a new live run or current-build acceptance."
+  }
+}

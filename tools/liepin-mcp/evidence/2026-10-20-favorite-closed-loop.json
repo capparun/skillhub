@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-20T05:39:41.185Z",
+  "candidate": "7e0b440d241821a7afec646662a29325b4e4223a7013e13fb5d70eb203c394a2",
+  "status": "completed",
+  "group": "未分组",
+  "beforeSaved": false,
+  "afterAdd": true,
+  "afterRemove": false,
+  "bothChangesVerified": true,
+  "ownedTabClosed": true,
+  "existingFavoritesModified": false,
+  "newGroupCreated": false,
+  "contacted": false,
+  "_provenance": {
+    "kind": "recovered-historical-summary",
+    "originalSha256": "16e81ef1b9dcc9438bd299c8d9ef42dde836ba29ce131edb518df99003c6b874",
+    "privatePathsOmitted": true,
+    "originalRawEvidenceRevalidated": false,
+    "note": "Recovered existing historical summary; not a new live run or current-build acceptance."
+  }
+}

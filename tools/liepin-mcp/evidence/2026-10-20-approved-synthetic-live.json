@@ -1,0 +1,65 @@
+{
+  "kind": "synthetic-public-api",
+  "browserActions": [
+    "创建自有合成页",
+    "点击“打开合成详情”按钮一次",
+    "读取新合成详情页标题",
+    "关闭合成详情，切回并核对合成首页",
+    {
+      "at": "2026-10-20T02:16:40.283Z",
+      "phase": "dispatching",
+      "description": "向下滚动页面 320 像素"
+    },
+    {
+      "at": "2026-10-20T02:16:40.509Z",
+      "phase": "returned",
+      "description": "滚动指令已返回，控件位置仍由回读确认",
+      "delivery": "dispatched"
+    },
+    {
+      "at": "2026-10-20T02:16:40.513Z",
+      "phase": "dispatching",
+      "description": "按键：Escape（收起合成控件）"
+    },
+    {
+      "at": "2026-10-20T02:16:41.163Z",
+      "phase": "returned",
+      "description": "浏览器已返回动作结果，业务效果仍由回读确认",
+      "delivery": "dispatched"
+    }
+  ],
+  "checks": {
+    "losslessLargeSnapshot": true,
+    "childIdentityAndRead": true,
+    "returnToParent": true,
+    "scroll": true,
+    "escape": true
+  },
+  "cleanup": [
+    {
+      "tabId": "1745401428",
+      "closed": true
+    },
+    {
+      "tabId": "1745401425",
+      "closed": true
+    }
+  ],
+  "extension": {
+    "name": "Hunter MCP compatibility preview",
+    "version": "0.0.22"
+  },
+  "sessionCleanup": {
+    "closed": [],
+    "kept": [],
+    "failed": []
+  },
+  "ok": true,
+  "_provenance": {
+    "kind": "recovered-historical-summary",
+    "originalSha256": "cacefcb890feefe78f3d4914226bb897da36320dfdd536d69cb492b86b8a8cdc",
+    "privatePathsOmitted": true,
+    "originalRawEvidenceRevalidated": false,
+    "note": "Recovered existing historical summary; not a new live run or current-build acceptance."
+  }
+}

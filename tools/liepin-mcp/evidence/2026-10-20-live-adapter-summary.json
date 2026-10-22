@@ -1,0 +1,105 @@
+{
+  "candidate": "68f993da7872e3dbdfd386234e81a369d5f9d3c0e6a5d2efcc03eb59040d0429",
+  "status": "completed",
+  "search": {
+    "roundId": "trial",
+    "status": "completed",
+    "count": 3,
+    "pages": 1,
+    "warning": null
+  },
+  "details": [
+    {
+      "index": 1,
+      "status": "partial",
+      "textLength": 6398,
+      "limitations": {
+        "attachmentRestricted": true,
+        "collapsedSections": []
+      },
+      "keys": [
+        "schemaVersion",
+        "source",
+        "resumeId",
+        "url",
+        "capturedAt",
+        "status",
+        "title",
+        "text",
+        "sections",
+        "missingSections",
+        "visibility",
+        "truncated",
+        "expansion",
+        "limitations",
+        "warnings"
+      ]
+    },
+    {
+      "index": 2,
+      "status": "partial",
+      "textLength": 3216,
+      "limitations": {
+        "attachmentRestricted": true,
+        "collapsedSections": []
+      },
+      "keys": [
+        "schemaVersion",
+        "source",
+        "resumeId",
+        "url",
+        "capturedAt",
+        "status",
+        "title",
+        "text",
+        "sections",
+        "missingSections",
+        "visibility",
+        "truncated",
+        "expansion",
+        "limitations",
+        "warnings"
+      ]
+    }
+  ],
+  "operationStatuses": [
+    {
+      "id": "connect",
+      "status": "completed"
+    },
+    {
+      "id": "round-trial",
+      "status": "completed"
+    },
+    {
+      "id": "detail-0",
+      "status": "completed"
+    },
+    {
+      "id": "detail-1",
+      "status": "completed"
+    }
+  ],
+  "searchClickCount": 1,
+  "detailCloseCount": 2,
+  "returnCount": 2,
+  "privateEvidence": "[private local path omitted]",
+  "restoration": {
+    "nativeManifestByteEqual": true,
+    "officialExtensionEnabled": true,
+    "compatExtensionEnabled": false,
+    "ownedSearchClosed": true
+  },
+  "limitations": [
+    "two-detail acceptance only; not all fields or long-run stability proof",
+    "first harness misread sites.run direct value; resumed existing task without reconnect or search replay",
+    "initial confirmation timestamp was manually supplied and is not exact message receipt time; actual operation timestamps are recorded"
+  ],
+  "_provenance": {
+    "kind": "recovered-historical-summary",
+    "originalSha256": "c26ef5b3b96517f43af370d467daab140dc88c4692179aebff822f61914a23ed",
+    "privatePathsOmitted": true,
+    "originalRawEvidenceRevalidated": false,
+    "note": "Recovered existing historical summary; not a new live run or current-build acceptance."
+  }
+}

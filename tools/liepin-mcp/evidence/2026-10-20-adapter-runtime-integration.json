@@ -1,0 +1,33 @@
+{
+  "upstream": "0.0.30",
+  "browserAccessed": false,
+  "actualRuntimeAndTabClasses": true,
+  "checks": {
+    "childOnly": true,
+    "sameAdapterSession": true,
+    "parentRetained": true,
+    "activationVerified": true,
+    "otherSitesUnchanged": true,
+    "userBindingDoesNotOwnTab": true,
+    "nextCallUsesSelectedBinding": true
+  },
+  "patch": [
+    {
+      "path": "dist/src/runtime/runtime.js",
+      "originalSha256": "6f1176214c82a39d0dd5928f8293b38c2e67e2622694cf6f37645a1248c68e87",
+      "patchedSha256": "5b16f70014b814ce1870fc39bdf573a70557b82bb9d12b32e3c6542437c25749"
+    },
+    {
+      "path": "dist/src/runtime/hunter-adapter-tabs.mjs",
+      "originalSha256": null,
+      "patchedSha256": "2e3cf45d5fcdd2b2e43e1b37713fdd4892b5cc8181663e297825c01fcb46388d"
+    }
+  ],
+  "_provenance": {
+    "kind": "recovered-historical-summary",
+    "originalSha256": "d00ce87e18e5109923c4d60b017af48aae56ad7ffda0f93ef6b84b30b1f56620",
+    "privatePathsOmitted": true,
+    "originalRawEvidenceRevalidated": false,
+    "note": "Recovered existing historical summary; not a new live run or current-build acceptance."
+  }
+}

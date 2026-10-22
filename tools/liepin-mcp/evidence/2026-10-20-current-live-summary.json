@@ -1,0 +1,51 @@
+{
+  "candidate": "134dd8ea38ae51198f2a3d8d8c2b7e6c2776cdf412d878ef833c1218efca1fe2",
+  "status": "passed-scoped-live-acceptance",
+  "scope": "Existing task and compatibility environment; one new search, homepage10, two details; historical search reused without replay",
+  "searches": 1,
+  "listRows": 10,
+  "details": 2,
+  "readable": 1,
+  "partial": 1,
+  "detailTextLengths": [
+    6398,
+    944
+  ],
+  "detailSectionCounts": [
+    8,
+    5
+  ],
+  "truncated": false,
+  "childCloseReceipts": 2,
+  "parentReturnReceipts": 2,
+  "taskStatus": "ready",
+  "privateEvidence": "[private local path omitted]",
+  "privateReport": "[private local path omitted]",
+  "runtimeRetained": true,
+  "officialExtension": "disabled",
+  "noPaginationContactFavoriteUnlock": true,
+  "fullProductAccepted": false,
+  "newSourceReadonlyFieldProbe": {
+    "rows": 10,
+    "explicitCurrentEmployment": 8,
+    "employmentRecords": 12,
+    "installedCandidateIncludesFieldFix": false,
+    "privateEvidence": "[private local path omitted]"
+  },
+  "schemeListReadonly": {
+    "status": "completed",
+    "count": 1,
+    "privateEvidence": "[private local path omitted]"
+  },
+  "localTests": {
+    "core": 312,
+    "mcp": 130
+  },
+  "_provenance": {
+    "kind": "recovered-historical-summary",
+    "originalSha256": "63ed764224f562ed521eced0daacdf9b5abc401055ab92528dd978fa316311df",
+    "privatePathsOmitted": true,
+    "originalRawEvidenceRevalidated": false,
+    "note": "Recovered existing historical summary; not a new live run or current-build acceptance."
+  }
+}

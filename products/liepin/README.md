@@ -19,7 +19,7 @@
 
 | 组件 | 真实源码位置 | 职责 |
 | --- | --- | --- |
-| 新版Adapter | `tools/liepin-mcp/adapters/liepin/` | 13个标准浏览器业务命令 |
+| 新版Adapter | `tools/liepin-mcp/adapters/liepin/` | 15个标准浏览器业务命令 |
 | 新版Skill | `tools/liepin-mcp/skill/hunter-liepin-mcp/` | 组织通用寻访流程；不硬编码单次客户任务 |
 | 共享业务核心 | `distribution/liepin-search/runtime/packages/liepin/lib/` | 任务、证据评估、报告、授权与恢复；新版仍依赖它，不能按旧版代码删除 |
 | MCP执行配套 | `tools/liepin-mcp/lib/`、`local.mjs` | Adapter适配与本地工具 |

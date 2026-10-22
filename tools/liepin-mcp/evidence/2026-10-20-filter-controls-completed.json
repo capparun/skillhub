@@ -1,0 +1,152 @@
+{
+  "candidate": "134dd8ea38ae51198f2a3d8d8c2b7e6c2776cdf412d878ef833c1218efca1fe2",
+  "status": "filter-controls-verified",
+  "fields": {
+    "keyword": {
+      "evidence": "evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "experience": {
+      "evidence": "evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "city": {
+      "evidence": "ab78-choices-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "expectedCity": {
+      "evidence": "ab78-choices-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "education": {
+      "evidence": "ab78-choices-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "schoolTier": {
+      "evidence": "ab78-choices-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "language": {
+      "evidence": "ab78-choices-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "overseas": {
+      "evidence": "ab78-choices-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "management": {
+      "evidence": "ab78-choices-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "salaryMin": {
+      "evidence": "ab78-ranges-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "salaryMax": {
+      "evidence": "ab78-ranges-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "expectedSalaryMin": {
+      "evidence": "ab78-ranges-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "expectedSalaryMax": {
+      "evidence": "ab78-ranges-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "ageMin": {
+      "evidence": "ab78-ranges-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "ageMax": {
+      "evidence": "ab78-ranges-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "gender": {
+      "evidence": "b4-gender-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "title": {
+      "evidence": "summary-autocomplete-readback-evidence.json",
+      "mode": "independent-readback"
+    },
+    "company": {
+      "evidence": "summary-autocomplete-readback-evidence.json",
+      "mode": "independent-readback"
+    },
+    "school": {
+      "evidence": "summary-autocomplete-readback-evidence.json",
+      "mode": "independent-readback"
+    },
+    "major": {
+      "evidence": "summary-autocomplete-readback-evidence.json",
+      "mode": "independent-readback"
+    },
+    "industry": {
+      "evidence": "summary-autocomplete-b-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "position": {
+      "evidence": "summary-autocomplete-b-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "expectedIndustry": {
+      "evidence": "summary-autocomplete-b-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "expectedPosition": {
+      "evidence": "summary-autocomplete-b-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "resumeLanguage": {
+      "evidence": "summary-language-evidence.json",
+      "mode": "apply-and-readback"
+    },
+    "match": {
+      "evidence": "ab78-selects",
+      "mode": "per-field-readback"
+    },
+    "fullTime": {
+      "evidence": "ab78-selects",
+      "mode": "per-field-readback"
+    },
+    "activity": {
+      "evidence": "ab78-selects",
+      "mode": "per-field-readback"
+    },
+    "jobChanges": {
+      "evidence": "ab78-selects",
+      "mode": "per-field-readback"
+    },
+    "jobStatus": {
+      "evidence": "ab78-selects",
+      "mode": "per-field-readback"
+    }
+  },
+  "fieldCount": 30,
+  "taskStatus": "ready",
+  "scopeNote": "Controls verified across multiple batches, not all combined in one query",
+  "explicitSearchesThisSession": 0,
+  "detailOpensThisSession": 0,
+  "siteMayAutoQuery": true,
+  "tests": {
+    "coreFull": 309,
+    "mcpFull": 130,
+    "additionalScreenReaderRegression": "passed"
+  },
+  "installEvidence": "2026-10-20-filter-summary-install.json",
+  "environment": "compatibility enabled, official disabled; persistent development environment",
+  "remaining": [
+    "two search rounds and at most two detail opens",
+    "whole PRD acceptance and platform/client validation",
+    "release review"
+  ],
+  "privateEvidenceDirectory": "[private local path omitted]",
+  "_provenance": {
+    "kind": "recovered-historical-summary",
+    "originalSha256": "f849aef2d617e6a3e218adcbb0fa9fd39405f522ae2750ee25fe7b23c7c506c6",
+    "privatePathsOmitted": true,
+    "originalRawEvidenceRevalidated": false,
+    "note": "Recovered existing historical summary; not a new live run or current-build acceptance."
+  }
+}

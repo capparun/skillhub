@@ -48,6 +48,22 @@ export async function discoverDetailTabByAddress({listTabs,before,deadline,timin
  }
  return {found:null,lastSeen};
 }
+/** Wait only for the already-owned child; a loading document never permits another click. */
+export async function waitForCommittedDetailUrl(child,{timeoutMs=30_000,pollMs=300,now=()=>Date.now(),pause=ms=>new Promise(resolve=>setTimeout(resolve,ms)),check=()=>{},onWaiting=()=>{}}={}){
+ const deadline=now()+timeoutMs;let reported=false;
+ while(true){
+  check();
+  if(now()>=deadline)throw Object.assign(Error('已创建详情标签，但文档在限定时间内未就绪；未重复点击'),{code:'DETAIL_DOCUMENT_NOT_READY',childId:String(child.id)});
+  try{return await withStep('detail-document-commit',()=>child.url(),{timeoutMs:Math.max(1,deadline-now())});}
+  catch(error){
+   const match=String(error?.message).match(/^tab (\d+) has no committed document \(status loading, pending (https:\/\/[^ ]+)\)$/);
+   if(!match||match[1]!==String(child.id)||!detailIdentityFromUrl(match[2]))throw error;
+   if(now()>=deadline)throw Object.assign(Error('已创建详情标签，但文档在限定时间内未就绪；未重复点击'),{code:'DETAIL_DOCUMENT_NOT_READY',childId:String(child.id)});
+   if(!reported){onWaiting();reported=true;}
+   await pause(Math.min(pollMs,Math.max(1,deadline-now())));
+  }
+ }
+}
 /** Follow only children returned by the single observed click, never arbitrary tabs. */
 export async function openMcpDetailDriver(client,id,{signal,onAction=()=>{},readExpanded,visibleReading=false,timings=DEFAULT_DETAIL_TIMINGS}={}){
  const check=()=>{if(signal?.aborted)throw Error('操作已取消，已派发效果须核对');};
@@ -112,7 +128,7 @@ export async function openMcpDetailDriver(client,id,{signal,onAction=()=>{},read
   },
   children:async()=>{
    check();const result=[];
-   for(const child of children){const url=await child.handle.url();check();if(url==='about:blank')continue;result.push({page:child.id,url});}
+   for(const child of children){const url=await waitForCommittedDetailUrl(child.handle,{timeoutMs:timings.discoveryMs,pollMs:timings.pollMs,check,onWaiting:()=>log('详情标签已创建，文档仍在加载；等待同一标签就绪，不重复点击','observed')});check();if(url==='about:blank')continue;result.push({page:child.id,url});}
    return result;
   },
   read:async child=>{

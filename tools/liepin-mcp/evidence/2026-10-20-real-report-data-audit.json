@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-20T05:43:41.706Z",
+  "scope": "development acceptance, not formal recruitment",
+  "stats": {
+    "candidates": 4,
+    "sources": {
+      "liepin": 4
+    },
+    "observations": 6,
+    "readableDetails": 2,
+    "detailStatuses": {
+      "readable": 1,
+      "partial": 1,
+      "other": 0
+    },
+    "evaluated": 2,
+    "unresolvedIdentities": 18,
+    "completedRounds": 1,
+    "unresolvedOperations": 0
+  },
+  "platformRecords": 22,
+  "exactQuoteReferences": 2,
+  "reportFiles": [
+    {
+      "name": "platform.html",
+      "bytes": 157486,
+      "sha256": "0d7aee0e3d9a5be0f62679a7e9ad93d1626fd7931ebf4748ade4d74eebc274b1"
+    },
+    {
+      "name": "evaluation.html",
+      "bytes": 114926,
+      "sha256": "c92f4bb58dde702e35bc65e70bf8cc7527c9ab8d9789efd8d8d99d2093b4ccf0"
+    },
+    {
+      "name": "evaluation.json",
+      "bytes": 380593,
+      "sha256": "9650291c07f6effbbc9da4cd50d434cbcd36c1e5f226d5f8a3d01fee75e77d30"
+    },
+    {
+      "name": "evaluation.csv",
+      "bytes": 76473,
+      "sha256": "10817d65b41e0afa88bac6345ab006592b0fdef302ee0dba159f77c866937c6f"
+    },
+    {
+      "name": "evaluation.md",
+      "bytes": 108226,
+      "sha256": "c1ae3590b832262ad5be0756016d9bae7b1f8f651e3214258b12d1acb659a092"
+    }
+  ],
+  "visualReview": "not-performed-on-real-candidate-data",
+  "rawObservationsPreserved": true,
+  "rankOrShortlistCreated": false,
+  "_provenance": {
+    "kind": "recovered-historical-summary",
+    "originalSha256": "b88576693fe608d5ae9576fd9a97e4b8b1293afc925dcfc7be3d37da80417b60",
+    "privatePathsOmitted": true,
+    "originalRawEvidenceRevalidated": false,
+    "note": "Recovered existing historical summary; not a new live run or current-build acceptance."
+  }
+}

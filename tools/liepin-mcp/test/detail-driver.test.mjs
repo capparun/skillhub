@@ -73,3 +73,13 @@ test('detail cleanup logs dispatch and receipt without claiming independent tab 
  assert.equal(events.some(e=>e.phase==='verified'),false);
  assert.ok(events.some(e=>e.phase==='observed'&&e.description.includes('地址与原搜索页一致')));
 });
+
+test('detail driver waits for its clicked child document and never replays the card click',async()=>{
+ const c=fakeClient(),claim=c.claimOpenedTab,events=[];let reads=0;
+ c.claimOpenedTab=id=>{const child=claim(id),getUrl=child.url;child.url=async()=>{if(++reads===1)throw Error(`tab ${id} has no committed document (status loading, pending https://h.liepin.com/resume/showresumedetail/?res_id_encode=person${id})`);return getUrl();};return child;};
+ const driver=await openMcpDetailDriver(c,'123',{onAction:e=>events.push(e),timings:{clickReplyMs:100,discoveryMs:200,listTabsMs:100,pollMs:1}});
+ await driver.check({detailTarget:'#name'});await driver.click({detailTarget:'#name'});
+ assert.deepEqual(await driver.children(),[{page:'101',url:'https://h.liepin.com/resume/showresumedetail/?res_id_encode=person101'}]);
+ assert.equal(c.counts().clicks,1);assert.ok(events.some(e=>e.description.includes('等待同一标签就绪')));
+ await driver.returnToList();assert.deepEqual(c.counts(),{clicks:1,closes:1,returns:1});
+});

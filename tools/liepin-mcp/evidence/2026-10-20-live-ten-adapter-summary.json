@@ -1,0 +1,149 @@
+{
+  "candidate": "28c09f17545681229ef707b3b83ad27aa114e4500e0fcfed1928770a24926f17",
+  "status": "completed",
+  "startedAt": "2026-10-20T03:13:15.552Z",
+  "finishedAt": "2026-10-20T03:14:00.167Z",
+  "searches": 1,
+  "listCount": 10,
+  "detailCount": 10,
+  "detailStates": [
+    {
+      "status": "partial",
+      "textLength": 6398,
+      "sections": [
+        "求职意向",
+        "工作经历",
+        "项目经历",
+        "教育经历",
+        "语言能力",
+        "技能特长",
+        "自我评价",
+        "附加信息"
+      ]
+    },
+    {
+      "status": "readable",
+      "textLength": 857,
+      "sections": [
+        "求职意向",
+        "工作经历",
+        "教育经历",
+        "语言能力"
+      ]
+    },
+    {
+      "status": "partial",
+      "textLength": 3658,
+      "sections": [
+        "求职意向",
+        "工作经历",
+        "教育经历",
+        "语言能力",
+        "技能特长",
+        "自我评价"
+      ]
+    },
+    {
+      "status": "readable",
+      "textLength": 808,
+      "sections": [
+        "求职意向",
+        "工作经历",
+        "教育经历",
+        "语言能力"
+      ]
+    },
+    {
+      "status": "readable",
+      "textLength": 1314,
+      "sections": [
+        "求职意向",
+        "工作经历",
+        "教育经历",
+        "语言能力"
+      ]
+    },
+    {
+      "status": "readable",
+      "textLength": 832,
+      "sections": [
+        "求职意向",
+        "工作经历",
+        "教育经历",
+        "语言能力"
+      ]
+    },
+    {
+      "status": "readable",
+      "textLength": 913,
+      "sections": [
+        "求职意向",
+        "工作经历",
+        "教育经历",
+        "语言能力",
+        "自我评价"
+      ]
+    },
+    {
+      "status": "readable",
+      "textLength": 966,
+      "sections": [
+        "求职意向",
+        "工作经历",
+        "教育经历",
+        "语言能力",
+        "技能特长",
+        "自我评价"
+      ]
+    },
+    {
+      "status": "partial",
+      "textLength": 5329,
+      "sections": [
+        "求职意向",
+        "工作经历",
+        "项目经历",
+        "教育经历",
+        "语言能力",
+        "技能特长",
+        "自我评价"
+      ]
+    },
+    {
+      "status": "partial",
+      "textLength": 1164,
+      "sections": [
+        "工作经历",
+        "项目经历",
+        "教育经历",
+        "语言能力"
+      ]
+    }
+  ],
+  "linkedListCount": 10,
+  "batch": [
+    {
+      "status": "completed",
+      "completed": 10,
+      "total": 10
+    }
+  ],
+  "detailCloseReceipts": 10,
+  "nativeManifestRestored": true,
+  "extensionRestoration": "verified-official-on-compat-off",
+  "browserBlankObserved": false,
+  "limitations": [
+    "No claim of full visible-field completeness",
+    "No pagination, contact, favorite or unlock",
+    "Windows and remaining feature acceptance pending",
+    "confirmedAt is authorization-recording time, not exact message receipt timestamp"
+  ],
+  "restorationScreenshot": "2026-10-20-ten-completed-restored.png",
+  "_provenance": {
+    "kind": "recovered-historical-summary",
+    "originalSha256": "b81c77c3bb4f80c5c45347c68773e74ceeefb05ea3ac8b6483c1c66240e0b1d8",
+    "privatePathsOmitted": true,
+    "originalRawEvidenceRevalidated": false,
+    "note": "Recovered existing historical summary; not a new live run or current-build acceptance."
+  }
+}

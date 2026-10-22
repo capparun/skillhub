@@ -178,3 +178,9 @@ source-click原dry-run按新增收藏数停止，dry-run永不新增，因此tar
 回归核心398/398、MCP228/228。4806候选安装后使用该包自己的MCP与local工具，现有筛选和评估账本只读核对通过；没有重复真实搜索来假装全链路同版重验。当前产品状态入口已更新，旧基线保留作追溯。
 
 私有证据主工作区 .liepin-install-state/servo-final-acceptance/；报告evaluation-v2.html、evaluation-v2.details.html、evaluation-v2.records.json；summary.json明确partial及剩余队列。无未确认操作、无打开的审阅。搜索工作页已用CUA关闭，保留本地报告供用户查看及原有窗口。
+
+## 13. 开发入口与主目录副本
+
+当前本地提交bfbe4833，分支codex/liepin-final-fixes。统一候选4806fe26与该提交运行源码对应；主目录中存在15处与已知旧候选不同的修改，未强制覆盖。尝试镜像更新的运行文件已撤回；新增文件因系统Trash不可用，移到主目录 .liepin-install-state/source-sync-quarantine/ 可逆保留，没有关闭safe-delete或绕过保护。
+
+主目录 tools/liepin-mcp/skill/hunter-liepin-mcp/SKILL.md 现为显式导航，要求读取持久工作树的完整Skill并使用安装回执执行；主目录产品状态加了同样的真源提示。不要从主目录历史runtime/tools构建发布。同步审计在 .liepin-install-state/source-sync-20261022.json。该处理不修改实际安装候选、全局客户端配置或用户原有浏览器页面。

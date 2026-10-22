@@ -8,7 +8,10 @@ import {detailUrl} from './detail.js';
 export function inspectFavorite({resumeId,group,includeHtml=false}) {
  const url=new URL(location.href),text=document.body?.innerText ?? '';
  if(url.origin!=='https://h.liepin.com' || url.pathname!=='/resume/showresumedetail/' || url.searchParams.get('res_id_encode')!==resumeId)return {blocked:true,reason:'wrong_detail'};
- if(/验证码|访问过于频繁|安全验证|异常访问|请登录|扫码登录/.test(text))return {blocked:true,reason:'page_unavailable'};
+ // Only an unmistakable challenge page counts. Ordinary experience wording such
+ // as 功能安全验证 must not stop a favorite preflight.
+ const riskText=/验证码|访问过于频繁|异常访问|请登录|扫码登录/.test(text)
+  || (/安全验证/.test(text) && (text.length<400 || /(?:请|需|需要|进行)[^。\n]{0,6}安全验证|安全验证(?:后|未通过|失败)/.test(text)));
  const norm=x=>(x ?? '').replace(/\s+/g,'');
  const visible=e=>e.getClientRects().length>0 && getComputedStyle(e).visibility!=='hidden';
  const path=e=>{
@@ -20,6 +23,9 @@ export function inspectFavorite({resumeId,group,includeHtml=false}) {
  const named=(name,root=document)=>buttons.filter(b=>root.contains(b) && norm(b.textContent)===name);
  const one=items=>items.length===1?items[0]:null;
  const favorite=one(named('收藏')),saved=one(named('已收藏'));
+ // A real resume always carries one of these controls; a challenge page carries
+ // neither. Risk wording alone is not enough to stop the operation.
+ if(riskText && !favorite && !saved)return {blocked:true,reason:'page_unavailable'};
  const popup=(label,action)=>{
   const leaves=[...document.querySelectorAll('span,div,p')].filter(e=>visible(e) && norm(e.textContent)===label);
   for(const leaf of leaves){let root=leaf.parentElement;while(root && root!==document.body){if(named(action,root).length===1)return root;root=root.parentElement;}}

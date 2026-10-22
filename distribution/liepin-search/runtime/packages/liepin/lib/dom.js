@@ -117,7 +117,20 @@ export function inspect(request = {}) {
           return [{company:parts[0].trim(),title:parts[1].trim(),period,raw}];
         }) : [];
         const currentEmployment = employment.filter(item => /[-–—~至]\s*至今(?:\s|[（(]|$)/.test(item.period));
-        return { detailLinks: [...card.querySelectorAll('a[href]')].filter(visible).map(a=>a.getAttribute('href')), detailTarget: nameEl && visible(nameEl) ? path(nameEl) : null, cardSelector: path(card), employment, currentCompany: currentEmployment.length === 1 ? currentEmployment[0].company : null, currentTitle: currentEmployment.length === 1 ? currentEmployment[0].title : null, name: ownText || read('.new-resume-personal-name'), experience: read('.personal-detail-workyears'), education: read('.personal-detail-edulevel'), city: read('.personal-detail-dq'), expectation: read('.personal-expect-content'), skills: read('.new-resume-personal-skills'), status: read('.new-resume-status'), summary: card.innerText.trim() };
+        // The result row names the resume in its own class (tr.r-<resId>). The
+        // card we read is an inner div, so the row is the nearest table row
+        // above it; only that row's class is consulted. Whether to trust it as
+        // identity is decided by list-identity.js, which labels the source.
+        const rowClassResumeId = (() => {
+          for (let node = card; node && node !== document.body; node = node.parentElement) {
+            if (node.tagName !== 'TR') continue;
+            return [...(node.classList ?? [])]
+              .map(name => /^r-(.+)$/.exec(name)?.[1])
+              .find(value => value && /^[A-Za-z0-9_-]{1,512}$/.test(value)) ?? null;
+          }
+          return null;
+        })();
+        return { rowClassResumeId, detailLinks: [...card.querySelectorAll('a[href]')].filter(visible).map(a=>a.getAttribute('href')), detailTarget: nameEl && visible(nameEl) ? path(nameEl) : null, cardSelector: path(card), employment, currentCompany: currentEmployment.length === 1 ? currentEmployment[0].company : null, currentTitle: currentEmployment.length === 1 ? currentEmployment[0].title : null, name: ownText || read('.new-resume-personal-name'), experience: read('.personal-detail-workyears'), education: read('.personal-detail-edulevel'), city: read('.personal-detail-dq'), expectation: read('.personal-expect-content'), skills: read('.new-resume-personal-skills'), status: read('.new-resume-status'), summary: card.innerText.trim() };
       }) };
   }
   if (request.mode === 'controls') {

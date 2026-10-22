@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import { updateTask } from './task-store.js';
 
-const kinds = ['apply-search','prepare','inspect','search','restore-search','detail','detail-open','favorite-open','favorite-group-create','favorite','unfavorite','save-search','delete-search'];
+const kinds = ['apply-search','prepare','inspect','search','restore-search','page','detail','detail-open','favorite-open','favorite-group-create','favorite','unfavorite','save-search','delete-search'];
 export function cumulativeBudgetLimit(task){
  const extension=task.requirements?.budgetExtension;
  return extension&&Number.isSafeInteger(extension.limit)&&extension.limit>=100&&extension.reviewer?.trim()&&extension.reason?.trim()&&Number.isFinite(Date.parse(extension.confirmedAt))?extension.limit:100;

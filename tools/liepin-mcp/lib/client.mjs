@@ -25,7 +25,7 @@ export class BrowserClient {
    const p=this.pending.get(r.id);if(!p)return;
    this.pending.delete(r.id);clearTimeout(p.timer);r.error?p.reject(Error(r.error.message)):p.resolve(r.result);
   });
-  await this.rpc('initialize',{protocolVersion:'2024-11-05',capabilities:{},clientInfo:{name:'hunter-liepin-mcp',version:'0.3.0-alpha.1'}},{timeoutMs:Math.min(this.requestTimeoutMs,10000)});
+  await this.rpc('initialize',{protocolVersion:'2024-11-05',capabilities:{},clientInfo:{name:'hunter-liepin-mcp',version:'0.3.0-alpha.1'}},{timeoutMs:Math.min(this.requestTimeoutMs,30000)});
   this.child.stdin.write(JSON.stringify({jsonrpc:'2.0',method:'notifications/initialized'})+'\n',error=>{if(error)this.fail(error);});
  }
  rpc(method,params,{timeoutMs=this.requestTimeoutMs}={}){

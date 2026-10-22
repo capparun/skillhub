@@ -12,6 +12,13 @@ test('retains complete visible text beyond legacy 3000 character truncation', ()
   assert.ok(result.sections.find(s=>s.heading==='工作经历').text.length>3000);
   assert.deepEqual(result.missingSections,[]);
 });
+test('risk wording inside real resume content is not a challenge page', () => {
+  // 功能安全验证 is ordinary experience wording for servo/motion-control candidates.
+  const text = '个人信息\n李**\n工作经历\n盛景智能科技（嘉兴）有限公司 电子工程师\n开展EMC设计和验证、功能安全验证（IEC 6180-5-2）等工作\n教育经历\n某大学 本科\n项目经历\n伺服驱动项目';
+  const result = parseDetail(snapshot(text), id);
+  assert.equal(result.status, 'readable');
+  assert.notEqual(result.status, 'blocked');
+});
 test('does not call partial access complete and never returns blocked content', () => {
   assert.equal(parseDetail(snapshot('工作经历\n测试公司\n查看完整简历'),id).status,'partial');
   for (const [text,status] of [['请登录','login_required'],['安全验证','blocked'],['简历已删除','unavailable'],['页面菜单','unrecognized']]) {

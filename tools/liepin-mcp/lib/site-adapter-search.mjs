@@ -1,4 +1,4 @@
-import {search,results,logger,saveSearchPage} from './workflow.mjs';
+import {search,results,nextPage,logger,saveSearchPage} from './workflow.mjs';
 import {restoreSearch} from '../../../distribution/liepin-search/runtime/packages/liepin/lib/restore-search-task.js';
 import {executeBoundSearch} from '../../../distribution/liepin-search/runtime/packages/liepin/lib/bound-search-task.js';
 import {executeMcpOperation} from './execution.mjs';
@@ -14,6 +14,9 @@ export function boundContext({tab,args,signal}){
 export function searchAdapterRound(context,dependencies={}){
  if(context.args.restore===true)return restoreAdapterRound(context,dependencies).then(snapshot=>({snapshot}));
  return search(boundContext(context),context.args,{...dependencies,signal:context.signal});
+}
+export function nextAdapterPage(context){
+ return nextPage(boundContext(context),context.args,{signal:context.signal});
 }
 export function readAdapterResults(context){
  return results(boundContext(context),context.args,{signal:context.signal});

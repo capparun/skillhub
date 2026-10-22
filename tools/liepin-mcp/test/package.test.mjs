@@ -36,7 +36,7 @@ test('site adapter candidate excludes independent server and runs local entry ou
  const candidate=buildPackage(path.join(temp,'候选 包'),{delivery:'site-adapter'});
  const manifest=JSON.parse(fs.readFileSync(path.join(candidate.root,'manifest.json')));
  assert.equal(manifest.delivery,'site-adapter');assert.equal(fs.existsSync(path.join(candidate.root,'tools/liepin-mcp/server.mjs')),false);
- assert.equal(manifest.files.filter(f=>f.path.startsWith('tools/liepin-mcp/adapters/liepin/')).length,13);
+ assert.equal(manifest.files.filter(f=>f.path.startsWith('tools/liepin-mcp/adapters/liepin/')).length,14);
  assert.ok(manifest.files.some(f=>f.path==='tools/liepin-mcp/adapters/liepin/favorite-list.js'));
  assert.ok(manifest.files.some(f=>f.path==='tools/liepin-mcp/compat/adapter-tabs.mjs'));
  const launcherModule=pathToFileURL(path.join(candidate.root,'tools/liepin-mcp/scripts/build-native-launcher.mjs')).href;

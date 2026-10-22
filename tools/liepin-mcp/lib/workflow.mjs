@@ -5,6 +5,7 @@ import {detailTargets} from '../../../distribution/liepin-search/runtime/package
 import {run} from '../../../distribution/liepin-search/runtime/packages/liepin/lib/engine.js';
 import {plan} from '../../../distribution/liepin-search/runtime/packages/liepin/lib/filters.js';
 import {inspect} from '../../../distribution/liepin-search/runtime/packages/liepin/lib/dom.js';
+import {identifyListRow} from '../../../distribution/liepin-search/runtime/packages/liepin/lib/list-identity.js';
 import {createTask,readTask,updateTask,mergeListResults} from '../../../distribution/liepin-search/runtime/packages/liepin/lib/task-store.js';
 import {exportTask} from '../../../distribution/liepin-search/runtime/packages/liepin/lib/report.js';
 import {createMcpSearchDriver} from './transport.mjs';
@@ -12,7 +13,7 @@ export {createTask,exportTask};
 /** Browser operations share the original account ledger; no parallel alpha journal. */
 export async function operation(file,id,payload,execute,{signal}={}){
  const {kind,...business}=payload;
- const mapped={search:'search',results:'inspect',detail:'detail-open'}[kind];
+ const mapped={search:'search',results:'inspect',nextpage:'page',detail:'detail-open'}[kind];
  if(!mapped)throw Error('不支持的 MCP 操作类型');
  const requestPayload=kind==='detail'?{
   observationId:business.observationId,
@@ -67,6 +68,40 @@ export async function results(client,{file,operation_id,tab_id,limit=3},{signal}
   updateTask(file,t=>({...mergeListResults(t,rows,{roundId:operation_id}),mcpSearch:{tabId:tab.id,operationId:operation_id,rows}}));
   return {count:rows.length,tabId:tab.id};
  },{signal});
+}
+// Advance the same result list by one page. No query is submitted again: this
+// clicks the observed next-page control, re-reads, and only saves the rows after
+// the page really moved.
+export async function nextPage(client,{file,operation_id,tab_id},{signal,openDriver}={}){
+ return operation(file,operation_id,{kind:'nextpage',tab_id},async()=>{
+  await client.verify();
+  const tab=client.tab(tab_id);
+  const driver=openDriver?await openDriver(tab):createMcpSearchDriver(tab,{expectedUrl:await tab.url(),signal,onAction:logger(file)});
+  const before=await driver.evaluate(inspect,{mode:'results',limit:30});
+  if(before?.blocked||before?.login||before?.blank)throw Error('结果页未就绪，停止翻页');
+  const next=before?.pagination?.next;
+  if(typeof next!=='string')throw Error('当前页没有下一页控件');
+  const beforePage=before?.pagination?.current??null;
+  const first=before?.rows?.[0];
+  const firstKey=first?`${first.name}|${first.experience}`:null;
+  await driver.click(next);
+  let after=null,advanced=false;
+  for(let i=0;i<15;i++){
+   await new Promise(r=>setTimeout(r,400));
+   after=await driver.evaluate(inspect,{mode:'results',limit:30});
+   const pageMoved=after?.pagination?.current&&beforePage?after.pagination.current!==beforePage:false;
+   const rowMoved=firstKey!==null&&after?.rows?.[0]?`${after.rows[0].name}|${after.rows[0].experience}`!==firstKey:false;
+   if(pageMoved||rowMoved){advanced=true;break;}
+  }
+  if(!advanced)throw Error('翻页后页码与首行均未变化；已保留原页数据，不重试');
+  const rows=(after.rows??[]).map(row=>({...identifyListRow(row),source:'liepin',page:after?.pagination?.current??null}));
+  updateTask(file,task=>{
+   const merged=mergeListResults(task,rows,{roundId:`page-${operation_id}`});
+   merged.mcpSearch={tabId:tab.id,operationId:operation_id,currentPage:after?.pagination?.current??null,rows};
+   return merged;
+  });
+  return {page:after?.pagination?.current??null,count:rows.length};
+ });
 }
 export async function detail(client,{file,operation_id,index},{signal}={}){
  const task=readTask(file);const state=task.mcpSearch;const row=state?.rows?.[index];

@@ -78,7 +78,7 @@ export function sourcingProgress(task){
   const operations=(task.operations??[]).filter(o=>o.kind==='favorite'&&o.payload?.resumeId===candidate.identity&&o.payload?.group===decision?.group);
   const operation=operations.at(-1),evidence=operation?.evidence;
   const journal=task.operations??[],lastMutation=journal.findLastIndex(o=>['favorite','unfavorite'].includes(o.kind)&&o.payload?.resumeId===candidate.identity);
-  const membership=journal.findLast((o,index)=>index>lastMutation&&o.kind==='inspect'&&o.status==='completed'&&o.evidence?.verification==='favorites-list-readback'&&o.evidence.groupReadback===true&&o.evidence.selectedGroup===decision?.group&&o.evidence.rows?.some(row=>row.resumeId===candidate.identity&&row.identityEvidence==='visible-detail-link'));
+  const membership=journal.findLast((o,index)=>index>lastMutation&&o.kind==='inspect'&&o.status==='completed'&&o.evidence?.verification==='favorites-list-readback'&&o.evidence.groupReadback===true&&o.evidence.selectedGroup===decision?.group&&o.evidence.rows?.some(row=>row.resumeId===candidate.identity&&['visible-detail-link','row-class'].includes(row.identityEvidence)));
   const mutation=journal[lastMutation];
   const favorite=['started','unknown'].includes(mutation?.status)?'unknown':membership?'confirmed':mutation?.kind==='unfavorite'?'not_confirmed':operation?.status==='completed'&&evidence?.saved?'saved_group_unverified':'not_confirmed';
   return {candidateKey:candidate.key,decision:stale?null:decision??null,decisionStale:stale,favorite,operationId:operation?.operationId??null,groupReadbackOperationId:membership?.operationId??null};

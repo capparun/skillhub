@@ -61,6 +61,8 @@ try{
  tabId=String(await client.js(`(await browser.tabs.new(${JSON.stringify(SEARCH_URL)})).id`));
  const handle=client.claimOpenedTab(tabId);
  const bound=await handle.url();
+ if(/^https:\/\/safe\.liepin\.com\//.test(String(bound??'')))
+  throw Error('猎聘要求账号安全验证（safe.liepin.com）：请手动点通后再跑；不要自动重试');
  if(!/getConditionItem/.test(bound??''))throw Error('搜索页地址未确认：'+(bound??'空'));
  await client.js(`await (await browser.tabs.get(${JSON.stringify(tabId)})).release()`);
  await run('tabs',{});

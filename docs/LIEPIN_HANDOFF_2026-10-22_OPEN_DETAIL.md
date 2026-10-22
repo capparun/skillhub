@@ -128,3 +128,15 @@ node tools/liepin-mcp/scripts/source-click.mjs \
 - 自建搜索页完整URL与创建回执不同，关闭保护拒绝派发，暂保留；用户原有两张详情未动。
 - 私有账本和脱敏摘要：主工作区 .liepin-install-state/detail-recovery-acceptance/{task.json,scope.json,summary.json}；通信回滚收据在 .liepin-install-state/detail-recovery-20261022d/setup-backup.json。不得把简历或完整标签URL提交Git。
 - 下一步：复审补丁并走双平台CI；Windows真实浏览器与缺失回执真机恢复仍未验收。本轮未推送、合并或发布。
+
+## 9. 接手方法纠正与真实窗口验收（2026-10-22）
+
+用户明确：重新交给 Codex 的关键是可通过 CUA 观察和操作真实电脑窗口，补足前任仅靠DOM/回执无法知道现场发生什么的缺口。开发诊断使用CUA；交付Skill业务不依赖CUA。异常先保留窗口并交叉核对实际页面、活动标签、弹层、风险提示和程序事件，不凭错误码直接判风控。
+
+本次集中只读验收使用 ed8ba2ae 候选：一次搜索保存3条，连续打开两份详情。两笔 detail-open 均completed；CUA原生截图与AX实际看见第二份详情正文和滚动位置，随后确认返回搜索列表，无白屏或验证提示。未收藏、未联系、未解锁。
+
+实际搜索页带 #session：此前与创建URL逐字比较导致清理保护拒绝关闭，这是片段差异，不能据此认为页面被替换。此次通过CUA关闭唯一自建搜索标签，窗口回到用户原首页，原两张详情标签保留。
+
+私有证据在主工作区 .liepin-install-state/detail-window-acceptance/summary.json 与 task.json。截图只在当前工具会话观察，未声称已保存截图文件。缺失点击回执恢复分支仍未在真机触发。
+
+仍需收口：source-click.mjs是任务化诊断脚本，含因时默认参数、正则fit、写死授权描述，不能当通用产品决策器或直接运行批量收藏。现有正式favorite-list会检查已有详情及当前标准下的follow_up依据；脚本未生成这些依据。正常业务应复用已确认标准、逐项证据评估和真实授权。读后关闭再收藏会重复打开的成本仍存在，不把该问题写成已解决。

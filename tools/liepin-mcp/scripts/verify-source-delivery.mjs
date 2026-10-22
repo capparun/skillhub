@@ -13,7 +13,7 @@ export function snapshotSource(root){
 }
 export function verifySourceDelivery(report){
  const root=fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(),'liepin-source-delivery-'))),source=path.join(root,'source'),files=snapshotSource(source),result={root,source,files,privateEvidenceCopied:false,status:'started'};
- const run=(command,args,cwd,label)=>{const r=spawnSync(command,args,{cwd,encoding:'utf8',timeout:NPM_INSTALL_TIMEOUT_MS,maxBuffer:20*1024*1024});fs.writeFileSync(path.join(root,label+'.log'),(r.stdout??'')+(r.stderr??''),{mode:0o600});if(r.error||r.status!==0)throw Error(label+'失败：'+(r.error?.message??'详见任务日志'));return r.stdout;};
+ const run=(command,args,cwd,label)=>{const r=spawnSync(command,args,{cwd,encoding:'utf8',timeout:NPM_INSTALL_TIMEOUT_MS,maxBuffer:20*1024*1024});fs.writeFileSync(path.join(root,label+'.log'),(r.stdout??'')+(r.stderr??''),{mode:0o600});if(r.error||r.status!==0){const diagnostics=((r.stdout??'')+(r.stderr??''));result.failureDiagnostics={label,exitCode:r.status,log:path.join(root,label+'.log'),excerpt:diagnostics.slice(-24000)};throw Error(label+'失败：'+(r.error?.message??'详见任务日志')+'\n'+diagnostics.slice(-24000));}return r.stdout;};
  try{
   const original=buildPackage(path.join(root,'original-package'),{delivery:'site-adapter'});
   const output=run(process.execPath,[path.join(source,'tools/liepin-mcp/scripts/build-package.mjs'),path.join(root,'rebuilt-package'),'site-adapter'],source,'rebuild');

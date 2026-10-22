@@ -48,7 +48,8 @@ try{
  checkpoint('prepare-adapter-runtime');
  const prepared=await prepareAdapterRuntime(installed.directory);
  verifyPreparedRuntime(installed.directory);
- if(prepared.adapters.length!==13)throw Error('Adapter 注册不完整');
+ const expectedAdapters=['bind','connect','current-detail','detail-batch','detail-review','favorite-list','favorite','favorites','next-page','open-detail','prepare','results','saved-search','search','tabs'].sort();
+ if(JSON.stringify([...prepared.adapters].sort())!==JSON.stringify(expectedAdapters))throw Error('Adapter 注册不完整：'+JSON.stringify(prepared.adapters));
  const {buildNativeLauncher}=await import(pathToFileURL(path.join(installed.directory,'tools/liepin-mcp/scripts/build-native-launcher.mjs')));
  const native=buildNativeLauncher(installed.directory,path.join(root,'通信 启动器'));
  // Exercise the shipped first-registration and upgrade/rollback entry on a
@@ -173,6 +174,6 @@ try{
  }
  result.customerInstall={status:'local-installed-browser-setup-required',fixedState:true,skillInstalled:true,persistentDoctor:true,browserVerified:false,globalConfigurationChanged:false};
 
- Object.assign(result,{status:'passed',fingerprint:candidate.sourceFingerprint,adapterCount:prepared.adapters.length,checks:['npm-ci','fixed-local-launch','unicode-space-path','installed-platform-report','installed-evaluation-bundle','twelve-adapter-registry','isolated-runtime-patch','generated-launcher-initialize','installed-first-browser-registration','installed-registration-upgrade-rollback','stable-compatible-extension-assets','generated-client-config-initialize','reject-modified-native-launcher','launcher-rejects-modified-runtime','installed-executor-context','installed-tabs-result-contract','installed-restore-value-contract','other-sites-unchanged','website-compatible-customer-install','customer-skill-registration','persistent-customer-doctor','credential-not-in-output']});
+ Object.assign(result,{status:'passed',fingerprint:candidate.sourceFingerprint,adapterCount:prepared.adapters.length,checks:['npm-ci','fixed-local-launch','unicode-space-path','installed-platform-report','installed-evaluation-bundle','fifteen-adapter-registry','isolated-runtime-patch','generated-launcher-initialize','installed-first-browser-registration','installed-registration-upgrade-rollback','stable-compatible-extension-assets','generated-client-config-initialize','reject-modified-native-launcher','launcher-rejects-modified-runtime','installed-executor-context','installed-tabs-result-contract','installed-restore-value-contract','other-sites-unchanged','website-compatible-customer-install','customer-skill-registration','persistent-customer-doctor','credential-not-in-output']});
 }catch(error){Object.assign(result,{status:'failed',error:error.message});process.exitCode=1;}
 finally{fs.writeFileSync(report,JSON.stringify(result,null,2));console.log(JSON.stringify(result));}

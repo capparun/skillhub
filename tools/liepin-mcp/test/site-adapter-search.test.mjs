@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {searchAdapterRound,readAdapterResults} from '../lib/site-adapter-search.mjs';
 import {initializeWorkflow,approveRound} from '../../../distribution/liepin-search/runtime/packages/liepin/lib/workflow.js';
-import {readTask} from '../../../distribution/liepin-search/runtime/packages/liepin/lib/task-store.js';
+import {readTask,updateTask,mergeListResults} from '../../../distribution/liepin-search/runtime/packages/liepin/lib/task-store.js';
 import {createSiteScope,bindSiteScope} from '../../../distribution/liepin-search/runtime/packages/liepin/lib/site-scope.js';
 import {grantOperations} from '../../../distribution/liepin-search/runtime/packages/liepin/lib/operation-gate.js';
 function fixture(t){
@@ -70,4 +70,17 @@ test('unknown restore query stays paused and cannot be replayed',async t=>{
  await assert.rejects(searchAdapterRound(f.context,{openRestoreDriver:async()=>f.driver,executeRestoreSearch:async()=>{calls++;throw Error('synthetic disconnected');}}),/disconnected/);
  assert.equal(readTask(f.file).status,'paused');
  await assert.rejects(searchAdapterRound(f.context,{openRestoreDriver:()=>assert.fail('unknown operation must stop first')}));assert.equal(calls,1);
+});
+
+
+test('current-page results normalize observed row-class IDs and deduplicate the search identity',async t=>{
+ const {file,confirmedAt}=fixture(t),tab_id='123';updateTask(file,task=>mergeListResults(task,[{source:'liepin',resumeId:'same-id',summary:'first snapshot'}],{roundId:'original'}));
+ grantOperations(file,{allowedRequests:[{kind:'inspect',payload:{tab_id,limit:30}}],confirmedAt,scope:'synthetic current page'});
+ const context={args:{file,tab_id,operation_id:'current-page',limit:30},tab:{id:tab_id,url:async()=>url,evaluate:async()=>({url,rows:[{rowClassResumeId:'same-id',summary:'raw current card'}]}),act:()=>assert.fail('must not click or search')}};
+ await readAdapterResults(context);const task=readTask(file);assert.equal(task.candidates.length,1);assert.equal(task.unlinkedObservations?.length??0,0);assert.equal(task.mcpSearch.rows[0].resumeId,'same-id');assert.equal(task.mcpSearch.rows[0].identityEvidence,'row-class');assert.equal(task.candidates[0].observations.at(-1).data.summary,'raw current card');
+});
+test('current-page missing and conflicting identity remain unresolved instead of merging masked names',async t=>{
+ const {file,confirmedAt}=fixture(t),tab_id='123';grantOperations(file,{allowedRequests:[{kind:'inspect',payload:{tab_id,limit:30}}],confirmedAt,scope:'synthetic identity conflict'});
+ const rows=[{name:'某**',summary:'no identifier'},{name:'某**',summary:'conflicting sources',rowClassResumeId:'one',detailLinks:['https://h.liepin.com/resume/showresumedetail/?res_id_encode=two']}];
+ await readAdapterResults({args:{file,tab_id,operation_id:'unresolved-page',limit:30},tab:{id:tab_id,url:async()=>url,evaluate:async()=>({url,rows}),act:()=>assert.fail('read only')}});const task=readTask(file);assert.equal(task.candidates.length,0);assert.equal(task.unlinkedObservations.length,2);assert.equal(task.unlinkedObservations[1].data.identityEvidence,'conflicting-row-class');
 });

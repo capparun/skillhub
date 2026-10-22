@@ -12,7 +12,7 @@
 {
   "title": "嵌入式开发工程师",
   "criteria": [{"id":"embedded","label":"嵌入式项目经验","category":"skills","kind":"required","weight":1}],
-  "rounds": [{"id":"trial-1","phase":"trial","filters":{"keyword":"嵌入式开发","pages":1,"limit":10}}]
+  "rounds": [{"id":"trial-1","phase":"trial","filters":{"keyword":"嵌入式开发","pages":1,"limit":30}}]
 }
 ```
 
@@ -37,6 +37,8 @@ criteria.category：skills/experience/qualification/responsibilities；kind：re
 1. 本地 doctor 检查依赖，不能证明浏览器已连接。
 2. 已有页面先 Adapter tabs 读取元数据，再 bind({file,tab_id,expected_url}) 核对并认领指定页面；不关闭用户页。没有适用页面时才 Adapter connect 使用 file/operation_id，需授权 inspect 请求 payload={view:"adapter-search-connect",url:"https://h.liepin.com/search/getConditionItem"}。返回实际 Adapter tabId；只验证地址，不证明登录。已有绑定可复用，禁止反复 connect 恢复白屏。
 3. 首次search前已完成上节分组选择（含明确“不收藏”）；后续轮次复用选择。search 输入 file、round_id、tab_id。逐页结果会保存，后续 results 可读取当前页而不重新搜索；results 需要独立已授权 operation_id。
+当前页读取量未被用户限定时，计划显式写limit:30以保存完整首页；只读取过3/5/10条时先用results补当前页，不重新搜索。随后逐条复核并选择直接职责线索进入详情，不机械全开，也不按列表靠前与否判定适合。低层默认值仅为调用兼容，不替代此业务计划。
+
 4. task(mode=`trial-quality`)读取试搜质量，再用 review 保存真实复核结论；需要调整时用 revise 提出新轮次。正式 full 轮次需当前试搜复核允许继续，不能直接跳过。
 
 单独 prepare 输入 file、operation_id、tab_id、filters。授权请求的 kind 为 prepare，payload={page:tab_id,filters}；记录授权时需与实际调用值一致。

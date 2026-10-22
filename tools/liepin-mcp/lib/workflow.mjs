@@ -64,7 +64,7 @@ export async function results(client,{file,operation_id,tab_id,limit=3},{signal}
  return operation(file,operation_id,{kind:'results',tab_id,limit},async()=>{
   await client.verify();const tab=client.tab(tab_id);const driver=createMcpSearchDriver(tab,{expectedUrl:await tab.url(),signal,onAction:logger(file)});
   const result=await driver.evaluate(inspect,{mode:'results',limit});if(result.loading||result.blank)throw Error('列表尚未就绪');
-  const rows=result.rows.map(r=>({...r,source:'liepin'}));
+  const rows=result.rows.map(r=>({...identifyListRow(r),source:'liepin'}));
   updateTask(file,t=>({...mergeListResults(t,rows,{roundId:operation_id}),mcpSearch:{tabId:tab.id,operationId:operation_id,rows}}));
   return {count:rows.length,tabId:tab.id};
  },{signal});

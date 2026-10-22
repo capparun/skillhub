@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 import {diagnosticTargets,observedDiagnosticTargets} from '../scripts/diagnostic-targets.mjs';
 const rows=['a','b','b','c'].map(resumeId=>({resumeId}));
 test('read-only target one selects one even though no favorites are added',()=>{
@@ -12,11 +13,11 @@ test('continuation excludes completed identities and duplicates without dropping
  assert.deepEqual([...done],['a']);
 });
 test('diagnostic CLI refuses writes before reading installation or accessing browser',()=>{
- const result=spawnSync(process.execPath,[new URL('../scripts/source-click.mjs',import.meta.url).pathname,'--dry-run','false'],{encoding:'utf8'});
+ const result=spawnSync(process.execPath,[fileURLToPath(new URL('../scripts/source-click.mjs',import.meta.url)),'--dry-run','false'],{encoding:'utf8'});
  assert.notEqual(result.status,0);assert.match(result.stderr,/仅用于只读验收/);
 });
 test('diagnostic CLI does not invent keyword or authorization from a previous customer',()=>{
- const result=spawnSync(process.execPath,[new URL('../scripts/source-click.mjs',import.meta.url).pathname],{encoding:'utf8'});
+ const result=spawnSync(process.execPath,[fileURLToPath(new URL('../scripts/source-click.mjs',import.meta.url))],{encoding:'utf8'});
  assert.notEqual(result.status,0);assert.match(result.stderr,/真实 --authorization/);
 });
 

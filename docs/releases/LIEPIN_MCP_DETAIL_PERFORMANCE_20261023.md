@@ -28,5 +28,11 @@
 - MCP回归包含零固定等待、滚动失败停止、取消后零动作、错误/重复身份拒绝以及分段计时/不重复采集。
 - 真实浏览器核对搜索条件和标签；五个自建详情关闭，最后关闭本轮自建搜索，原有页面保留。
 - 候选0.3.0源码指纹`cd92c72525c946c586ef2f6dd8d9aea6a6e45603ba2fc8d3d84a95b69261a546`。当前宿主已采用测速候选，扩展字节/身份及Native权限不变，保留升级备份；未反复拆装或恢复官方环境。
-- 旧330d6c47归档保留作此前基线，不能冒充本次性能候选归档；Windows本轮CI与候选归档另行补齐，原目标助手/Windows真机/生产维护未验项保持。
+- 旧330d6c47归档保留作此前基线，不能冒充本次性能候选归档；Windows本轮CI与候选归档已补齐，原目标助手/Windows真机/生产维护未验项保持。
 - 直接脱敏证据：`tools/liepin-mcp/evidence/2026-10-23-detail-performance.json`。原始简历与完整回执仅在主工作区私有`.liepin-install-state/servo-final-acceptance/`。
+
+## 最终回执
+
+提交125dedb7的CI [39822079360](https://github.com/capparun/skillhub/actions/runs/39822079360)整体success：macOS核心398/MCP239，Windows核心398/MCP234（另5项明确skip），两平台22项隔离安装、15入口。macOS指纹cd92c725与真机测速候选一致；Windows CRLF指纹d0a252b0分列。两平台CI不替代Windows真实浏览器或目标助手首次调用。
+
+私有性能候选归档SHA256：`08cde320281bf3f6402f2dd06dc11cf2b03f600622b705b117527bb84b73d9b7`，222390字节，133声明文件＋manifest；approved=false/published=false，未上传或部署。归档在主工作区`.liepin-install-state/release-speed-candidate-20261023/`，旧归档保留。回执见同目录文档`LIEPIN_MCP_SPEED_20261023_CI_RECEIPT.json`。

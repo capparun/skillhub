@@ -1,0 +1,40 @@
+{
+  "runId": 39822079360,
+  "url": "https://github.com/capparun/skillhub/actions/runs/39822079360",
+  "commit": "125dedb7b7234f3dbfd0b1a2b5d5fc22548d2002",
+  "status": "success",
+  "platforms": {
+    "liepin-adapter-windows-latest": {
+      "tests": {
+        "mcp": 234,
+        "core": 398
+      },
+      "checks": 22,
+      "adapters": 15,
+      "fingerprint": "d0a252b0cad1c78f51649498d7efc51da89c7f093d801e62c4bec6147d032d0b",
+      "browserVerified": false
+    },
+    "liepin-adapter-macos-15-intel": {
+      "tests": {
+        "mcp": 239,
+        "core": 398
+      },
+      "checks": 22,
+      "adapters": 15,
+      "fingerprint": "cd92c72525c946c586ef2f6dd8d9aea6a6e45603ba2fc8d3d84a95b69261a546",
+      "browserVerified": false
+    }
+  },
+  "archive": {
+    "product": "liepin-search",
+    "version": "0.3.0",
+    "file": "liepin-search-v0.3.0.tar.gz",
+    "sha256": "08cde320281bf3f6402f2dd06dc11cf2b03f600622b705b117527bb84b73d9b7",
+    "sizeBytes": 222390,
+    "sourceFingerprint": "cd92c72525c946c586ef2f6dd8d9aea6a6e45603ba2fc8d3d84a95b69261a546",
+    "transport": "opencli-mcp-site-adapter",
+    "channel": "release-candidate",
+    "approved": false,
+    "published": false
+  }
+}

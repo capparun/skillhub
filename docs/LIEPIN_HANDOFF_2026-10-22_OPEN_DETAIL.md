@@ -253,3 +253,5 @@ CI专用分支已同步`a5b72905`，运行[39811057372](https://github.com/cappa
 当前真实宿主为性能候选cd92c725，安装回执在主工作区`.liepin-install-state/speed-opt-20261023/customer-installation.json`，Native升级备份在同目录setup-backup.json。只更新了宿主路径，既有兼容扩展字节/ID和通信权限未变，保持新环境不反复切换。旧3d2de22c为此前宿主、330d6c47为此前归档，不再称当前运行版本。
 
 MCP回归239/239。直接记录见`docs/releases/LIEPIN_MCP_DETAIL_PERFORMANCE_20261023.md`和`tools/liepin-mcp/evidence/2026-10-23-detail-performance.json`。完整原始测速回执在既有私有任务目录speed-20261023-*.json，不进Git；未做同样本前后A/B，不承诺固定秒数或提速百分比。跨平台CI/新归档以该性能增量后续回执为准；原Windows真机、目标助手及Zeabur门仍保留未验。
+
+性能增量最终：125dedb7已推CI分支，CI39822079360双平台通过，Mac398/239、Win398/234（另5skip），均22安装项/15入口。新私有归档SHA08cde320…、222390字节，详见性能文档与CI_RECEIPT。未合并、未发布、未部署，不再为本次提速追加真实账号动作。

@@ -15,12 +15,19 @@ const executor=fs.readFileSync(path.join(upstream,executorPath),'utf8');
 if(hash(executor)!=='01f1c67e413e06f799240e6b89ca4e39f254730d18fa92daeed7b765f2a1877a')throw Error('Official executor source hash differs; review before patching');
 const executorMarker='const ctx = { args, tab: model.tab, sites: model.sites, recon: model.recon, signal: opts.signal };';
 if(executor.split(executorMarker).length!==2)throw Error('Executor patch anchor changed');
-const patchedExecutor=executor.replace(executorMarker,executorMarker+'\n        if (cmd.site === \'liepin\') { ctx.tabs = model.tabs; ctx.userTabs = model.userTabs; }');
+const patchedExecutor=executor.replace(executorMarker,executorMarker+'\n        if (cmd.site === \'liepin\') { ctx.tabs = model.tabs; ctx.userTabs = model.userTabs; ctx.adoptTab = model.adoptTab; }');
 const marker='return { tab, page, sites: api.sites, recon: api.recon };';
 if(original.split(marker).length!==2)throw Error('Runtime patch anchor changed');
 const replacement=`if (site !== 'liepin') return { tab, page, sites: api.sites, recon: api.recon };
         const lifecycle = createAdapterTabLifecycle({
             tab,
+            verifyAdoption: async (id, expectedUrl) => {
+                const url = new URL(expectedUrl);
+                if (url.origin !== 'https://h.liepin.com' || url.pathname !== '/resume/showresumedetail/' || url.searchParams.getAll('res_id_encode').length !== 1 || !url.searchParams.get('res_id_encode')) throw new Error('Invalid detail adoption URL');
+                const result = await this.bridge.send('chrome-call', { session: sessionId, surface: 'adapter', chromeMethod: 'tabs.get', chromeArgs: [Number(id)] });
+                if (result.data?.id !== Number(id) || result.data.url !== expectedUrl || result.data.openerTabId !== Number(tab.id)) throw new Error('Detail opener or address not confirmed');
+                await userTabs.bind(String(id), expectedUrl);
+            },
             openTab: async (url) => { const id = await page.newTab(url); state.finalized = false; return id; },
             bindTab: async (id) => new Tab(id, { rt: this, sessionId, state }, await this.createPage({ session: sessionId, surface: 'adapter', page: id })),
             activateTab: async (id) => {
@@ -44,7 +51,10 @@ const replacement=`if (site !== 'liepin') return { tab, page, sites: api.sites, 
                 }
             }
         });
-        return { tab: lifecycle.tab, tabs: lifecycle.tabs, userTabs, page, sites: api.sites, recon: api.recon };`;
+        const adoptTab = async (id, expectedUrl) => {
+            return lifecycle.tabs.adopt(String(id), expectedUrl);
+        };
+        return { tab: lifecycle.tab, tabs: lifecycle.tabs, userTabs, adoptTab, page, sites: api.sites, recon: api.recon };`;
 const patched="import {createAdapterTabLifecycle,createAdapterUserTabs} from './hunter-adapter-tabs.mjs';\n"+original.replace(marker,replacement);
 fs.mkdirSync(output,{recursive:false});fs.mkdirSync(path.join(output,'dist/src/runtime'),{recursive:true});
 fs.writeFileSync(path.join(output,relative),patched,{flag:'wx'});

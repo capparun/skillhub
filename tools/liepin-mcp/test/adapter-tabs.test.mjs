@@ -81,3 +81,13 @@ test('global existence lookup requires an exact metadata response, never invento
  await assert.rejects(createAdapterUserTabs({}).lookup('5'),/unavailable/);
  for(const response of [null,{tabId:'6',exists:false},{tabId:'5',exists:'false'}])await assert.rejects(createAdapterUserTabs({getMetadata:async()=>response}).lookup('5'),/invalid/);
 });
+
+test('address adoption requires runtime verification and preserves no ownership on rejection',async()=>{
+ const options={tab:{id:'1'},bindTab:async id=>({id}),activateTab:async()=>{}};
+ const unverified=createAdapterTabLifecycle(options);
+ await assert.rejects(()=>unverified.tabs.adopt('2','https://h.liepin.com/resume/showresumedetail/?res_id_encode=r2'),/Verified adoption unavailable/);
+ assert.deepEqual(unverified.tabs.opened(),[]);
+ const denied=createAdapterTabLifecycle({...options,verifyAdoption:async()=>{throw Error('opener mismatch');}});
+ await assert.rejects(()=>denied.tabs.adopt('2','https://h.liepin.com/resume/showresumedetail/?res_id_encode=r2'),/opener mismatch/);
+ assert.deepEqual(denied.tabs.opened(),[]);
+});

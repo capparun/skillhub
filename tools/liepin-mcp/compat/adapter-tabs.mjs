@@ -2,7 +2,7 @@
  * bindTab must bind the SAME site:<name> session, not a regular mcp session.
  * Ownership comes only from an actual act result, never caller-supplied IDs.
  */
-export function createAdapterTabLifecycle({tab,bindTab,activateTab,openTab}){
+export function createAdapterTabLifecycle({tab,bindTab,activateTab,openTab,verifyAdoption}){
  const owned=new Set(),handles=new Map();
  const valid=id=>/^\d+$/.test(id)&&Number.isSafeInteger(Number(id));
  const parentId=()=>String(tab.id);
@@ -50,6 +50,15 @@ export function createAdapterTabLifecycle({tab,bindTab,activateTab,openTab}){
   async closeChild(id){
    id=String(id);const handle=await tabs.child(id);
    await handle.close();owned.delete(id);handles.delete(id);
+  },
+  /** Grant ownership to a tab whose address the caller already verified in this site's inventory. */
+  async adopt(id,expectedUrl){
+   id=String(id);
+   if(!valid(id)||id===parentId())throw Error('Invalid adopted tab identity');
+   if(typeof verifyAdoption!=='function')throw Error('Verified adoption unavailable');
+   await verifyAdoption(id,expectedUrl);
+   if(!owned.has(id))owned.add(id);
+   return tabs.child(id);
   },
   async returnToParent(){
    const id=parentId();if(!valid(id))throw Error('Parent tab is not bound');

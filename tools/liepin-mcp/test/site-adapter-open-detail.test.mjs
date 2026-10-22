@@ -27,3 +27,11 @@ test('unpatched runtime fails before any browser action',()=>{
  const reader=createReviewedDetailReader({read:async()=>({url,readyState:++calls===1?'loading':'complete',text:'工作经历\n伺服研发\n教育经历\n本科'}),review:async()=>{reviews++;return {views:[{}],atEnd:true};}});
  await reader({},'abc');assert.equal(reviews,0);await reader({},'abc');await reader({},'abc');assert.equal(reviews,1);assert.equal(calls,3);
 });
+
+test('detail recovery uses verified context adoption instead of raw lifecycle adoption',async()=>{
+ let verified=0;
+ const tabs={child:async id=>({id}),closeChild:async()=>{},returnToParent:async()=>{},opened:()=>[],adopt:()=>{throw Error('raw adoption bypass');}};
+ const context={tab:{id:'1'},args:{tab_id:'1'},tabs,adoptTab:async(id,url)=>{verified++;assert.equal(url,'observed-url');return {id};}};
+ const client=adapterDetailClient(context);await client.adoptTab('2','observed-url');assert.equal(verified,1);
+ assert.equal(adapterDetailClient({...context,adoptTab:undefined}).adoptTab,undefined);
+});

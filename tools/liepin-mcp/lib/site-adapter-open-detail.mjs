@@ -12,7 +12,15 @@ export function adapterDetailClient(context){
  const base=boundContext(context),{tabs,tab}=context;
  if(!tabs?.child||!tabs?.closeChild||!tabs?.returnToParent||!tabs?.opened)throw Error('当前官方运行时缺少同会话标签接口；请使用已验证的兼容构建');
  const child=id=>({id,url:async()=>(await tabs.child(id)).url(),evaluate:async(...args)=>(await tabs.child(id)).evaluate(...args),act:async(...args)=>(await tabs.child(id)).act(...args),close:()=>tabs.closeChild(id)});
- return {...base,tab:id=>{base.tab(id);return {id:String(tab.id),url:()=>tab.url(),evaluate:(...a)=>tab.evaluate(...a),act:a=>tab.act(a),activate:()=>tabs.returnToParent()};},claimOpenedTab:child};
+ const userTabs=context.userTabs;
+ return {...base,tab:id=>{base.tab(id);return {id:String(tab.id),url:()=>tab.url(),evaluate:(...a)=>tab.evaluate(...a),act:a=>tab.act(a),activate:()=>tabs.returnToParent()};},claimOpenedTab:child,
+  // Address-first recovery: list this site's tabs, then adopt one whose address proved it is the detail page.
+  userTabs:async()=>{if(typeof userTabs?.list!=='function')throw Error('当前运行时缺少标签清单接口；无法按地址确认详情页');return userTabs.list();},
+  adoptTab:typeof context.adoptTab!=='function'?undefined:async(id,expectedUrl)=>{
+   const handle=await context.adoptTab(String(id),expectedUrl);
+   if(String(handle?.id)!==String(id))throw Error('认领详情标签的结果身份不一致');
+   return child(String(id));
+  }};
 }
 /** Readiness polling must not repeat the visible review or wait on loading content. */
 export function createReviewedDetailReader({read,review,onAction=()=>{}}){

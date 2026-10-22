@@ -106,3 +106,15 @@ saved-search：list/save/apply/delete；favorite：status/add/remove；favorites
 ### 手机阅读与独立资料文件
 
 评估HTML通过正式report导出，返回files.summary/details/records。主报告先显示统计快照，再展示跟进与少量边界案例；不将全部原文或JSON嵌在主报告。桌面使用表格，手机布局不应有页面级横向溢出。已保存详情链接指向同目录文件的稳定锚点，平台原简历仅链接已观察且身份一致的HTTPS猎聘地址，不猜URL、不主动打开平台验证链接。原始JSON包含完整任务与观察，保留私有权限；3个文件一起交付和移动。导出拒绝已有文件或符号链接，失败不覆盖原任务。
+
+## 同一结果集逐页寻访
+
+一次 prepare、一次 search（pages:1），处理当前页列表及必要详情，再调用官方 Adapter `next-page({file,tab_id,operation_id})`。先按已批准页数登记精确 `{kind:"page",payload:{tab_id}}` 请求；翻页后核对回执中的当前页和新观察，再继续处理，不重复提交同一查询来获取第N页。不能将上一页的卡片选择器带到新页。
+
+继续当前页时用本地 task 的 detail-targets（底层 detailTargets）取得稳定 observation_id 与 hash，不直接从 candidate.observations 猜取 id；已关联观察的稳定ID可能是计算生成的。带“阅”只表示已读，去重依据是稳定身份和已确认收藏记录。
+
+## 开发诊断与正式寻访分开
+
+仓库 source-click.mjs 是只读开发验收脚本，不是正式寻访入口。必须显式给出关键词和实际授权原文；target表示最多读取的详情数，不能按新增收藏数计数。它不形成JD适配判断、不自动收藏，也不预置任何客户或分组。异常时保留现场、先核对，不为补足数量重搜或换ID重放。
+
+正式收藏继续按本Skill的标准确认→逐项证据评估→跟进决定→精确授权→favorite-list→目标组回读执行。卡片关键词命中不能替代岗位评估。当前读取与收藏为两次调用时会重复打开详情，应如实记录该成本；不能为了少一次打开跳过详情核实。

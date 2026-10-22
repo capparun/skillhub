@@ -140,3 +140,13 @@ node tools/liepin-mcp/scripts/source-click.mjs \
 私有证据在主工作区 .liepin-install-state/detail-window-acceptance/summary.json 与 task.json。截图只在当前工具会话观察，未声称已保存截图文件。缺失点击回执恢复分支仍未在真机触发。
 
 仍需收口：source-click.mjs是任务化诊断脚本，含因时默认参数、正则fit、写死授权描述，不能当通用产品决策器或直接运行批量收藏。现有正式favorite-list会检查已有详情及当前标准下的follow_up依据；脚本未生成这些依据。正常业务应复用已确认标准、逐项证据评估和真实授权。读后关闭再收藏会重复打开的成本仍存在，不把该问题写成已解决。
+
+## 10. 只读诊断脚本修复与正式Skill指引（2026-10-22）
+
+source-click原dry-run按新增收藏数停止，dry-run永不新增，因此target=1仍可能多读；候选人身份取错identity字段，且从linked observations读取不存在的id，实际真机搜索后报Argument observation_id is required（未点击详情）。现使用canonical detailTargets生成稳定ID及hash、按已读取详情数限制队列。
+
+脚本现为只读开发验收：拒绝dry-run=false；关键词和授权原文必须显式传入；不预置客户/分组、不按正则决定收藏、不捏造用户日期或范围；首次失败停止并保留浏览器现场。跨页授权显式登记page请求，目标未达时如实报范围用尽。原B路径脚本保留历史，不因本次改动删除。
+
+本次真实验收先触发参数错误后保留原搜索页；修复后用同一账本和结果页补读一份，detailCount=1、completed、partial2464字，searchRepeated=false。未产生收藏。补读脚本与回执在主工作区 .liepin-install-state/diagnostic-script-20261022/。CUA确认返回正常搜索列表，再点击本轮搜索标签关闭，原有页面保留。此补读覆盖新观察选择逻辑和实际Adapter，不冒充整份CLI从头无错误通过。
+
+新增5项回归，全MCP218/218。开发辅助模块留scripts目录，不进入客户运行库。Skill补充next-page发现、一次搜索逐页处理、canonical detail-targets和诊断/正式寻访边界。Skill文档变化尚未重新构建安装；当前已安装候选仍ed8ba2ae。读后收藏重复打开和真机缺失回执恢复仍未完成。

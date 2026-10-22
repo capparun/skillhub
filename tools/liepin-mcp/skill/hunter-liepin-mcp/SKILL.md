@@ -25,7 +25,7 @@ description: 使用官方 opencli-mcp Site Adapter 与本地任务工具 完成�
 
 - 新寻访：读取 [任务流程](references/workflow.md)，先整理需求、询问本次收藏目标分组列表，再确认试搜计划。
 - 继续任务：本地 `task` 的 brief/stats/detail-targets，必要时 show；复用任务，不重建以重置计数。
-- 浏览器：先发现官方 liepin Adapter 的实际 schema，再调用 tabs/bind/connect/prepare/search/results/open-detail/current-detail/detail-batch/saved-search/favorite/favorite-list/favorites。tabs/bind 通过明确的兼容接口发现并认领已打开页面；先 tabs，再以返回 ID 与完整 URL 调 bind。不要直接把普通 js 会话 ID 当作已绑定 Adapter 页面。
+- 浏览器：先发现官方 liepin Adapter 的实际 schema，再调用 tabs/bind/connect/prepare/search/results/next-page/open-detail/current-detail/detail-batch/saved-search/favorite/favorite-list/favorites。tabs/bind 通过明确的兼容接口发现并认领已打开页面；先 tabs，再以返回 ID 与完整 URL 调 bind。不要直接把普通 js 会话 ID 当作已绑定 Adapter 页面。
 - 本地评估与导出：local.mjs 的 task/report，无需浏览器。
 - open-detail/detail-batch 需要已验证的同会话标签兼容构建；未安装时应明确报错，不改用隐藏属性。
 

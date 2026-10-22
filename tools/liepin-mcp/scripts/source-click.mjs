@@ -1,14 +1,9 @@
-// Path A: everything happens on the result list. One search, then per candidate
-//   open-detail (real card click, read, back to list)
-//   -> judge fit -> favorite-list (real card click, favorite, readback, back)
-//   -> next-page (no new query) when the page is exhausted.
-// Nothing is opened by a synthesised URL, so every detail request carries the
-// search context and referrer a person would produce.
-//
-//   node tools/liepin-mcp/scripts/source-click.mjs \
-//     --installation <customer-installation.json> --keyword 伺服驱动 \
-//     --group 因时伺服控制 --target 5 --interval-ms 60000 --evidence <out.json>
+// Read-only developer acceptance: one observed card click per requested detail.
+// Not a sourcing decision maker. Never grants or performs favorite writes.
+// Supply the real authorization text and explicit keyword; use the Skill's
+// evidence evaluation and sourcing decisions for production favorites.
 import fs from 'node:fs';
+import {diagnosticTargets,observedDiagnosticTargets} from './diagnostic-targets.mjs';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 
@@ -18,21 +13,21 @@ const load=p=>import(pathToFileURL(path.join(repo,p)).href);
 
 const arg=(name,fallback)=>{const i=process.argv.indexOf('--'+name);return i>0&&process.argv[i+1]?process.argv[i+1]:fallback;};
 const installationPath=arg('installation');
-const keyword=arg('keyword','伺服驱动');
-const group=arg('group','因时伺服控制');
+const keyword=arg('keyword');
+const authorization=arg('authorization');
+const group=null;
 const target=Number(arg('target','5'));
 const limit=Number(arg('limit','10'));
 const maxPages=Number(arg('max-pages','3'));
 const intervalMs=Number(arg('interval-ms','60000'));
-const dryRun=arg('dry-run','false')==='true';
-// Judge from the card first (期望/技能/公司都在卡片上); only read the full resume
-// first when the card is ambiguous. Reading and then reopening the same resume a
-// few seconds apart is exactly the pattern that looks automated.
-const readFirst=arg('read-first','false')==='true';
-const fitPattern=arg('fit','伺服|驱动|运动控制|电机|自动化|变频|电气');
+const dryRun=arg('dry-run','true')==='true';
+if(!dryRun)throw Error('source-click仅用于只读验收；收藏请走Skill的证据评估、跟进决定及favorite-list');
+if(!keyword?.trim()||!authorization?.trim())throw Error('只读验收需要明确 --keyword 和真实 --authorization 原文');
+const readFirst=true;
 const evidencePath=arg('evidence',path.join(process.cwd(),'source-click.json'));
 if(!installationPath)throw Error('需要 --installation 指向 customer-installation.json');
 if(!Number.isSafeInteger(target)||target<1||target>40)throw Error('目标人数须为 1–40');
+if(!Number.isSafeInteger(limit)||limit<1||limit>30||!Number.isSafeInteger(maxPages)||maxPages<1||maxPages>5)throw Error('limit须为1–30，max-pages须为1–5');
 if(!Number.isSafeInteger(intervalMs)||intervalMs<15000||intervalMs>180000)throw Error('间隔须为 15000–180000 毫秒');
 
 const {BrowserClient}=await load('tools/liepin-mcp/lib/client.mjs');
@@ -44,16 +39,16 @@ const {readTask}=await load('distribution/liepin-search/runtime/packages/liepin/
 const installation=JSON.parse(fs.readFileSync(installationPath,'utf8'));
 if(!installation.mcpServer)throw Error('安装回执缺少 mcpServer');
 const SEARCH_URL='https://h.liepin.com/search/getConditionItem';
-const budget=Math.min(100,4+target*3);
+const budget=2+target+maxPages;
 const work=path.join(path.dirname(path.resolve(evidencePath)),'source-click-task');
 fs.mkdirSync(work,{recursive:true});
 const taskFile=path.join(work,'task.json'),scopeFile=path.join(work,'scope.json');
 if(fs.existsSync(taskFile))throw Error('本轮已开始：'+taskFile+'；中断后先核对回执，不自动重放');
 const now=()=>new Date().toISOString();
-initializeWorkflow(taskFile,{title:'因时伺服方向寻访（点击主链路，'+keyword+'）',
- criteria:[{id:'servo',label:'伺服/驱动/运动控制相关经验',category:'experience',kind:'required',weight:1}],
+initializeWorkflow(taskFile,{title:'列表点击详情只读验收（'+keyword+'）',
+ criteria:[{id:'servo',label:'仅验证详情采集流程，不形成岗位适配判断',category:'experience',kind:'required',weight:1}],
  rounds:[{id:'sourcing-round',phase:'trial',filters:{keyword,pages:1,limit}}]});
-createSiteScope(scopeFile,{label:'因时寻访 '+keyword,maxOperations:budget,confirmedAt:now()});
+createSiteScope(scopeFile,{label:'只读详情验收 '+keyword,maxOperations:budget,confirmedAt:now()});
 bindSiteScope(taskFile,scopeFile);
 
 const client=new BrowserClient(undefined,{requestTimeoutMs:180000});
@@ -63,6 +58,7 @@ const evidence=id=>readTask(taskFile).operations.find(o=>o.operationId===id)?.ev
 const report={mode:'click',keyword,group,target,limit,maxPages,intervalMs,dryRun,
  installation:installation.fingerprint??null,startedAt:now(),steps:[],added:[],skipped:[],failed:[],pages:[]};
 const step=(name,startedAt,extra)=>{const item={step:name,wallMs:Math.round(performance.now()-startedAt),...(extra??{})};report.steps.push(item);console.log(JSON.stringify(item));return item;};
+const readCountSafe=()=>report.skipped.filter(row=>row.decision==='not_evaluated').length;
 const closeTab=async id=>{try{await client.js(`await browser.chrome.call('tabs.remove',[${Number(id)}])`);return true;}catch{return false;}};
 const assertNotSecurityCheck=url=>{
  if(/^https:\/\/safe\.liepin\.com\//.test(String(url??'')))
@@ -85,92 +81,76 @@ try{
  await run('bind',{file:taskFile,tab_id:searchTab,expected_url:bound});
  step('open_search_tab_and_bind',t,{tabId:searchTab});
 
- authorizeTask(taskFile,{allowedKinds:['prepare','search','page','detail-open','favorite'],maxOperations:budget,confirmedAt:now(),
-  scope:'用户 2026-10-22 要求：完成 liepin MCP 验证并帮因时找到不少于 '+target+' 位「'+keyword+'」候选人放入收藏夹「'+group+'」；只走列表点击，不联系、不解锁',
+ authorizeTask(taskFile,{allowedKinds:['prepare','search','page','detail-open'],maxOperations:budget,confirmedAt:now(),
+  scope:authorization+'；只读开发验收，不收藏、不联系、不解锁',
   allowedRequests:[{kind:'prepare',payload:{page:searchTab,filters:{keyword}}},{kind:'search',payload:{keyword,pages:1,limit}}]});
 
  // ---- search once --------------------------------------------------------
  t=performance.now();
  await run('prepare',{file:taskFile,tab_id:searchTab,filters:{keyword},operation_id:'click-prepare'});
- approveRound(taskFile,'sourcing-round',{confirmedAt:now(),scope:'因时寻访：授权本轮搜索 1 页'});
+ approveRound(taskFile,'sourcing-round',{confirmedAt:now(),scope:authorization+'；本轮只读搜索1页'});
  await run('search',{file:taskFile,tab_id:searchTab,round_id:'sourcing-round'});
  step('search',t,{rows:(evidence('round-sourcing-round')?.rows??[]).length});
 
  // ---- walk pages, collect by clicking ------------------------------------
  const done=new Set();
- let pageNo=1,added=0,candidateNo=0;
- for(let page=1;page<=maxPages&&added<target;page++){
+ let pageNo=1,readCount=0,candidateNo=0;
+ for(let page=1;page<=maxPages&&readCount<target;page++){
   // rows currently on screen, tied back to their saved observations
   const task=readTask(taskFile);
   const current=Number(task.mcpSearch?.currentPage??pageNo);
-  const listObs=(task.candidates??[]).flatMap(c=>(c.observations??[])
-   .filter(o=>o.stage==='list'&&Number(o.data?.page)===current)
-   .map(o=>({id:o.id,resumeId:String(c.identity).replace(/^liepin:/,''),name:o.data?.name??null,
-     page:current,summary:o.data?.summary??null})));
+  const listObs=observedDiagnosticTargets(task,current);
   report.pages.push({page:current,candidates:listObs.length});
-  for(const item of listObs){
-   if(added>=target)break;
+  for(const item of diagnosticTargets(listObs,{remaining:target-readCount,done})){
+   if(readCount>=target)break;
    if(done.has(item.resumeId))continue;
    done.add(item.resumeId);
    candidateNo+=1;
    const started=performance.now();
    try{
-    // 1) decide from the card; read the resume only when asked
-    let fit=new RegExp(fitPattern).test(String(item.summary??''));
     let detail=null,text='';
     if(readFirst){
      grantOperations(taskFile,{allowedRequests:[{kind:'detail-open',payload:{
-      observationId:item.id,observationHash:readTask(taskFile).candidates.flatMap(c=>c.observations).find(o=>o.id===item.id)?.hash,page:searchTab}}],
-      confirmedAt:now(),scope:'因时寻访：点开 '+item.resumeId+' 的简历'});
+      observationId:item.id,observationHash:item.hash,page:searchTab}}],
+      confirmedAt:now(),scope:authorization+'；只读本次已观察卡片详情'});
      await run('open-detail',{file:taskFile,tab_id:searchTab,observation_id:item.id,
       operation_id:`click-read-${candidateNo}`});
      detail=evidence(`click-read-${candidateNo}`)?.detail;
      text=String(detail?.text??'');
-     fit=new RegExp(fitPattern).test(text);
+     if(!['readable','partial'].includes(detail?.status))throw Error('详情未可读，停止本轮');
+     readCount+=1;
     }
-    const entry={position:candidateNo,resumeId:item.resumeId,name:item.name,status:detail?.status??null,
-     chars:text.length,fit,coldOpen:false,byCard:!readFirst,wallMs:Math.round(performance.now()-started)};
-    if(!fit){entry.skipped='未命中关键词（'+(readFirst?'正文':'卡片')+'）';report.skipped.push(entry);console.log(JSON.stringify({candidate:entry}));continue;}
-    if(readFirst&&text.length<200){entry.skipped='正文过短';report.skipped.push(entry);console.log(JSON.stringify({candidate:entry}));continue;}
-    if(dryRun){entry.skipped='dry-run';report.skipped.push(entry);console.log(JSON.stringify({candidate:entry}));continue;}
-
-    // 2) favorite the same card from the list (opens, saves, reads back, returns)
-    const openOp=`click-favopen-${candidateNo}`;
-    grantOperations(taskFile,{allowedRequests:[
-     {kind:'favorite-open',payload:{observationId:item.id,observationHash:readTask(taskFile).candidates.flatMap(c=>c.observations).find(o=>o.id===item.id)?.hash,page:searchTab,purpose:'favorite',favoriteOperationId:`click-fav-${candidateNo}`}},
-     {kind:'favorite',payload:{observationId:item.id,observationHash:readTask(taskFile).candidates.flatMap(c=>c.observations).find(o=>o.id===item.id)?.hash,page:searchTab,resumeId:item.resumeId,action:'add',group}}],
-     confirmedAt:now(),scope:'因时寻访：将 '+item.resumeId+' 加入 '+group});
-    await run('favorite-list',{file:taskFile,tab_id:searchTab,observation_id:item.id,
-     action:'add',group,open_operation_id:openOp,operation_id:`click-fav-${candidateNo}`});
-    const fav=evidence(`click-fav-${candidateNo}`);
-    entry.saved=fav?.favoriteSaved===true||fav?.saved===true;entry.changed=entry.saved;
-    (entry.saved?report.added:report.failed).push(entry);
-    if(entry.saved)added+=1;
+    const entry={position:candidateNo,status:detail?.status??null,chars:text.length,
+     coldOpen:false,decision:'not_evaluated',wallMs:Math.round(performance.now()-started)};
+    report.skipped.push({...entry,skipped:'read-only acceptance; no favorite write'});
     console.log(JSON.stringify({candidate:entry}));
    }catch(error){
     report.failed.push({position:candidateNo,resumeId:item.resumeId,error:error.message});
     console.log(JSON.stringify({failed:{position:candidateNo,resumeId:item.resumeId,error:error.message}}));
-    if(/安全验证|safe\.liepin\.com/.test(error.message))throw error;
+    throw error; // unknown outcomes never advance to another candidate
    }
-   if(added<target)await new Promise(r=>setTimeout(r,intervalMs));
+   if(readCount<target)await new Promise(r=>setTimeout(r,intervalMs));
   }
-  if(added>=target||page===maxPages)break;
+  if(readCount>=target||page===maxPages)break;
   // 3) turn one page in the same session, no new query
   const tp=performance.now();
   try{
+   grantOperations(taskFile,{allowedRequests:[{kind:'page',payload:{tab_id:searchTab}}],confirmedAt:now(),scope:authorization+'；已批准范围内下一页只读验收'});
    await run('next-page',{file:taskFile,tab_id:searchTab,operation_id:`click-page-${page+1}`});
    const turned=evidence(`click-page-${page+1}`);
    pageNo=turned?.page??page+1;
    step('next_page',tp,{page:pageNo,count:turned?.count??null});
   }catch(error){report.failed.push({stage:'next-page',error:error.message});break;}
  }
- finished=true;
+ finished=readCount>=target;
+ if(!finished)report.stopReason="批准页数已用尽，详情数不足目标；不追加搜索或读取";
 }catch(error){
  report.error=error.message;
 }finally{
- if(searchTab)await closeTab(searchTab);
+ if(searchTab&&finished)report.searchClosed=await closeTab(searchTab);
+ else if(searchTab)report.searchPreserved=true; // keep failure scene for native-window diagnosis
  report.finishedAt=now();
- report.summary={added:report.added.length,skipped:report.skipped.length,failed:report.failed.length,finished};
+ report.summary={read:readCountSafe(),added:0,skipped:report.skipped.length,failed:report.failed.length,finished};
  fs.writeFileSync(evidencePath,JSON.stringify(report,null,1),{mode:0o600});
  console.log(JSON.stringify({summary:report.summary,error:report.error??null}));
  client.close();

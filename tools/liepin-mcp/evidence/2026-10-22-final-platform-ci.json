@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-22",
+  "commit": "6910067d90928c314240f0c39aaf873e12b99545",
+  "runId": 39806530912,
+  "url": "https://github.com/capparun/skillhub/actions/runs/39806530912",
+  "platforms": {
+    "liepin-adapter-windows-latest": {
+      "sourceStatus": "passed",
+      "tests": {
+        "mcp": 231,
+        "core": 398
+      },
+      "installStatus": "passed",
+      "installChecks": 22,
+      "adapterCount": 15,
+      "packageFingerprint": "65894f0198ad658266b2837fc3a2f2dbd9552e5c189d24cdf37e6b293344b8c2",
+      "browserVerified": false
+    },
+    "liepin-adapter-macos-15-intel": {
+      "sourceStatus": "passed",
+      "tests": {
+        "mcp": 236,
+        "core": 398
+      },
+      "installStatus": "passed",
+      "installChecks": 22,
+      "adapterCount": 15,
+      "packageFingerprint": "330d6c47691870f2a475b686660203171a007775624e1a510bcd1809c0ce1ba6",
+      "browserVerified": false
+    }
+  },
+  "published": false,
+  "mainMerged": false,
+  "liveWindowsBrowserVerified": false,
+  "windowsExplicitSkips": [
+    "build directory alias",
+    "extension source symbolic link",
+    "linked manifest and directories",
+    "macOS temporary path alias",
+    "POSIX SIGTERM forwarding"
+  ]
+}

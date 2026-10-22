@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-22",
+  "kind": "real-retained-detail-new-favorite",
+  "runtimeFingerprint": "3d2de22c66111568382bb320e342a942ffdb6939268c6ff3f44b6cd4c527419f",
+  "saved": true,
+  "changed": true,
+  "groupSelectedBeforeSave": true,
+  "clickCount": 3,
+  "totalMs": 2371,
+  "independentExactGroupReadback": true,
+  "targetPresent": true,
+  "groupTotal": 31,
+  "visibleRows": 10,
+  "rawCandidateDataIncluded": false,
+  "contacted": false,
+  "unlocked": false,
+  "existingFavoritesCancelled": false,
+  "notes": [
+    "Same owned retained detail used for reading, evidence assessment and add; no second detail open for the write.",
+    "Save receipt alone did not assert group membership; separate favorite-list confirmed stable identity in exact target group.",
+    "Follow-up pool does not mean all JD qualifications proven."
+  ]
+}

@@ -29,12 +29,14 @@ syncBuiltinESMExports();`);
 test('doctor rejects a newer unreviewed OpenCLI even when its version command succeeds', () => {
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'liepin-doctor-version-'));
   try {
-    for(const version of ['1.8.8','1.9.0']) {
+    const required = JSON.parse(fs.readFileSync('distribution/liepin-search/distribution.json', 'utf8')).requirements.opencli;
+    const unreviewed = `${Number(required.split('.')[0]) + 1}.0.0`;
+    for(const version of [required, unreviewed]) {
       const preload=path.join(dir,`version-${version}.mjs`);
       fs.writeFileSync(preload,`import cp from 'node:child_process';import {syncBuiltinESMExports} from 'node:module';cp.spawnSync=(_command,args)=>({status:0,stdout:args.includes('--version')?'${version}':'',stderr:''});syncBuiltinESMExports();`);
       const run=spawnSync(process.execPath,['--import',preload,'distribution/liepin-search/doctor.mjs','--json','--skills-dir',path.join(dir,'skills'),'--state-dir',path.join(dir,'state')],{encoding:'utf8',env:{...process.env,OPENCLI_BIN:process.execPath}});
       const report=JSON.parse(run.stdout),check=report.checks.find((c:{label:string})=>c.label.startsWith('OpenCLI '));
-      assert.equal(check.ok,version==='1.8.8');assert.equal(check.detail,version);
+      assert.equal(check.ok,version===required);assert.equal(check.detail,version);
     }
   } finally {fs.rmSync(dir,{recursive:true,force:true});}
 });

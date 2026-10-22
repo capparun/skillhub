@@ -5,7 +5,7 @@ import {npmInstallOptions} from '../distribution/liepin-search/npm-distribution.
 test('explicit registry overrides ambient config and offline keeps the same registry cache keys',()=>{
  const result=npmInstallOptions(['--npm-registry','https://registry.npmmirror.com','--offline'],{configuredRegistry:'https://registry.npmjs.org/',env:{}});
  assert.equal(result.registry,'https://registry.npmmirror.com/');
- assert.deepEqual(result.args,['install','--omit=dev','--registry','https://registry.npmmirror.com/','--offline']);
+ assert.deepEqual(result.args,['install','--omit=dev','--ignore-scripts','--registry','https://registry.npmmirror.com/','--offline']);
 });
 test('npm current configuration is preserved when no registry override is requested',()=>{
  assert.equal(npmInstallOptions([],{configuredRegistry:'https://registry.example.org/npm/',env:{}}).registry,'https://registry.example.org/npm/');

@@ -62,11 +62,11 @@ test('命令行命令指向 install.sh', () => {
 test('Windows 命令行命令指向 install.ps1 并传递参数', () => {
   assert.equal(
     windowsCliCommand(freeInput),
-    "$script = irm https://skills.example.com/install.ps1; & ([scriptblock]::Create($script)) -Product 'hunter-align'",
+    "$script = irm https://skills.example.com/install.ps1; & ([scriptblock]::Create($script.TrimStart([char]0xFEFF))) -Product 'hunter-align'",
   );
   assert.equal(
     windowsPaidCliCommand(paidInput),
-    "$script = irm https://skills.example.com/install.ps1; & ([scriptblock]::Create($script)) -Product 'soho-sourcing' -Token 'hunter_it_testtoken123'",
+    "$script = irm https://skills.example.com/install.ps1; & ([scriptblock]::Create($script.TrimStart([char]0xFEFF))) -Product 'soho-sourcing' -Token 'hunter_it_testtoken123'",
   );
 });
 

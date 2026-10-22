@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-22",
+  "scope": "Liepin public installation page only; local preview not published",
+  "releaseRouting": {
+    "legacy": "0.2.3 keeps CLI instructions",
+    "mcp": "0.3+ selects MCP guide"
+  },
+  "tests": {
+    "focusedPassed": 11,
+    "sitePassed": 44,
+    "siteSkipped": 4,
+    "siteFailed": 0,
+    "typecheck": "passed",
+    "targetedLint": "passed",
+    "productionBuild": "passed"
+  },
+  "browser": {
+    "fourStepsNavigated": true,
+    "responsiveWidths": [
+      320,
+      390
+    ],
+    "horizontalOverflow": false,
+    "previewNotice": "unpublished fixture, fake hash, do not execute",
+    "installationExecuted": false
+  },
+  "temporaryPreviewRouteIncluded": false,
+  "productionDeployed": false,
+  "runtimePackageChanged": false,
+  "notes": [
+    "Corrected stale Windows BOM, exact CLI requirement and ignore-scripts test fixtures; production installer behavior unchanged.",
+    "Version routing tests do not prove Windows real-browser or target assistant execution."
+  ]
+}

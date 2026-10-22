@@ -1,0 +1,13 @@
+{
+  "kind": "saved-real-data-replay-not-live-browser",
+  "rows": 30,
+  "identified": 30,
+  "unresolved": 0,
+  "localFixtureReads": 1,
+  "accountAccessed": false,
+  "browserActions": 0,
+  "rawSummariesPreserved": true,
+  "inputSha256": "d48c5f5065c8e116ade582f105cc1e4e1fb86fbe981304e8f8d95a6d68d1e727",
+  "implementationSha256": "386ed987ed716eb02e6b15c9e6f7b604711151b4ba22d1c5340401a1e0a6e21d",
+  "installedFingerprint": "330d6c47691870f2a475b686660203171a007775624e1a510bcd1809c0ce1ba6"
+}

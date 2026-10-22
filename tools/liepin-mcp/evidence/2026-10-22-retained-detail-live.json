@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-22",
+  "packageFingerprint": "4806fe261391b67d90830f411c921ce1457eb9b02f37e4e8716cb278b27ac313",
+  "transport": "official opencli-mcp Site Adapter with existing compatibility build",
+  "scope": {
+    "used": 12,
+    "max": 12,
+    "historyReset": false
+  },
+  "newRound": {
+    "queries": 1,
+    "savedRows": 5,
+    "detailReads": 1,
+    "detailStatus": "readable",
+    "visibleTextCharacters": 2574,
+    "criteriaReviewed": 9
+  },
+  "retainedReview": {
+    "detailOpenedOnce": true,
+    "favoriteInvokedOnSameRetainedDetail": true,
+    "saved": true,
+    "changed": false,
+    "clickCount": 0,
+    "groupVerifiedByWrite": false,
+    "closed": true,
+    "returned": true
+  },
+  "independentGroupRead": {
+    "exactGroupObserved": true,
+    "total": 30,
+    "visibleRows": 10,
+    "targetVisible": false,
+    "targetMembership": "unknown",
+    "paginationPerformed": false
+  },
+  "unknownOperations": 0,
+  "openReviews": 0,
+  "newFavorites": 0,
+  "originalUserTabsPreserved": true,
+  "limitations": [
+    "new add/save state transition not exercised because candidate was already saved",
+    "target group membership cannot be concluded from first-page absence",
+    "not a completed recruiting search"
+  ]
+}

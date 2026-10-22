@@ -1,6 +1,6 @@
 # 开发候选安装、升级与回滚
 
-尚未发布。macOS已验证隔离安装、13个Adapter注册、持久兼容宿主连接及真实猎聘分项业务。Windows真机及目标AI客户端首次业务仍未完成，不把macOS结果外推为跨平台验收。
+尚未发布。macOS已验证隔离安装、15个Adapter注册、持久兼容宿主连接及真实猎聘分项业务。Windows真机及目标AI客户端首次业务仍未完成，不把macOS结果外推为跨平台验收。
 
 ## 推荐入口：已解压的候选包
 
@@ -133,7 +133,7 @@ node tools/liepin-mcp/scripts/prepare-adapter-runtime.mjs "VERSION_DIR"
 node tools/liepin-mcp/scripts/verify-prepared-runtime.mjs "VERSION_DIR"
 ```
 
-准备操作只允许修改该候选内部的官方 0.0.30 依赖，按固定源码哈希应用 runtime 和 executor 两部分补丁，并注册 12 个 Adapter。已有准备回执时不会重复覆盖。验证器检查补丁及 Adapter 文件完整性，但不证明 Chrome 当前加载该候选，也不自动切换 Native Host。
+准备操作只允许修改该候选内部的官方 0.0.30 依赖，按固定源码哈希应用 runtime 和 executor 两部分补丁，并注册 15 个 Adapter。已有准备回执时不会重复覆盖。验证器检查补丁及 Adapter 文件完整性，但不证明 Chrome 当前加载该候选，也不自动切换 Native Host。
 
 跨平台本地验收命令：
 

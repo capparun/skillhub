@@ -184,3 +184,28 @@ source-click原dry-run按新增收藏数停止，dry-run永不新增，因此tar
 当前本地提交bfbe4833，分支codex/liepin-final-fixes。统一候选4806fe26与该提交运行源码对应；主目录中存在15处与已知旧候选不同的修改，未强制覆盖。尝试镜像更新的运行文件已撤回；新增文件因系统Trash不可用，移到主目录 .liepin-install-state/source-sync-quarantine/ 可逆保留，没有关闭safe-delete或绕过保护。
 
 主目录 tools/liepin-mcp/skill/hunter-liepin-mcp/SKILL.md 现为显式导航，要求读取持久工作树的完整Skill并使用安装回执执行；主目录产品状态加了同样的真源提示。不要从主目录历史runtime/tools构建发布。同步审计在 .liepin-install-state/source-sync-20261022.json。该处理不修改实际安装候选、全局客户端配置或用户原有浏览器页面。
+
+
+## 14. 2026-10-22 跨平台复验修复（接手增量）
+
+- 当前源码 `76fcb20a`，业务包仍为4806fe26；本轮仅改验收脚本/测试，不变更扩展、业务权限或站点检测。
+- CI39792878740：macOS源回归通过，安装因旧13入口断言失败；Windows回归失败。已将安装断言改为15个准确入口名称集合，本机真实隔离安装通过（`/private/tmp/liepin-platform-current-fixed.json`）。
+- CI39794042110 Windows为228项中221通过、2失败、5跳过；新增诊断测试两处使用URL.pathname而非fileURLToPath，Windows盘符处理错误，已修复，本机定向5/5通过。具体云端修复确认等待最新CI39795107790。
+- 日志尾部不足以定位失败，已把失败TAP块独立写入失败回执，避免只留“详见日志”却未上传日志。
+- CI39795028083是被最新修复替代的中间运行，已申请取消；不混用旧运行和最新提交。
+- 需求矩阵及上线前检查顶部补充了当前缺口；尚未发布/合并。Windows真机、用户暂缓客户端与Zeabur门不假报通过。
+- CUA已实际查看Chrome的evaluation-v2报告及截图；未点击或修改候选人页面。本轮没有新增收藏、搜索或简历访问。
+
+- 最新CI39795107790双平台通过：macOS核心398/MCP228，Windows核心398/MCP223+5skip；两平台22项隔离安装、15入口通过。正式包Mac4806fe26、Windowsfc0e8ecc（CRLF）分别记录，browserVerified:false保留。脱敏证据current-platform-ci.json。
+- 安装/架构入口数及Skill同页收藏预算说明3份Markdown纠错形成候选feb6ca76（/private/tmp/liepin-prelaunch-docs-20261022h）；与4806逐文件比对只有这3份文档不同，尚未安装、不替换实际宿主。
+
+
+## 15. 同页审阅真实幂等验收
+
+沿用4806已安装候选及原账本，针对已保存的对口企业证据，新增一次“配天＋10年以上＋硕士＋统招本科”查询，首页5条。原任务追加revision-1，复核明确由Agent开发执行，不冒充用户新发言。用replaces_operation_id先独立核对旧自建页不存在再创建新工作页；没有重放未知操作。
+
+当前集合重新观察到一位长期伺服驱动及关节驱动工程师，详情2574字readable，9条件逐项核实，记录follow_up与MATLAB/量产/尺寸等具体缺口。详情原本已收藏，detail-review的add在同一保留页真实执行，saved=true/changed=false/clickCount=0；随后关闭并返回搜索页。没有取消原收藏或为了测试重复写入。
+
+准确目标组独立读取total30，实际当前页10条，目标未出现；不能据此认定不在组，也不能认定已入组。当前12/12，0未知、0开放review，新增收藏0。同页“新添加并保存”的分支仍只有自动化及旧共享收藏driver真机证据，未伪称本轮真实新增。
+
+新版本地evaluation-v3三文件已生成并在CUA实际打开，10身份/3评估/1跟进/0入组核实明确分列。任务partial，剩余列表与2位边界保留。本轮搜索工作标签4778已关闭，用户原标签保留。私有证据主目录servo-final-acceptance/targeted-*.json；脱敏证据retained-detail-live.json。

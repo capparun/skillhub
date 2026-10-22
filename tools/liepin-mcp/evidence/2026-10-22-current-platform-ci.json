@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-22",
+  "commit": "76fcb20a12a8775b0290892836ea94f7f706d6be",
+  "runId": 39795107790,
+  "url": "https://github.com/capparun/skillhub/actions/runs/39795107790",
+  "platforms": {
+    "macos-15-intel": {
+      "sourceStatus": "passed",
+      "tests": {
+        "mcp": 228,
+        "core": 398
+      },
+      "installStatus": "passed",
+      "installChecks": 22,
+      "adapterCount": 15,
+      "packageFingerprint": "4806fe261391b67d90830f411c921ce1457eb9b02f37e4e8716cb278b27ac313",
+      "browserVerified": false
+    },
+    "windows-latest": {
+      "sourceStatus": "passed",
+      "tests": {
+        "mcp": 223,
+        "core": 398
+      },
+      "installStatus": "passed",
+      "installChecks": 22,
+      "adapterCount": 15,
+      "packageFingerprint": "fc0e8ecc98b9a15c53b40e015d5b3f7d4ebd8ee438fab660c31d7fbc783b3e10",
+      "browserVerified": false
+    }
+  },
+  "published": false,
+  "mainMerged": false,
+  "liveWindowsBrowserVerified": false,
+  "windowsExplicitSkips": [
+    "build directory alias",
+    "extension source symbolic link",
+    "linked manifest and directories",
+    "macOS temporary path alias",
+    "POSIX SIGTERM forwarding"
+  ]
+}

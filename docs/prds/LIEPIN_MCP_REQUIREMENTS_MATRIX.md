@@ -1,5 +1,26 @@
 # 猎聘 MCP 版需求覆盖清单
 
+## 2026-10-22 当前增量（以本节覆盖下文旧“当前”状态）
+
+直接回执：`tools/liepin-mcp/evidence/2026-10-22-current-platform-ci.json`。CI为76fcb20a的运行源码；后续3份Markdown纠错候选feb6ca76与4806fe26逐文件比对只改架构、安装和同页预算说明，尚未安装或发布。
+
+| 项目 | 当前证据 | 尚未完成 |
+| --- | --- | --- |
+| 来源与包 | CI专用分支 `1a4a1f1b`；0.3.0指纹 `4806fe261391b67d90830f411c921ce1457eb9b02f37e4e8716cb278b27ac313`，15个Adapter | 未合并、未发布、未部署 |
+| 回归 | 本机核心398/MCP228；旧CI39792878740 macOS回归通过，安装检查旧13入口断言已改为核对15个准确名称 | 最新CI39795107790已通过：macOS核心398/MCP228、Windows核心398/MCP223（5项明确skip） |
+| 安装 | 修正断言后本机隔离安装全部通过，指纹仍为4806fe26，未改变业务包 | 最新CI39795107790两平台均通过22项隔离安装；Windows真实Chrome未验 |
+| 同页审阅 | 真机读完保存后保持详情、独立关闭返回已通过；不再为评估重开同一份详情 | 新detail-review添加收藏路径仅自动化覆盖，尚无真实添加回执 |
+| 新轮业务 | 真实筛选回读、一次搜索、保存5条，2份详情逐项评估；0未知操作、0新增收藏 | 2位待校准、3位待详情；这是开发增量，不宣称正式寻访完成 |
+| 当前报告 | 真实Chrome窗口与截图核对evaluation-v2；统计、重点表格、详情和独立原始文件存在 | 不把生成报告等同找到合适人选 |
+| 保留门 | 用户暂缓目标客户端及Windows真机、Zeabur核对 | 不自动改成通过；目前不建议上线 |
+
+当前源码真源是 `/Users/shawnruan/.codex/worktrees/liepin-final-acceptance/hunter-works`；主目录业务镜像存在冲突，禁止从旧镜像构建发布。业务Skill不依赖CUA；开发现场检查可用CUA。原始候选人数据不进入Git。
+
+
+## Windows 测试数量差异已定位
+
+此前“少5项未定位”现已由源码条件核实，5项都是显式skip：目录别名构建（package.test）、扩展源符号链接（extension-copy.test）、清单/目录链接拒绝（browser-setup.test）、macOS系统临时路径别名（browser-setup.test）、POSIX子进程SIGTERM转发（host-process.test）。这些跳过不能作为Windows对应行为通过；当前真实Windows回归失败另有2项，不能归入这5项skip。
+
 ## 2026-10-22 CI 增量
 
 run 39632999182 @ `58bc563f`：macOS与Windows均pass。macOS核心391/MCP200、指纹`42c749b1`；Windows核心391/MCP195、指纹`80b3205e`（CRLF）。Windows MCP少5项为既有平台差异（历史`0e614b18`同为195），**这5项是哪5项未定位**，不据此认定Windows功能等价。指纹变化仅来自两个安装脚本，业务文件哈希与`fbd2d537`全等，M12/M17/M19/M20的真机回执不受影响。Windows真机Chrome、目标客户端、Zeabur三门仍未验。

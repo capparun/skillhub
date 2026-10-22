@@ -1,6 +1,6 @@
 # 猎聘交付架构：官方 Site Adapter 优先
 
-用户于2026-10-20明确选择“优先用官方 site adapter”。最终入口为 **一个 opencli-mcp 服务 + 13个猎聘 Site Adapter + 本地任务工具 + 可复用 Skill**。`server.mjs` 是保留在开发源码中的历史原型，不随 Site Adapter 候选交付，不作为安装入口。
+用户于2026-10-20明确选择“优先用官方 site adapter”。最终入口为 **一个 opencli-mcp 服务 + 15个猎聘 Site Adapter + 本地任务工具 + 可复用 Skill**。`server.mjs` 是保留在开发源码中的历史原型，不随 Site Adapter 候选交付，不作为安装入口。
 
 | 层 | 负责 | 边界 |
 | --- | --- | --- |

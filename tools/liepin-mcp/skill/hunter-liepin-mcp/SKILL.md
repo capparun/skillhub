@@ -25,7 +25,7 @@ description: 使用官方 opencli-mcp Site Adapter 与本地任务工具 完成�
 
 - 新寻访：读取 [任务流程](references/workflow.md)，先整理需求、询问本次收藏目标分组列表，再确认试搜计划。
 - 继续任务：本地 `task` 的 brief/stats/detail-targets，必要时 show；复用任务，不重建以重置计数。
-- 浏览器：先发现官方 liepin Adapter 的实际 schema，再调用 tabs/bind/connect/prepare/search/results/next-page/open-detail/current-detail/detail-batch/saved-search/favorite/favorite-list/favorites。tabs/bind 通过明确的兼容接口发现并认领已打开页面；先 tabs，再以返回 ID 与完整 URL 调 bind。不要直接把普通 js 会话 ID 当作已绑定 Adapter 页面。
+- 浏览器：先发现官方 liepin Adapter 的实际 schema，再调用 tabs/bind/connect/prepare/search/results/next-page/open-detail/detail-review/current-detail/detail-batch/saved-search/favorite/favorite-list/favorites。tabs/bind 通过明确的兼容接口发现并认领已打开页面；先 tabs，再以返回 ID 与完整 URL 调 bind。不要直接把普通 js 会话 ID 当作已绑定 Adapter 页面。
 - 本地评估与导出：local.mjs 的 task/report，无需浏览器。
 - open-detail/detail-batch 需要已验证的同会话标签兼容构建；未安装时应明确报错，不改用隐藏属性。
 
@@ -79,3 +79,11 @@ description: 使用官方 opencli-mcp Site Adapter 与本地任务工具 完成�
 执行顺序：标准与范围确认→关键词探索→搜索及逐条列表复核→按需要补读详情→统一证据对照→在授权内收藏并核验目标分组→交付结果及边界案例→沿用用户反馈修订后续判断。目标是找到值得跟进的人，报告和采集数量不作为独立完成标准。无充分依据时允许本轮收藏为零，并说明下一轮改进方向。
 
 HTML评估交付默认生成3个同目录文件：重点摘要、`.details.html`已保存详情、`.records.json`原始记录。统计快照放在摘要顶部；桌面表格、手机窄屏纵向展示，不要求用户展开多层内容。姓名下提供本地详情和已观察且身份一致的平台原简历链接，不拼猜URL。平台原链接需要对应登录权限；本地详情只包含已保存可见内容，partial不称完整。交付3个文件链接，移动时一起保留；不把原始JSON嵌回主报告。
+
+## 同页详情审阅
+
+需要读完再判断收藏时，优先 `open-detail` 的 `keep_open:true`：保存资料后返回 `review.token`，当前详情保持打开。Agent使用已保存资料完成逐项评估和跟进决定，再调用 `detail-review({file,parent_tab_id,review_token,action:"add",operation_id,group})`。收藏精确授权payload仍绑定原列表observationId、hash、父页、resumeId、action和group；没有当前有效follow_up依据时拒绝收藏。
+
+无需收藏或收藏回读完成后调用 `detail-review({file,parent_tab_id,review_token,action:"close"})`，关闭本次详情并返回原列表。不要为了判断重新打开同一人。默认keep_open:false保留原有批次采集行为。
+
+审阅权限只在同一宿主运行时、同一站点会话内有效；重启、文档刷新或地址变化后不凭旧token/标签ID关闭或收藏。token失效时保留页面、核对状态，不冷开重放；收藏结果未知时先核对，不自动关闭现场。详情partial仍按部分可见资料分析，不推断未解锁内容。

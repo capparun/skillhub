@@ -10,7 +10,7 @@ export function verifyPreparedRuntime(directory){
  if(manifest.delivery!=='site-adapter')throw Error('不是 Adapter 候选');
  const receipt=JSON.parse(fs.readFileSync(path.join(directory,'adapter-runtime-receipt.json')));
  if(receipt.sourceFingerprint!==manifest.sourceFingerprint||receipt.status!=='prepared-not-connected'||!Array.isArray(receipt.files)||!receipt.files.length)throw Error('运行时准备回执不匹配');
- const expected=new Set(['node_modules/opencli-mcp/dist/src/sites/executor.js','node_modules/opencli-mcp/dist/src/runtime/runtime.js','node_modules/opencli-mcp/dist/src/runtime/hunter-adapter-tabs.mjs',...manifest.files.filter(f=>f.path.startsWith('tools/liepin-mcp/adapters/liepin/')&&f.path.endsWith('.js')).map(f=>'node_modules/opencli-mcp/adapters/liepin/'+path.posix.basename(f.path))]);
+ const expected=new Set(['node_modules/opencli-mcp/dist/src/sites/executor.js','node_modules/opencli-mcp/dist/src/runtime/runtime.js','node_modules/opencli-mcp/dist/src/runtime/hunter-adapter-tabs.mjs','node_modules/opencli-mcp/dist/src/runtime/hunter-detail-reviews.mjs',...manifest.files.filter(f=>f.path.startsWith('tools/liepin-mcp/adapters/liepin/')&&f.path.endsWith('.js')).map(f=>'node_modules/opencli-mcp/adapters/liepin/'+path.posix.basename(f.path))]);
  for(const item of receipt.files){
   if(!expected.delete(item.path)||!/^[a-f0-9]{64}$/.test(item.sha256??''))throw Error('运行时清单存在未知、重复或无效文件');
   const file=path.join(directory,item.path),stat=fs.lstatSync(file);

@@ -15,11 +15,13 @@ const executor=fs.readFileSync(path.join(upstream,executorPath),'utf8');
 if(hash(executor)!=='01f1c67e413e06f799240e6b89ca4e39f254730d18fa92daeed7b765f2a1877a')throw Error('Official executor source hash differs; review before patching');
 const executorMarker='const ctx = { args, tab: model.tab, sites: model.sites, recon: model.recon, signal: opts.signal };';
 if(executor.split(executorMarker).length!==2)throw Error('Executor patch anchor changed');
-const patchedExecutor=executor.replace(executorMarker,executorMarker+'\n        if (cmd.site === \'liepin\') { ctx.tabs = model.tabs; ctx.userTabs = model.userTabs; ctx.adoptTab = model.adoptTab; }');
+const patchedExecutor=executor.replace(executorMarker,executorMarker+'\n        if (cmd.site === \'liepin\') { ctx.tabs = model.tabs; ctx.userTabs = model.userTabs; ctx.adoptTab = model.adoptTab; ctx.detailReviews = model.detailReviews; }');
 const marker='return { tab, page, sites: api.sites, recon: api.recon };';
 if(original.split(marker).length!==2)throw Error('Runtime patch anchor changed');
 const replacement=`if (site !== 'liepin') return { tab, page, sites: api.sites, recon: api.recon };
+        const detailReviews = detailReviewStore(state);
         const lifecycle = createAdapterTabLifecycle({
+            reviewStore: detailReviews,
             tab,
             verifyAdoption: async (id, expectedUrl) => {
                 const url = new URL(expectedUrl);
@@ -54,13 +56,15 @@ const replacement=`if (site !== 'liepin') return { tab, page, sites: api.sites, 
         const adoptTab = async (id, expectedUrl) => {
             return lifecycle.tabs.adopt(String(id), expectedUrl);
         };
-        return { tab: lifecycle.tab, tabs: lifecycle.tabs, userTabs, adoptTab, page, sites: api.sites, recon: api.recon };`;
-const patched="import {createAdapterTabLifecycle,createAdapterUserTabs} from './hunter-adapter-tabs.mjs';\n"+original.replace(marker,replacement);
+        return { tab: lifecycle.tab, tabs: lifecycle.tabs, userTabs, adoptTab, detailReviews, page, sites: api.sites, recon: api.recon };`;
+const patched="import {detailReviewStore} from './hunter-detail-reviews.mjs';\nimport {createAdapterTabLifecycle,createAdapterUserTabs} from './hunter-adapter-tabs.mjs';\n"+original.replace(marker,replacement);
 fs.mkdirSync(output,{recursive:false});fs.mkdirSync(path.join(output,'dist/src/runtime'),{recursive:true});
 fs.writeFileSync(path.join(output,relative),patched,{flag:'wx'});
 fs.mkdirSync(path.join(output,'dist/src/sites'),{recursive:true});
 fs.writeFileSync(path.join(output,executorPath),patchedExecutor,{flag:'wx'});
 fs.copyFileSync(fileURLToPath(new URL('../compat/adapter-tabs.mjs',import.meta.url)),path.join(output,'dist/src/runtime/hunter-adapter-tabs.mjs'));
+fs.copyFileSync(fileURLToPath(new URL('../compat/detail-reviews.mjs',import.meta.url)),path.join(output,'dist/src/runtime/hunter-detail-reviews.mjs'));
+const reviewHelper=fs.readFileSync(path.join(output,'dist/src/runtime/hunter-detail-reviews.mjs'));
 const helper=fs.readFileSync(path.join(output,'dist/src/runtime/hunter-adapter-tabs.mjs'));
-fs.writeFileSync(path.join(output,'patch-manifest.json'),JSON.stringify({upstream:'0.0.30',files:[{path:executorPath,originalSha256:hash(executor),patchedSha256:hash(patchedExecutor)},{path:relative,originalSha256:hash(original),patchedSha256:hash(patched)},{path:'dist/src/runtime/hunter-adapter-tabs.mjs',originalSha256:null,patchedSha256:hash(helper)}],installed:false,scope:'same-site adapter child lifecycle; no extension permission changes'},null,2));
+fs.writeFileSync(path.join(output,'patch-manifest.json'),JSON.stringify({upstream:'0.0.30',files:[{path:'dist/src/runtime/hunter-detail-reviews.mjs',originalSha256:null,patchedSha256:hash(reviewHelper)},{path:executorPath,originalSha256:hash(executor),patchedSha256:hash(patchedExecutor)},{path:relative,originalSha256:hash(original),patchedSha256:hash(patched)},{path:'dist/src/runtime/hunter-adapter-tabs.mjs',originalSha256:null,patchedSha256:hash(helper)}],installed:false,scope:'same-site adapter child lifecycle; no extension permission changes'},null,2));
 console.log(output);

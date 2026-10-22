@@ -10,7 +10,7 @@ test('prepared runtime verifier rejects changed files, missing entries and extra
  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'runtime-receipt-'));t.after(()=>fs.rmSync(temp,{recursive:true,force:true}));
  const c=buildPackage(path.join(temp,'candidate'),{delivery:'site-adapter'}),manifest=JSON.parse(fs.readFileSync(path.join(c.root,'manifest.json')));
  const names=manifest.files.filter(f=>f.path.startsWith('tools/liepin-mcp/adapters/liepin/')).map(f=>path.basename(f.path));
- const files=['node_modules/opencli-mcp/dist/src/sites/executor.js','node_modules/opencli-mcp/dist/src/runtime/runtime.js','node_modules/opencli-mcp/dist/src/runtime/hunter-adapter-tabs.mjs',...names.map(n=>'node_modules/opencli-mcp/adapters/liepin/'+n)].map(p=>{
+ const files=['node_modules/opencli-mcp/dist/src/sites/executor.js','node_modules/opencli-mcp/dist/src/runtime/runtime.js','node_modules/opencli-mcp/dist/src/runtime/hunter-adapter-tabs.mjs','node_modules/opencli-mcp/dist/src/runtime/hunter-detail-reviews.mjs',...names.map(n=>'node_modules/opencli-mcp/adapters/liepin/'+n)].map(p=>{
   const file=path.join(c.root,p);fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,'fixture');return {path:p,sha256:crypto.createHash('sha256').update('fixture').digest('hex')};
  });
  const receipt={sourceFingerprint:c.sourceFingerprint,status:'prepared-not-connected',files};

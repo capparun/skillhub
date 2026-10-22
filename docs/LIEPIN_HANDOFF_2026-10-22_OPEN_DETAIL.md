@@ -150,3 +150,15 @@ source-click原dry-run按新增收藏数停止，dry-run永不新增，因此tar
 本次真实验收先触发参数错误后保留原搜索页；修复后用同一账本和结果页补读一份，detailCount=1、completed、partial2464字，searchRepeated=false。未产生收藏。补读脚本与回执在主工作区 .liepin-install-state/diagnostic-script-20261022/。CUA确认返回正常搜索列表，再点击本轮搜索标签关闭，原有页面保留。此补读覆盖新观察选择逻辑和实际Adapter，不冒充整份CLI从头无错误通过。
 
 新增5项回归，全MCP218/218。开发辅助模块留scripts目录，不进入客户运行库。Skill补充next-page发现、一次搜索逐页处理、canonical detail-targets和诊断/正式寻访边界。Skill文档变化尚未重新构建安装；当前已安装候选仍ed8ba2ae。读后收藏重复打开和真机缺失回执恢复仍未完成。
+
+## 11. 同页详情审阅落地（2026-10-22）
+
+新增 open-detail keep_open:true 与 detail-review(add/close)：一次列表点击保存详情后保留当前页，Agent完成本地证据评估与follow_up决定，再按原观察/父页/身份/组精确授权收藏；或关闭返回列表。不使用正则自动评估，不重复打开详情。
+
+权限保存在当前宿主站点session的WeakMap中，task仅保存审阅回执。仅实际点击所得子标签可转移到审阅会话；任务、父页、完整URL和文档timeOrigin均需匹配。重启/导航/刷新不恢复旧token权限；同父页未结束审阅禁止再次打开。关闭成功但返回父页失败分别记录；收藏未知结果时保留现场。
+
+- 新增审阅生命周期与集成测试；完整MCP227/227。合成账本集成测试覆盖先缺评估拒绝、后有效决定+精确授权三次收藏点击、最终关闭返回，全程详情只打开一次。
+- 真机候选17a550dd…（output/liepin-detail-review-20261022e）已隔离安装并接入，扩展保持原样。一次搜索3条、一次详情点击、partial2444字；open-detail返回后CUA确见详情仍保留，另一次detail-review close回读closed:true/returned:true，CUA确见返回列表。未真实收藏或联系。关闭自建搜索页，原有页面保留。
+- 私有证据：主工作区 .liepin-install-state/detail-review-acceptance/{task.json,detail.json,close.json,summary.json}。Native备份 .liepin-install-state/detail-review-20261022e/setup-backup.json。
+- 最后补充严格URL身份防护与流程文档后构建候选b1a56c2e175dfa865ad70444bfe26266e6ba15ea4cf634e4d5e5806df67e57d1（output/liepin-detail-review-20261022f，133文件）。此最终候选尚未安装或真机验收；当前浏览器仍17a550dd，不混同两者。
+- 未完成：新审阅收藏分支真实回读、缺失回执恢复现场验证、最终候选双平台CI与安装、整体PRD逐项收口。未推送/合并/上线。

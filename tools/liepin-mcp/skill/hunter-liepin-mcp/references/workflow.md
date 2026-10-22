@@ -117,4 +117,4 @@ saved-search：list/save/apply/delete；favorite：status/add/remove；favorites
 
 仓库 source-click.mjs 是只读开发验收脚本，不是正式寻访入口。必须显式给出关键词和实际授权原文；target表示最多读取的详情数，不能按新增收藏数计数。它不形成JD适配判断、不自动收藏，也不预置任何客户或分组。异常时保留现场、先核对，不为补足数量重搜或换ID重放。
 
-正式收藏继续按本Skill的标准确认→逐项证据评估→跟进决定→精确授权→favorite-list→目标组回读执行。卡片关键词命中不能替代岗位评估。当前读取与收藏为两次调用时会重复打开详情，应如实记录该成本；不能为了少一次打开跳过详情核实。
+正式收藏继续按本Skill的标准确认→逐项证据评估→跟进决定→精确授权→favorite-list→目标组回读执行。卡片关键词命中不能替代岗位评估。需要读后评估再收藏时，使用open-detail(keep_open:true)与detail-review复用同一详情；只有默认采集后已关闭、且确需后续收藏时才使用favorite-list重开。不能为了少一次打开跳过详情核实。

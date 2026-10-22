@@ -2,7 +2,7 @@
  * bindTab must bind the SAME site:<name> session, not a regular mcp session.
  * Ownership comes only from an actual act result, never caller-supplied IDs.
  */
-export function createAdapterTabLifecycle({tab,bindTab,activateTab,openTab,verifyAdoption}){
+export function createAdapterTabLifecycle({tab,bindTab,activateTab,openTab,verifyAdoption,reviewStore}){
  const owned=new Set(),handles=new Map();
  const valid=id=>/^\d+$/.test(id)&&Number.isSafeInteger(Number(id));
  const parentId=()=>String(tab.id);
@@ -59,6 +59,13 @@ export function createAdapterTabLifecycle({tab,bindTab,activateTab,openTab,verif
    await verifyAdoption(id,expectedUrl);
    if(!owned.has(id))owned.add(id);
    return tabs.child(id);
+  },
+  reviewAvailable(){if(!reviewStore)throw Error('详情审阅兼容接口不可用');reviewStore.assertAvailable(parentId());},
+  async retainReview(id,file){
+   if(!reviewStore)throw Error('详情审阅兼容接口不可用');
+   const child=await tabs.child(id);
+   const receipt=await reviewStore.retain({file,parent:parentId(),child,returnToParent:()=>activateTab(parentId())});
+   owned.delete(String(id));handles.delete(String(id));return receipt;
   },
   async returnToParent(){
    const id=parentId();if(!valid(id))throw Error('Parent tab is not bound');

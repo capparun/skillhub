@@ -1,0 +1,111 @@
+{
+  "date": "2026-10-23",
+  "scope": "real Liepin serial detail collection benchmark, not JD analysis or favorite latency",
+  "fingerprint": "cd92c72525c946c586ef2f6dd8d9aea6a6e45603ba2fc8d3d84a95b69261a546",
+  "restoredSearches": 1,
+  "currentPageRowsSaved": 30,
+  "samples": [
+    {
+      "index": 1,
+      "totalMs": 5268,
+      "status": "readable",
+      "characters": 4211,
+      "sections": 8,
+      "timing": {
+        "readMs": 858,
+        "visibleCheckMs": 1805,
+        "totalMs": 2678,
+        "fixedWaitMs": 0
+      }
+    },
+    {
+      "index": 2,
+      "totalMs": 3643,
+      "status": "partial",
+      "characters": 4083,
+      "sections": 7,
+      "timing": {
+        "readMs": 726,
+        "visibleCheckMs": 1772,
+        "totalMs": 2512,
+        "fixedWaitMs": 0
+      }
+    },
+    {
+      "index": 3,
+      "totalMs": 3689,
+      "status": "partial",
+      "characters": 6784,
+      "sections": 8,
+      "timing": {
+        "readMs": 781,
+        "visibleCheckMs": 1961,
+        "totalMs": 2758,
+        "fixedWaitMs": 0
+      }
+    },
+    {
+      "index": 4,
+      "totalMs": 2128,
+      "status": "readable",
+      "characters": 2393,
+      "sections": 8,
+      "timing": {
+        "readMs": 20,
+        "visibleCheckMs": 821,
+        "totalMs": 856,
+        "fixedWaitMs": 0
+      }
+    },
+    {
+      "index": 5,
+      "totalMs": 3820,
+      "status": "partial",
+      "characters": 3396,
+      "sections": 6,
+      "timing": {
+        "readMs": 788,
+        "visibleCheckMs": 1543,
+        "totalMs": 2347,
+        "fixedWaitMs": 0
+      }
+    }
+  ],
+  "timing": {
+    "meanMs": 3709.6,
+    "medianMs": 3689,
+    "minMs": 2128,
+    "maxMs": 5268,
+    "sumDetailOperationsMs": 18548,
+    "betweenItemIntervalMs": 6000,
+    "betweenItemIntervalCount": 4,
+    "includesJDAnalysis": false,
+    "includesFavorite": false
+  },
+  "integrity": {
+    "returnedDataMatchesSavedObservations": true,
+    "savedRawTextPreserved": true,
+    "truncated": false,
+    "readable": 2,
+    "partial": 3,
+    "unresolvedOperations": 0,
+    "retainedReviewsOpen": 0
+  },
+  "cleanup": {
+    "allFiveOwnedDetailTabsClosed": true,
+    "ownedSearchClosedAfterSaving": true,
+    "originalUserTabsPreserved": true
+  },
+  "runtime": {
+    "compatibleExtensionBytesUnchanged": true,
+    "extensionIdUnchanged": true,
+    "nativeAllowedOriginsUnchanged": true,
+    "existingHostUpdatedOnceWithBackup": true,
+    "compatibleEnvironmentRetained": true
+  },
+  "contacted": false,
+  "favoritesChanged": false,
+  "unlocked": false,
+  "privateCandidateDataIncluded": false,
+  "comparison": "No same-sample before/after live A/B. Fixed dwell removal is verified by regression; the five real operation times are post-change measurements only."
+}

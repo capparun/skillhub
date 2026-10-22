@@ -35,3 +35,11 @@ test('detail recovery uses verified context adoption instead of raw lifecycle ad
  const client=adapterDetailClient(context);await client.adoptTab('2','observed-url');assert.equal(verified,1);
  assert.equal(adapterDetailClient({...context,adoptTab:undefined}).adoptTab,undefined);
 });
+
+test('reviewed reader reports collection and viewport costs without a second collection',async()=>{
+ const {createReviewedDetailReader}=await import('../lib/site-adapter-open-detail.mjs');let reads=0;const events=[];
+ const url='https://h.liepin.com/resume/showresumedetail/?res_id_encode=abc';
+ const reader=createReviewedDetailReader({read:async()=>{reads++;return {url,readyState:'complete',text:'工作经历\n伺服研发\n教育经历\n本科'};},review:async()=>({views:[{}],atEnd:true,fixedWaitMs:0}),onAction:e=>events.push(e)});
+ const result=await reader({},'abc');assert.equal(reads,1);assert.match(result.text,/伺服研发/);
+ const timing=events.find(e=>e.detailPerformance)?.detailPerformance;assert.ok(timing);assert.equal(timing.fixedWaitMs,0);assert.ok(timing.readMs>=0);assert.ok(timing.visibleCheckMs>=0);assert.ok(timing.totalMs>=timing.readMs);
+});

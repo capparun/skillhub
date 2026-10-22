@@ -26,11 +26,12 @@ export function adapterDetailClient(context){
 export function createReviewedDetailReader({read,review,onAction=()=>{}}){
  const reviewed=new Set();
  return async(tab,resumeId)=>{
-  const result=await read(tab,resumeId);
+  const started=Date.now(),result=await read(tab,resumeId),readMs=Date.now()-started;let visibleCheckMs=0;
   if(!reviewed.has(resumeId)&&['readable','partial'].includes(parseDetail(result,resumeId).status)){
-   const checked=await review(tab,resumeId);reviewed.add(resumeId);
+   const reviewStarted=Date.now(),checked=await review(tab,resumeId);visibleCheckMs=Date.now()-reviewStarted;reviewed.add(resumeId);
    onAction({phase:'observed',description:`详情可见阅读完成 ${checked.views.length} 屏；${checked.atEnd?'已到页面底部':'仍有后续栏目未逐屏核对'}`,readingReview:checked});
   }
+  onAction({phase:'observed',description:`详情采集 ${readMs} 毫秒，栏目位置核对 ${visibleCheckMs} 毫秒；不计作人工阅读速度`,detailPerformance:{readMs,visibleCheckMs,totalMs:Date.now()-started,fixedWaitMs:0}});
   return result;
  };
 }

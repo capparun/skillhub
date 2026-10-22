@@ -245,3 +245,11 @@ source-click原dry-run按新增收藏数停止，dry-run永不新增，因此tar
 CI专用分支已同步`a5b72905`，运行[39811057372](https://github.com/capparun/skillhub/actions/runs/39811057372)整体success：macOS核心398/MCP236、Windows核心398/MCP231（另5项明确skip），两平台22项安装、15入口。指纹分别仍330d6c47/65894f01。此轮包含最新安装页与归档审查提交；网站另有本机生产构建/44项测试证据，不能把Adapter CI说成已在云端测试网站。详细脱敏回执见`docs/releases/LIEPIN_MCP_20261023_CI_RECEIPT.json`。
 
 生产只读复核：现有Zeabur CLI认证返回`401 Unauthorized`，未发起登录或改配置，生产维护/回滚门仍阻塞。当前会话也没有暴露opencli-mcp工具，脚本BrowserClient真机通路不替代桌面目标客户端首次调用；Windows暂无真机。以上沿用用户暂缓决定，不重复请求授权，不宣称上线就绪。
+
+## 17. 2026-10-23 详情提速已落地并真机测5份
+
+用户“好，干”后已去除列表/详情机械停留，保留真实滚动核对、身份/异常保护和6秒条目间隔。原任务一次恢复原筛选、保存30条，再读5份未读相关详情；平均3.710秒、范围2.128–5.268秒（不含JD分析和收藏），2可读/3部分可见，逐份返回与保存一致。0未知操作/开放审阅；全部自建详情和本轮搜索标签1745404823已关闭，原有页面保留。不翻页、不收藏、不联系、不解锁。
+
+当前真实宿主为性能候选cd92c725，安装回执在主工作区`.liepin-install-state/speed-opt-20261023/customer-installation.json`，Native升级备份在同目录setup-backup.json。只更新了宿主路径，既有兼容扩展字节/ID和通信权限未变，保持新环境不反复切换。旧3d2de22c为此前宿主、330d6c47为此前归档，不再称当前运行版本。
+
+MCP回归239/239。直接记录见`docs/releases/LIEPIN_MCP_DETAIL_PERFORMANCE_20261023.md`和`tools/liepin-mcp/evidence/2026-10-23-detail-performance.json`。完整原始测速回执在既有私有任务目录speed-20261023-*.json，不进Git；未做同样本前后A/B，不承诺固定秒数或提速百分比。跨平台CI/新归档以该性能增量后续回执为准；原Windows真机、目标助手及Zeabur门仍保留未验。

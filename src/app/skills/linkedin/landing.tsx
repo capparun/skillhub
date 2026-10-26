@@ -1,70 +1,34 @@
 'use client';
-
-import { useEffect, useState } from 'react';
-import { api, type SessionInfo } from '@/lib/client/api';
-import { type ReleaseState, releaseLabel } from '@/lib/product-release';
-import { SiteHeader } from '../../components/site-header';
-import { BeginnerInstallFlow } from '../../components/beginner-install-flow';
-import { InstallModal, type ModalProduct } from '../../components/install-modal';
-import styles from '../../page.module.css';
-import usageStyles from './usage.module.css';
-import { ProductSectionNav } from '../../components/product-section-nav';
-import { LinkedInUsageExamples } from './usage-examples';
-
-const fallback: ModalProduct = {
-  slug: 'soho-sourcing',
-  name: 'LinkedIn 人才寻访',
-  description: '从职位要求出发，在 LinkedIn 搜索候选人，完成匹配判断、排序和寻访报告。',
-  isPublic: false,
-  latestRelease: null,
+import {useEffect,useState} from 'react';
+import {useRouter} from 'next/navigation';
+import {freeCliCommand,windowsCliCommand} from '@/lib/prompts';
+import {releaseLabel,type ReleaseState} from '@/lib/product-release';
+import {Copy} from './copy-instruction';
+import styles from './quick-guide.module.css';
+type Props={release:{version:string;sha256:string}|null;releaseState:ReleaseState;appUrl:string};
+const agents=['WorkBuddy','Codex','Claude Code','其他本地 AI 助手'];
+const tasks={
+  people:'请使用 LinkedIn Skill 找人。岗位或目标角色：[填写]；地区：[填写]；硬性条件：[填写]；优先条件：[填写]；目标人数：[填写]。先确认当前 Chrome Profile、LinkedIn 账号及可用权限，再与我确认筛选方案和本次执行范围。每轮记录条件、结果总数与已读数量，按数量决定是否调整条件或继续翻页。评估已采集的人选，缺少证据的标明原因；用表格交付姓名、公司、职位、匹配依据、待确认项和来源链接。不发送消息或邀请。',
+  companies:'请使用 LinkedIn Skill 找公司。目标行业或产品：[填写]；公司规模：[填写]；业务地区：[填写]；必须满足的条件及证据要求：[填写]；目标家数：[填写]。先核实账号是否具备 Sales Navigator；没有权限时说明普通 LinkedIn 可做的范围，不假定有高级筛选。和我确认筛选条件与执行范围，记录每轮总数及已读数量，去重并逐家评估。人数估算须标明依据与不确定性。输出公司、业务、规模、地区、符合依据和来源链接的表格。不联系任何人。',
+  existing:'请使用 LinkedIn Skill 研究这份已有名单：[粘贴公司或人员链接]。研究目的：[填写]；需要核实的信息：[填写]。复用已有资料，仅补充任务需要的信息。每个对象都给出结论、依据、缺口和来源；无法访问的单独说明，不用“未评估”代替已经能完成的判断。执行范围先与我确认；不发送消息或邀请。'
 };
-
-export function LinkedInLanding() {
-  const [product, setProduct] = useState<ModalProduct>(fallback);
-  const [releaseState, setReleaseState] = useState<ReleaseState>('loading');
-  const [me, setMe] = useState<SessionInfo['user'] | null>(null);
-  const [platform, setPlatform] = useState<'mac' | 'windows' | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    api<{ products: ModalProduct[] }>('/api/products').then(({ products }) => {
-      if (cancelled) return;
-      const found = products.find((item) => item.slug === 'soho-sourcing');
-      if (!found) { setReleaseState('error'); return; }
-      setProduct({ ...found, name: fallback.name, description: fallback.description });
-      setReleaseState('ready');
-    }).catch(() => { if (!cancelled) setReleaseState('error'); });
-    api<SessionInfo>('/api/auth/me').then(({ user }) => {
-      if (!cancelled) setMe(user);
-    }).catch(() => undefined);
-    return () => { cancelled = true; };
-  }, []);
-
-  return <main className={styles.page}>
-    <div className={usageStyles.headerWidth}><SiteHeader nav="none" brandLinked={false} /></div>
-    <ProductSectionNav className={usageStyles.sectionNav} sections={[{ id: 'overview', label: '产品介绍' }, { id: 'install-center', label: '安装与连接' }, { id: 'usage-examples', label: '使用示例' }]} />
-    <section id="overview" className={styles.hero}>
-      <div className={styles.kicker}><span /> 猎策 · LinkedIn 人才寻访</div>
-      <h1>在 LinkedIn 找人，<em>把筛选依据一起交付。</em></h1>
-      <p>{fallback.description} 在 WorkBuddy、Codex 或 Claude Code 中使用，职位与候选人数据留在本机。</p>
-      <button className={styles.heroButton} onClick={() => document.getElementById('install-center')?.scrollIntoView({ behavior: 'smooth' })}>查看 LinkedIn 安装步骤</button><a className={usageStyles.usageLink} href="#usage-examples">已装好？查看使用示例 →</a>
-    </section>
-    <section className={styles.list} aria-label="LinkedIn 产品介绍">
-      <article className={styles.card}>
-        <h2>LinkedIn 人才寻访</h2>
-        <p className={styles.cardDesc}>{releaseLabel(releaseState, product.latestRelease)}</p>
-        <ul className={styles.bullets}>
-          <li>LinkedIn 站内与 X-Ray 双通道搜索</li>
-          <li>按职位要求判断匹配程度，排序并标注待核实项</li>
-          <li>生成候选人初评与寻访报告</li>
-          <li>有 Sales Navigator 权限时，可筛选公司与人员、读取详情并导出表格</li>
-          <li>安装需要 Node.js 22+、Chrome 和官方 OpenCLI 扩展；普通 LinkedIn 功能不要求 Sales Navigator 订阅</li>
-        </ul>
-      </article>
-    </section>
-    <BeginnerInstallFlow product={product} releaseState={releaseState} onInstall={setPlatform} />
-    <LinkedInUsageExamples />
-    <footer className={styles.footer}><span>© 2026 猎策 · LinkedIn 人才寻访</span><span>LOCAL / PRIVATE</span></footer>
-    {platform && <InstallModal product={product} me={me} initialPlatform={platform} loginHref="/login?next=%2Fskills%2Flinkedin" onClose={() => setPlatform(null)} />}
-  </main>;
+export function LinkedInLanding({release,releaseState,appUrl}:Props){
+ const router=useRouter();const [platform,setPlatform]=useState<'mac'|'windows'>('mac');const [agent,setAgent]=useState('WorkBuddy');const [task,setTask]=useState<keyof typeof tasks>('people');
+ useEffect(()=>{if(/Windows/i.test(navigator.userAgent))setPlatform('windows');},[]);
+ const command=(platform==='windows'?windowsCliCommand:freeCliCommand)({appUrl,productSlug:'soho-sourcing'});
+ const target=`我使用 ${agent}，系统是 ${platform==='windows'?'Windows':'macOS'}。`;
+ const install=`${target}请安装猎策 LinkedIn 正式版 ${release?.version??''}。先核对 Node.js 22+、npm、Chrome，以及此助手实际支持的本地 Skill 目录和命令执行权限。按安装器支持的目标参数或 HUNTER_SKILLS_DIR 指定正确的 Skill 目录；不要猜路径或覆盖其他插件配置。执行官网命令：\n${command}\n安装包 SHA-256 应为 ${release?.sha256??''}（不是安装脚本的哈希）。完成后执行安装包提供的 doctor，保存安装回执，确认助手可发现 cskh-linkedin 与 cskh-linkedin-salesnav。命令调用优先用回执中的包内 OpenCLI 启动入口，不假定系统 PATH 上的 opencli 就是本包版本。失败时报告阶段与日志，不反复重装。不要自动执行搜索、发送消息或邀请。`;
+ const connect=`${target}请读取猎策 LinkedIn 安装回执，使用包内 OpenCLI 检查浏览器连接。浏览器扩展使用 Chrome 商店官方 OpenCLI，不使用猎聘 HL MCP 或开发候选扩展。列出实际连接的 Chrome Profile，识别 LinkedIn 登录账号；多个 Profile 时确认目标账号后绑定。分别核实普通 LinkedIn、Premium、Sales Navigator 的可用能力，不把 Premium 等同于 Sales Navigator，不把未知余额说成零。RPS 尚未实现。优先复用现有标签，不重复打开首页；遇到登录、验证或访问限制时停止并说明。只做连接与账号检查，不搜索、不读取私信、不发送消息或邀请。`;
+ return <main className={styles.page}>
+ <nav className={styles.nav} aria-label="LinkedIn 页面导航"><strong>猎策 · LinkedIn</strong><a href="#installation">快速上手</a><a href="/skills/linkedin/manual">使用说明与命令 →</a></nav>
+ <header className={styles.hero}><span className={styles.badge}>{releaseLabel(releaseState,release)}</span><h1>找人、找公司，<br/>把筛选依据一起交付。</h1><p>把岗位要求、目标公司条件或已有名单交给 AI，在 LinkedIn 核实信息，交付带来源链接的表格报告。</p><a className={styles.primary} href="#installation">开始安装 ↓</a><a className={styles.textLink} href="#start">已安装，开始任务 →</a></header>
+ <section id="installation"><span id="install-center"/><h2>三步开始使用</h2><p className={styles.muted}>准备好 Chrome、LinkedIn 账号，以及能读取本地 Skill 并执行命令的 AI 助手。普通账号也能开始；Sales Navigator 功能需要对应权限。</p>
+ <div className={styles.selectors}><label>电脑系统<select value={platform} onChange={e=>setPlatform(e.target.value as 'mac'|'windows')}><option value="mac">macOS</option><option value="windows">Windows</option></select></label><label>AI 助手<select value={agent} onChange={e=>setAgent(e.target.value)}>{agents.map(a=><option key={a}>{a}</option>)}</select></label></div><p className={styles.note}>选择后，复制的指令会带上系统和助手名称。粘贴到对应助手的新对话中执行。</p>
+ <article className={styles.step}><span className={styles.number}>01</span><div><h3>安装到 {agent}</h3><p>让助手检查环境，完成官网下载、校验与安装。</p>{releaseState==='ready'&&release?<><Copy text={install} label="复制安装指令"/><details><summary>手动安装、下载与校验</summary><p>需要 Node.js 22+、npm 和 Chrome。先确认目标助手的 Skill 目录和安装作用域；不确定时使用上方 AI 安装指令。</p><Copy text={command} label="复制终端命令"/><a href={`${appUrl}/api/products/soho-sourcing/download`}>下载 v{release.version} 安装包</a><p className={styles.code}>安装包 SHA-256：{release.sha256}</p></details></>:<p role="alert">暂时无法获取可安装的公开版本。<button className={styles.secondary} onClick={()=>router.refresh()}>重新获取版本</button><a href="/">查看产品与访问权限</a></p>}<p className={styles.note}>通过标志：doctor 通过，助手能找到 LinkedIn Skill，并保存安装回执。安装成功不等于账号已经连接。</p></div></article>
+ <article className={styles.step}><span className={styles.number}>02</span><div><h3>连接 Chrome 和 LinkedIn</h3><p>在要使用的 Chrome Profile 中安装 <a href="https://chromewebstore.google.com/detail/opencli/ildkmabpimmkaediidaifkhjpohdnifk" target="_blank" rel="noreferrer">官方 OpenCLI 扩展 ↗</a>，按扩展提示连接。打开 <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer">LinkedIn ↗</a> 并登录目标账号。</p><Copy text={connect} label="复制连接检查指令"/><p className={styles.note}>通过标志：识别正确 Profile 和 LinkedIn 账号，报告实际可用权限。Premium 不代表有 Sales Navigator；RPS 暂不支持。</p></div></article>
+ <article id="start" className={styles.step}><span className={styles.number}>03</span><div><h3>提供要求，开始任务</h3><p>选择任务，填写条件、目标数量和证据要求。先确认方案与执行范围，再开始搜索。</p><div className={styles.selectors}><label>这次想做什么<select value={task} onChange={e=>setTask(e.target.value as keyof typeof tasks)}><option value="people">找人 / 寻找负责人</option><option value="companies">找公司</option><option value="existing">研究已有名单</option></select></label></div><Copy text={tasks[task]} label="复制任务模板"/><p className={styles.note}>结果：表格名单、推荐或排除理由、证据链接、缺失信息，以及已读数量和未完成范围。消息和邀请另行明确授权。</p></div></article>
+ </section>
+ <section className={styles.docs} id="usage-examples"><h2>常用任务</h2><div className={styles.examples}>{[['继续上次任务','请读取上次 LinkedIn 任务记录，核对账号和已完成范围，从断点继续；复用已有数据与标签，不重复搜索已完成条件。'],['核实人数与业务','请核实名单中的公司业务、跨国自有实体或团队及地区人数。人数允许估算时标明依据和范围；缺少证据与明确不符合分别说明。'],['重新生成表格报告','请根据本地已有数据重新生成便于阅读的表格报告，保留来源链接、判断依据和未完成范围；不访问新页面。']].map(([title,text])=><article key={title}><h3>{title}</h3><p>{text}</p><Copy text={text} label="复制指令" compact/></article>)}</div><a className={styles.textLink} href="/skills/linkedin/manual">查看完整流程、账号能力与 CLI 命令表 →</a></section>
+ <section className={styles.docs}><h2>安装和使用遇到问题</h2><details><summary>安装成功，助手却找不到 Skill 或命令</summary><p>先根据安装回执核对 Skill 目录和包内启动入口，再刷新技能或新开对话。不同助手的接入方式需要分别检查，不要直接重装或覆盖其他工具。</p></details><details><summary>Chrome 开着，为什么仍然找不到账号？</summary><p>Chrome 打开不等于扩展已连接。检查目标 Profile 的官方 OpenCLI 扩展、连接状态和实际 LinkedIn 登录身份；不要切换到另一个账号继续。登录或验证码由账号本人处理。</p></details><details><summary>普通账号、Premium、Sales Navigator 和 RPS 有什么区别？</summary><p>普通 LinkedIn 按页面实际权限执行；Premium 的计划权益需单独核实，不保证高级搜索可用。Sales Navigator 才进入对应公司和人员筛选流程。RPS 尚未实现；未知权益或额度保持未知，不编造余额。</p></details><details><summary>如何更新？哪些环境已验证？</summary><p>使用当前版本的安装指令更新，保留原任务记录并核对安装回执。2.1.0 已完成 Windows 原始 2.0.16 安装后升级、官网新装、诊断和命令入口测试；首次下载曾超时，同命令复测成功。Windows 真实业务搜索及各 AI 助手首次任务需分别验收。</p></details></section>
+ </main>;
 }

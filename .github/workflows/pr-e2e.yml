@@ -29,7 +29,8 @@ jobs:
   e2e-tests:
     name: E2E (Real Services)
     if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.draft }}
-    runs-on: ubuntu-latest
+    # Playwright 1.58 requires a supported runner; do not float to Ubuntu 26.04.
+    runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
       MINIO_IMAGE: skillhub-minio-ci:2025-10-15

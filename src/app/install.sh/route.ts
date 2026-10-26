@@ -30,7 +30,7 @@ if ! command -v node >/dev/null 2>&1; then
 fi
 NODE_MAJOR="\$(node -p "process.versions.node.split('.')[0]")"
 MIN_NODE=20
-if [ "\$PRODUCT" = "gllue-only" ]; then MIN_NODE=22; fi
+if [ "\$PRODUCT" = "gllue-only" ] || [ "\$PRODUCT" = "liepin-search" ]; then MIN_NODE=22; fi
 if [ "\$NODE_MAJOR" -lt "\$MIN_NODE" ]; then
   echo "Node.js 版本过低(\$(node --version)),请升级到 \$MIN_NODE 或更高版本" >&2
   exit 1
@@ -75,10 +75,13 @@ for (const key of ['DL', 'SHA', 'VER']) {
   if (!out[key]) { console.error('服务器响应缺少字段: ' + key); process.exit(1); }
 }
 for (const key of Object.keys(out)) {
-  console.log(key + '=' + JSON.stringify(String(out[key])));
+  fs.writeFileSync('./pkg.' + key, String(out[key]), {flag:'wx', mode:0o600});
 }
-" > ./pkg.env || exit 1
-. ./pkg.env
+" || exit 1
+DL="\$(cat ./pkg.DL)"
+SHA="\$(cat ./pkg.SHA)"
+VER="\$(cat ./pkg.VER)"
+CRED="\$(cat ./pkg.CRED)"
 
 echo "→ 下载安装包 v\$VER ..."
 curl -fsSL -o pkg.tar.gz "\$DL"
@@ -109,7 +112,7 @@ fi
 echo "→ 环境诊断 ..."
 node doctor.mjs
 echo ""
-echo "✓ 安装完成,可以开始使用了"
+echo "✓ 本地安装与检查完成，请返回安装页继续连接网站与使用验证。"
 `;
 }
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { liepinMcpUsagePrompt } from '@/lib/liepin-guide';
 import { useState } from 'react';
 import styles from './guide.module.css';
 
@@ -18,12 +19,13 @@ const examples = [
 ];
 const groups = ['常用任务', '搜索与筛选', '详情与报告', '方案与收藏', '任务收尾', '连接与排错', '全部'];
 
-export function LiepinUsageExamples() {
+export function LiepinUsageExamples({ mcp = false }: { mcp?: boolean }) {
+  const catalog = examples.map(item => ({ ...item, prompt: mcp ? liepinMcpUsagePrompt(item.id, item.prompt) : item.prompt }));
   const [group, setGroup] = useState('常用任务');
   const [open, setOpen] = useState<string | null>(null);
   const [copied, setCopied] = useState('');
   const [error, setError] = useState(false);
-  const visible = group === '常用任务' ? examples.slice(0, 3) : examples.filter(item => group === '全部' || item.group === group);
+  const visible = group === '常用任务' ? catalog.slice(0, 3) : catalog.filter(item => group === '全部' || item.group === group);
   async function copy(id: string, prompt: string) {
     try { await navigator.clipboard.writeText(prompt); setCopied(id); setError(false); }
     catch { setCopied(''); setError(true); }
@@ -36,6 +38,6 @@ export function LiepinUsageExamples() {
     <div>{visible.map(item => <article key={item.id} className={styles.usageRow}><div className={styles.usageTop}><div><h3><button aria-expanded={open === item.id} aria-controls={`usage-${item.id}`} onClick={() => setOpen(open === item.id ? null : item.id)}>{item.title}<span aria-hidden="true">{open === item.id ? '−' : '+'}</span></button></h3><p>{item.output}</p></div><button className={styles.secondary} aria-label={`复制“${item.title}”问法`} onClick={() => copy(item.id, item.prompt)}>{copied === item.id ? '已复制 ✓' : '复制问法'}</button></div><div id={`usage-${item.id}`} hidden={open !== item.id} className={styles.usageBody}><dl><dt>你提供</dt><dd>{item.input}</dd><dt>你得到</dt><dd>{item.output}</dd></dl><p className={styles.eyebrow}>发给 AI 助手的完整问法</p><p className={styles.usagePrompt}>{item.prompt}</p></div></article>)}</div>
     <p className={styles.usageHint}>{group === '常用任务' ? '先从这 3 个常用任务开始，其他用法可按分类查看。' : `当前显示 ${visible.length} 个示例`}</p>
     <p role="status" aria-live="polite">{copied ? '问法已复制，可粘贴给 AI 助手。' : ''}</p>{error && <p role="alert" className={styles.error}>复制失败，请展开问法后手动选择文字复制。</p>}
-    <details className={styles.details}><summary>使用前需要了解的边界</summary><p>这些是使用示例，不是真实候选人结果。详情仅覆盖账号可见内容，折叠、附件和权限限制可能造成缺失；最终人选由你复核。不自动发送消息、索要附件或付费解锁。收藏与方案变更按明确范围执行，结果不明先核对。</p><p>报告保存在本地，不默认上传或分享。任务清理需使用包含该能力的 v0.2.3 或更新版本；保存组可能需要在 Chrome 界面确认收尾。</p></details>
+    <details className={styles.details}><summary>使用前需要了解的边界</summary><p>这些是使用示例，不是真实候选人结果。详情仅覆盖账号可见内容，折叠、附件和权限限制可能造成缺失；最终人选由你复核。不自动发送消息、索要附件或付费解锁。收藏与方案变更按明确范围执行，结果不明先核对。</p><p>报告保存在本地，不默认上传或分享。{mcp ? '仅关闭本任务创建且身份核验的标签；来源不明的页面保留。' : '任务清理需使用包含该能力的 v0.2.3 或更新版本；保存组可能需要在 Chrome 界面确认收尾。'}</p></details>
   </section>;
 }

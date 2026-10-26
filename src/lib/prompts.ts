@@ -41,8 +41,17 @@ export function freeCliCommand(input: Pick<FreePromptInput, 'appUrl' | 'productS
   return `curl -fsSL ${input.appUrl}/install.sh | bash -s -- ${input.productSlug}`;
 }
 
+function windowsBootstrapCommand(appUrl: string): string {
+  // Base64 preserves Chinese script text across PowerShell 5.1 native encoding.
+  // Node uses its normal HTTPS certificate validation; no Schannel override.
+  const url = `${appUrl}/install.ps1`.replaceAll("'", "''");
+  const loader = `fetch(process.argv[1],{signal:AbortSignal.timeout(60000)}).then(async r=>{if(!r.ok)throw Error('HTTP '+r.status);process.stdout.write(Buffer.from(await r.text(),'utf8').toString('base64'))}).catch(e=>{console.error(e.message);process.exitCode=1})`;
+  const quotedLoader = loader.replaceAll("'", "''");
+  return `$encoded = & node -e '${quotedLoader}' '${url}'; if ($LASTEXITCODE -ne 0) { throw '安装脚本下载失败，已停止' }; $script = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String(($encoded -join ''))); & ([scriptblock]::Create($script.TrimStart([char]0xFEFF)))`;
+}
+
 export function windowsCliCommand(input: Pick<FreePromptInput, 'appUrl' | 'productSlug'>): string {
-  return `$script = irm ${input.appUrl}/install.ps1; & ([scriptblock]::Create($script.TrimStart([char]0xFEFF))) -Product '${input.productSlug}'`;
+  return `${windowsBootstrapCommand(input.appUrl)} -Product '${input.productSlug}'`;
 }
 
 export function windowsFreeInstallPrompt(input: FreePromptInput): string {
@@ -62,7 +71,7 @@ ${windowsInstallAcceptance}
 }
 
 export function windowsPaidCliCommand(input: Pick<PaidPromptInput, 'appUrl' | 'productSlug' | 'token'>): string {
-  return `$script = irm ${input.appUrl}/install.ps1; & ([scriptblock]::Create($script.TrimStart([char]0xFEFF))) -Product '${input.productSlug}' -Token '${input.token}'`;
+  return `${windowsBootstrapCommand(input.appUrl)} -Product '${input.productSlug}' -Token '${input.token}'`;
 }
 
 export function windowsPaidInstallPrompt(input: PaidPromptInput): string {

@@ -1,0 +1,272 @@
+[
+  {
+    "name": "capabilities",
+    "command": "capabilities",
+    "family": "linkedin",
+    "description": "列出已接入平台操作",
+    "parameters": "无",
+    "optional": true,
+    "access": "read"
+  },
+  {
+    "name": "account-inspect",
+    "command": "account-inspect",
+    "family": "linkedin",
+    "description": "账号/订阅诊断",
+    "parameters": "account、candidates[]；include_subscription?",
+    "optional": false,
+    "access": "read"
+  },
+  {
+    "name": "route-options",
+    "command": "route-options",
+    "family": "linkedin",
+    "description": "根据已有证据比较路由",
+    "parameters": "candidates[]、observations[]",
+    "optional": false,
+    "access": "read"
+  },
+  {
+    "name": "task-create",
+    "command": "task-create",
+    "family": "linkedin",
+    "description": "建立任务账本",
+    "parameters": "directory、task{task_id,intent,criteria[],target,budgets?,coverage?,evidence_scope?,source?}",
+    "optional": false,
+    "access": "write"
+  },
+  {
+    "name": "task-validate",
+    "command": "task-validate",
+    "family": "linkedin",
+    "description": "校验任务定义",
+    "parameters": "task_id、intent、criteria[]、target；budgets?、coverage?",
+    "optional": false,
+    "access": "read"
+  },
+  {
+    "name": "plan",
+    "command": "plan",
+    "family": "linkedin",
+    "description": "编译平台请求",
+    "parameters": "provider、operation、account、input",
+    "optional": false,
+    "access": "read"
+  },
+  {
+    "name": "execute",
+    "command": "execute",
+    "family": "linkedin",
+    "description": "执行单项平台请求",
+    "parameters": "provider、operation、account、input",
+    "optional": false,
+    "access": "read"
+  },
+  {
+    "name": "task-execute",
+    "command": "task-execute",
+    "family": "linkedin",
+    "description": "记账后执行平台请求",
+    "parameters": "directory、task_id、operation_id、request",
+    "optional": false,
+    "access": "write"
+  },
+  {
+    "name": "task-status",
+    "command": "task-status",
+    "family": "linkedin",
+    "description": "读取任务与证据版本",
+    "parameters": "directory、task_id",
+    "optional": false,
+    "access": "read"
+  },
+  {
+    "name": "task-assess",
+    "command": "task-assess",
+    "family": "linkedin",
+    "description": "保存模型判断",
+    "parameters": "directory、task_id、assessment_id、assessments[{key,status,reason,evidence[]}]",
+    "optional": false,
+    "access": "write"
+  },
+  {
+    "name": "task-report",
+    "command": "task-report",
+    "family": "linkedin",
+    "description": "单任务HTML/CSV",
+    "parameters": "directory、task_id、assessment_id、report_id",
+    "optional": false,
+    "access": "write"
+  },
+  {
+    "name": "task-recovery",
+    "command": "task-recovery",
+    "family": "linkedin",
+    "description": "已读/待读及中断清单",
+    "parameters": "directory、task_id",
+    "optional": false,
+    "access": "read"
+  },
+  {
+    "name": "task-resume",
+    "command": "task-resume",
+    "family": "linkedin",
+    "description": "原账本内续跑待处理详情",
+    "parameters": "directory、task_id、operation_id、evidence_revision、person_keys[]；include_about?、request_budget?",
+    "optional": false,
+    "access": "write"
+  },
+  {
+    "name": "task-consolidate",
+    "command": "task-consolidate",
+    "family": "linkedin",
+    "description": "跨批次正式汇总",
+    "parameters": "directory、report_id、sources[{directory,task_id,assessment_id}]",
+    "optional": false,
+    "access": "write"
+  },
+  {
+    "name": "task-resolve",
+    "command": "task-resolve",
+    "family": "linkedin",
+    "description": "登记局部失败替代",
+    "parameters": "directory、task_id、operation_id、replacement_id、reason",
+    "optional": false,
+    "access": "write"
+  },
+  {
+    "name": "task-import-sourcing",
+    "command": "task-import-sourcing",
+    "family": "linkedin",
+    "description": "导入已确认寻访需求",
+    "parameters": "directory、task、confirmed:true、sourcing_request；mapping_note?",
+    "optional": false,
+    "access": "write"
+  },
+  {
+    "name": "task-company-people",
+    "command": "task-company-people",
+    "family": "linkedin",
+    "description": "公司任务转人员任务",
+    "parameters": "parent{directory,task_id}、directory、task、company_keys[]",
+    "optional": false,
+    "access": "write"
+  },
+  {
+    "name": "task-prepare-outreach",
+    "command": "task-prepare-outreach",
+    "family": "linkedin",
+    "description": "生成待批准联系名单",
+    "parameters": "directory、task_id、handoff_id、assessment_id、person_keys[]、purpose",
+    "optional": false,
+    "access": "write"
+  },
+  {
+    "name": "task-outreach-input",
+    "command": "task-outreach-input",
+    "family": "linkedin",
+    "description": "转换旧招聘触达输入",
+    "parameters": "directory、task_id、handoff_id、person_key、recruiting_context{confirmed,description,source}",
+    "optional": false,
+    "access": "write"
+  },
+  {
+    "name": "salesnav-doctor",
+    "command": "doctor",
+    "family": "salesnav",
+    "description": "环境与桥接诊断",
+    "parameters": "profile?",
+    "optional": true,
+    "access": "read"
+  },
+  {
+    "name": "salesnav-capabilities",
+    "command": "capabilities",
+    "family": "salesnav",
+    "description": "能力与筛选字段目录",
+    "parameters": "无；账号感知形式：绑定字段",
+    "optional": true,
+    "access": "read"
+  },
+  {
+    "name": "salesnav-account-check",
+    "command": "account-check",
+    "family": "salesnav",
+    "description": "完整账号检查",
+    "parameters": "共同JSON字段：profile、expected_identity、expected_profile_url；request_budget?、execution_context?（account-check不接受缓存）",
+    "optional": false,
+    "access": "read"
+  },
+  {
+    "name": "salesnav-filter-options",
+    "command": "filter-options",
+    "family": "salesnav",
+    "description": "解析筛选选项",
+    "parameters": "共同JSON字段：profile、expected_identity、expected_profile_url；request_budget?、execution_context?（account-check不接受缓存）；search_type、field、query?",
+    "optional": false,
+    "access": "read"
+  },
+  {
+    "name": "salesnav-account-search",
+    "command": "account-search",
+    "family": "salesnav",
+    "description": "公司搜索",
+    "parameters": "共同JSON字段：profile、expected_identity、expected_profile_url；request_budget?、execution_context?（account-check不接受缓存）；keywords?、filters、limit、max_pages?\nfilters键：industry, headquarters_location, company_headcount, number_of_followers, fortune, job_opportunities, recent_activities, connection, saved_accounts, account_lists, annual_revenue, company_headcount_growth, department_headcount, department_headcount_growth, companies_in_crm；实体筛选值可含lookup_query（仅查找候选，最终label仍精确匹配）；evidence_directory?（新建绝对路径私有目录，关闭会话前保存UI截图及证据）",
+    "optional": false,
+    "access": "read"
+  },
+  {
+    "name": "salesnav-lead-search",
+    "command": "lead-search",
+    "family": "salesnav",
+    "description": "人员搜索",
+    "parameters": "共同JSON字段：profile、expected_identity、expected_profile_url；request_budget?、execution_context?（account-check不接受缓存）；keywords?、filters、limit、max_pages?\nfilters键：geography, current_company, function, title, seniority, company_headcount, past_company, company_type, company_headquarters_location, past_title, years_in_current_company, years_in_current_position, industry, profile_language, years_of_experience, groups, school, connection, connections_of, persona, account_lists, lead_lists, people_interacted_with, saved_leads_and_accounts, following_your_company, viewed_your_profile_recently, past_colleague, shared_experiences, changed_jobs, posted_on_linkedin, first_name, last_name, people_in_crm；实体筛选值可含lookup_query（仅查找候选，最终label仍精确匹配）；evidence_directory?（新建绝对路径私有目录，关闭会话前保存UI截图及证据）",
+    "optional": false,
+    "access": "read"
+  },
+  {
+    "name": "salesnav-search-page",
+    "command": "search-page",
+    "family": "salesnav",
+    "description": "游标续读",
+    "parameters": "共同JSON字段：profile、expected_identity、expected_profile_url；request_budget?、execution_context?（account-check不接受缓存）；cursor、limit?、max_pages?；evidence_directory?（新建绝对路径私有目录，关闭会话前保存UI截图及证据）",
+    "optional": false,
+    "access": "read"
+  },
+  {
+    "name": "salesnav-account-read",
+    "command": "account-read",
+    "family": "salesnav",
+    "description": "公司详情",
+    "parameters": "共同JSON字段：profile、expected_identity、expected_profile_url；request_budget?、execution_context?（account-check不接受缓存）；company",
+    "optional": false,
+    "access": "read"
+  },
+  {
+    "name": "salesnav-lead-read",
+    "command": "lead-read",
+    "family": "salesnav",
+    "description": "人员详情",
+    "parameters": "共同JSON字段：profile、expected_identity、expected_profile_url；request_budget?、execution_context?（account-check不接受缓存）；lead、include_about?（默认true）",
+    "optional": false,
+    "access": "read"
+  },
+  {
+    "name": "salesnav-batch",
+    "command": "batch",
+    "family": "salesnav",
+    "description": "同会话批量操作",
+    "parameters": "共同JSON字段：profile、expected_identity、expected_profile_url；request_budget?、execution_context?（account-check不接受缓存）；operations[{command,input}]",
+    "optional": false,
+    "access": "read"
+  },
+  {
+    "name": "salesnav-export",
+    "command": "export",
+    "family": "salesnav",
+    "description": "本地导出",
+    "parameters": "input_path、output_path、format(json/csv/md/html)",
+    "optional": false,
+    "access": "write"
+  }
+]

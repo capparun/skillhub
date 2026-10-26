@@ -1,0 +1,15 @@
+{
+  "name": "hunter-linkedin",
+  "version": "2.0.9",
+  "type": "module",
+  "description": "Hunter LinkedIn 渠道：寻访、Xray、评估、报告、公司调研",
+  "scripts": {
+    "test": "for t in test/*.test.js; do node \"$t\" || exit 1; done"
+  },
+  "dependencies": {
+    "@hunter/core": "2.0.8"
+  },
+  "peerDependencies": {
+    "@jackwener/opencli": "2.0.1"
+  }
+}

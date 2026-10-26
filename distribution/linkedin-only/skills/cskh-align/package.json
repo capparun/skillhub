@@ -1,0 +1,23 @@
+{
+ "name": "@cappa/cskh-align",
+  "version": "1.7.6",
+  "description": "猎头需求对齐助手 —— 输出经确认的人才画像、渠道策略、搜索参数和可视化 HTML",
+  "main": "SKILL.md",
+  "files": [
+    "SKILL.md",
+    "test-prompts.json",
+    "references/",
+    "scripts/"
+  ],
+  "keywords": [
+    "claude-skill",
+    "hunter",
+    "recruitment",
+    "jd-parser"
+  ],
+  "author": "cappa",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://skillshub8302.zeabur.app/"
+  }
+}

@@ -22,7 +22,7 @@ export function freeInstallPrompt(input: FreePromptInput): string {
   return `请帮我安装「${productName}」技能(猎策官方)。
 
 步骤:
-1. 检查环境:终端里 node --version 需要 ${['liepin-search', 'gllue-only'].includes(productSlug) ? '22' : '20'} 或更高。
+1. 检查环境:终端里 node --version 需要 ${['liepin-search', 'gllue-only', 'soho-sourcing'].includes(productSlug) ? '22' : '20'} 或更高。
 2. 向我说明将要发生的变更(下载安装包、把技能安装到本机 AI 助手的 skills 目录),取得我确认后继续。
 3. 下载安装包:
    curl -fsSL -o ${productSlug}.tar.gz "${appUrl}/api/products/${productSlug}/download"
@@ -58,7 +58,7 @@ export function windowsFreeInstallPrompt(input: FreePromptInput): string {
   return `请帮我在 Windows 上安装「${input.productName}」技能（猎策官方）。
 
 要求：
-1. 先运行 node --version，需要 Node.js ${['liepin-search', 'gllue-only'].includes(input.productSlug) ? '22' : '20'} 或更高版本；把真实版本输出告诉我。
+1. 先运行 node --version，需要 Node.js ${['liepin-search', 'gllue-only', 'soho-sourcing'].includes(input.productSlug) ? '22' : '20'} 或更高版本；把真实版本输出告诉我。
 2. 运行下面这一条 PowerShell 命令。不要自行改写安装步骤或手工复制文件：
    ${windowsCliCommand(input)}
 3. 官方脚本会自动获取 v${input.version}、校验 SHA-256、安装插件和 Skills，并运行 doctor。
@@ -78,7 +78,7 @@ export function windowsPaidInstallPrompt(input: PaidPromptInput): string {
   return `请帮我在 Windows 上安装「${input.productName}」（猎策专业版）。
 
 要求：
-1. 先运行 node --version，需要 Node.js ${['liepin-search', 'gllue-only'].includes(input.productSlug) ? '22' : '20'} 或更高版本；把真实版本输出告诉我。
+1. 先运行 node --version，需要 Node.js ${['liepin-search', 'gllue-only', 'soho-sourcing'].includes(input.productSlug) ? '22' : '20'} 或更高版本；把真实版本输出告诉我。
 2. 向我说明即将兑换一次性令牌、下载并校验安装包、安装技能与 OpenCLI 插件；取得我确认后继续。
 3. 确认后只运行下面这一条 PowerShell 命令。不要调用 bash、WSL 或 Git Bash，也不要自行改写安装步骤：
    ${windowsPaidCliCommand(input)}

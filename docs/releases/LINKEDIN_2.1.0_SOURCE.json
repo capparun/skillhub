@@ -1,0 +1,1386 @@
+{
+  "version": "2.1.0",
+  "kind": "frozen-reviewed-distribution-source",
+  "upstreamFiles": [
+    {
+      "source": "csk/src/distribution/install-distribution.mjs",
+      "sha256": "2043ba5b9347b830def5aaaa0ba5f0b7cc7b07e7a110a96eb70c8733756175d2",
+      "target": "install.mjs"
+    },
+    {
+      "source": "csk/src/distribution/doctor-distribution.mjs",
+      "sha256": "1e792da286eb71dfacd8aa3512830ab1a88f250109b4e86d4cc5480175ae12d6",
+      "target": "doctor.mjs"
+    },
+    {
+      "source": "csk/src/distribution/update-distribution.mjs",
+      "sha256": "ed28f9d2f793ec97dea8235ded597689e7315c73031f7ce4551fb32be9e53f61",
+      "target": "update.mjs"
+    },
+    {
+      "source": "csk/src/distribution/process-distribution.mjs",
+      "sha256": "59f90da2b86f409a0fe4e20be8e948d676bf5270120bbf45836ddd0d97ae4884",
+      "target": "process-distribution.mjs"
+    },
+    {
+      "source": "csk/src/distribution/target-distribution.mjs",
+      "sha256": "178d2b274abd645f4aa87fb31d304dd707121d87c1efcbaab8fb47c2d447cd29",
+      "target": "target-distribution.mjs"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/capability-probe.js",
+      "sha256": "d9e30d12a15734f2f72244ce0f91cac08ae75597bd28c8c23d4e22f6899f9d41",
+      "target": "runtime/packages/hunter-linkedin/capability-probe.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/company-id-lookup.js",
+      "sha256": "d51eb6fc05da3e5194e34c34c8a84cf209aa180a1cf6aff2e7cdf1fb5e5ec1b2",
+      "target": "runtime/packages/hunter-linkedin/company-id-lookup.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/company.js",
+      "sha256": "6a1e434a20112c440356b65c503797bb3fa433b82942ed3bf5c5417a4b9b2f77",
+      "target": "runtime/packages/hunter-linkedin/company.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/connect-safe.js",
+      "sha256": "1ba5ad2199f548970a934a12ccc6771c0116d8de460b22283f74d5ad5e311c84",
+      "target": "runtime/packages/hunter-linkedin/connect-safe.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-check-alive.js",
+      "sha256": "ad8b8124a1c6e4f018aa5631690feb67ae6e4e71edaf0d2904f7921d51dc5a43",
+      "target": "runtime/packages/hunter-linkedin/dev/test-check-alive.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-company-url.js",
+      "sha256": "a0bf026c418e499e83b40f59e232974e3cfe2792b583ce049edf98033a333350",
+      "target": "runtime/packages/hunter-linkedin/dev/test-company-url.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-explore.js",
+      "sha256": "91feedaf9d3d6495aa47c6855a49c9df474ba42b5431e2c06bdbe9e3d4ec9545",
+      "target": "runtime/packages/hunter-linkedin/dev/test-explore.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-facet-diagnose.js",
+      "sha256": "5188daf0ba02f32b87d3d04def8b3ce3da803b934c11f04096e506d18af43a47",
+      "target": "runtime/packages/hunter-linkedin/dev/test-facet-diagnose.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-facet-ui-front.js",
+      "sha256": "39873266dca3a120760f55defaba81f52fde65a0cf9ce2c30d5308bf0a458553",
+      "target": "runtime/packages/hunter-linkedin/dev/test-facet-ui-front.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-filters.js",
+      "sha256": "07420a5754ef77587bebeb566134d467d4f9fdee6eead44f12cf89a15055fc47",
+      "target": "runtime/packages/hunter-linkedin/dev/test-filters.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-geo-after-facet.js",
+      "sha256": "be2daa1c02540f33c893a49f8b8aab80d139de0b37c02358a7f2bb1b9ddcec37",
+      "target": "runtime/packages/hunter-linkedin/dev/test-geo-after-facet.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-geo-compare.js",
+      "sha256": "0a2722716c66e82b359e4ac9694995db1c9dd6433756cfb36b6968d051d7593c",
+      "target": "runtime/packages/hunter-linkedin/dev/test-geo-compare.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-geo-facet-url.js",
+      "sha256": "c726e8ad6c2329907280b35ad408a425d1ed374a1c147b16f3595e90e692d46b",
+      "target": "runtime/packages/hunter-linkedin/dev/test-geo-facet-url.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-geo-multi.js",
+      "sha256": "ebad99bfc5f666fae2d3f5932e26d2dce3d3051bfacca87ad3e4ffc161f38668",
+      "target": "runtime/packages/hunter-linkedin/dev/test-geo-multi.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-geo-multi2.js",
+      "sha256": "29d2d133e021a506e924d08911fd6efad426dce07776c020c5a3abd5bab03473",
+      "target": "runtime/packages/hunter-linkedin/dev/test-geo-multi2.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-geo-user.js",
+      "sha256": "22c652934794aa317a1f7e5164c47b6b1a7062bc8d54d22b9702280c7f1c32ad",
+      "target": "runtime/packages/hunter-linkedin/dev/test-geo-user.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-home-to-search.js",
+      "sha256": "019ba014380e731d88eb397f5bb098c37740b738bb95193968a07b8d789a9461",
+      "target": "runtime/packages/hunter-linkedin/dev/test-home-to-search.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-ind-verify.js",
+      "sha256": "08264d3064db6cf269cca508ff0f446aa0f57cd2008ff242c510113d857bcece",
+      "target": "runtime/packages/hunter-linkedin/dev/test-ind-verify.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-lang-url.js",
+      "sha256": "d11de0450bd265b7c0c153fbacc11a2dbf6aa94aaca820d773b84b2ce4b6b208",
+      "target": "runtime/packages/hunter-linkedin/dev/test-lang-url.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-lang-url2.js",
+      "sha256": "5603e39e3d32c58bdc2b2cdd1f3d844a4bd0c777dafebea5e2365fbefa7a36c7",
+      "target": "runtime/packages/hunter-linkedin/dev/test-lang-url2.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-people-search.js",
+      "sha256": "4761882c979109e4e0c54ecc9c8f2b21c22785ddbf0505197c4d4069a3248ccf",
+      "target": "runtime/packages/hunter-linkedin/dev/test-people-search.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-profile-parse.js",
+      "sha256": "ed5bc5c9bf1d547f5d88cdd233ecce4c75dce7536872c49e6b3ae7351fd12e2b",
+      "target": "runtime/packages/hunter-linkedin/dev/test-profile-parse.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-activate.js",
+      "sha256": "c3b8de9f74cf60aeebb99e08cd5b87b65990b42a722a3e937614d84a48867de5",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-activate.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-analyze.js",
+      "sha256": "a049fda3574187aaac1f7a6e764614b86dcdec133a663a4410c43150141d2cf6",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-analyze.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-api.js",
+      "sha256": "9176aaec37615c04beff824a60b73699ee34eb9573aa87fb60b8de068897f6a8",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-api.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-boolean.js",
+      "sha256": "7fcb876cbc389e2236207a7c70bb3b68c35f73c15f4962361fa62cb2f9583ee0",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-boolean.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-bot.js",
+      "sha256": "cce8f2e962bf46ce7738e67487162adb1dc30e2049878c61208b0d667756b730",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-bot.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-card-dom.js",
+      "sha256": "a7df0fb5695c560374db04dbd5a6076a199c2bf1507fc5312818b64543eed2de",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-card-dom.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-chrome-tabs.js",
+      "sha256": "3f573524607daa9f4fd8c3b50ab5381091bd0a8389dd4a0ee0ce9c2568430a2e",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-chrome-tabs.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-confirm.js",
+      "sha256": "a314d60849db8487e00089fdd9028322a8a8545aab6ba7fb943f4237151b6bb9",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-confirm.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-content.js",
+      "sha256": "5793922de5a7b072a037ce6870f984881a3e5aa9dfa0c335d27ae3fd4d976d7b",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-content.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-context.js",
+      "sha256": "a11e97931c4b190cc9a519dba0318cdb8322e31c6bd28db22d9851a53fa05f12",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-context.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-deep.js",
+      "sha256": "9e89e3280817cd4152403514d425e6098c27ac9571c78383dd6b44085f0a407a",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-deep.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-direct.js",
+      "sha256": "14dec77c0d186a5871762d390626408ae590de4d6882ec6bd0b8bbf2eb17c897",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-direct.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-ember.js",
+      "sha256": "d3995a5a8a22c265951d184843a055f25d9eb32a9a8256748905a9c75eba3861",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-ember.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-errors.js",
+      "sha256": "00ea57663544aeb60112849601dff5a7c23cd6ba8d1777ffd1e7ee31ba462412",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-errors.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-extension.js",
+      "sha256": "2d578551c1c96604dd2207179fd893aea56cb7af8e70c25de7112a49e46dac73",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-extension.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-facet-ember.js",
+      "sha256": "dd5c5048c2155f0df9978cf0098f31ae8c697383ab8832d70a745c69886f169d",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-facet-ember.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-facet-flow.js",
+      "sha256": "db75e641d2263fbd3ba295a29b685bacd941fd52d3b7e954a90150321b879fce",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-facet-flow.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-facet-trigger.js",
+      "sha256": "3c126fb6eb58ef7a6d9936b1e04b2b1119e8194ede9b195891fd48995da2c607",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-facet-trigger.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-facet-ui.js",
+      "sha256": "d91a4c7d4b5c7186eab9cecae420aa75f71764db19bffb51fc257e144d929f9f",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-facet-ui.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-facet-url.js",
+      "sha256": "3589238f5aeede8b083d030c8a189e472427e43158d57fb6221422bbdc3790ca",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-facet-url.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-facets.js",
+      "sha256": "a2dbe8b083bcd36dcf66c8d35fb0cd17ec59fdd3cee14f0806d36498d856006b",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-facets.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-final.js",
+      "sha256": "229bb81edfd5cedb0e0004c19ae15804976da8703df0a9dc7251930673fb9dd9",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-final.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-focus.js",
+      "sha256": "a45e489c97a7594d1908b8eaaa4372c47059f99dfdd05a13f0d89857371f29ae",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-focus.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-force.js",
+      "sha256": "1d93299a86f0fb366b1aab78ab7067e1438ce6db8042300d6ac1c755ec0dd1ce",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-force.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-front.js",
+      "sha256": "0395add1457fb53b9f20f4b12fabf264bbf404ecf3d8bf56ca5edc460b96b76d",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-front.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-front2.js",
+      "sha256": "bd26d2fc2f6346c47b598474b990c9dfba290483f7a350005afd12182c5c5a46",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-front2.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-ghost.js",
+      "sha256": "3419e12be1bbb9a844ecb4dc9e421013995b3b25fa6f891f66abc3babda4d44f",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-ghost.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-lockup.js",
+      "sha256": "460de38397688f83ef89460867d60dd15dd4c3e0bc30c6db5e7df1a92a1519c5",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-lockup.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-native.js",
+      "sha256": "00ee80cdf309cc66890ce08e12c465d70b1b791e088e52d32790b502ddfcdf73",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-native.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-network.js",
+      "sha256": "a46dc1522d8d5d3f95c77a4e413cf8b398a3b256be2ddd1f9256360418211d2a",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-network.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-now.js",
+      "sha256": "1afc9d0b9eb4193b0ae82b8d29b276d71012fea41955b871bc8659155ee06018",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-now.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-pause.js",
+      "sha256": "b02b65504544df19e261a77bce917666d20ce906d10567b44b46e55621206570",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-pause.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-remain.js",
+      "sha256": "fed6bd6e62fdc8625a4ca843525a1be0660b62968ad847cc9bb08c4d6695ae1b",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-remain.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-scroll.js",
+      "sha256": "1b9cb53aa5f20da3e51753eb256021d6403006b2565f7fb0592a4b99800fdfca",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-scroll.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-search.js",
+      "sha256": "6c3c27f6d1a4e9ca7c41649a33b8b1bd1731ae0a289478e3ec6b210e5de318a8",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-search.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-select.js",
+      "sha256": "4bdae4a94bcc77048ddead6a8912b6fb9a569d37af68d231d31d119c6126ff66",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-select.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-tabs.js",
+      "sha256": "5d9d2239ff38418d6ad72a98e4b8aaaa383cd2f25a1b5e349b38107468c6dd20",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-tabs.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-trigger.js",
+      "sha256": "c7e23931e76d0b88ead6de4a91fc8f13a908775162f468df7ac6e14bbff305b0",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-trigger.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-url-check.js",
+      "sha256": "2b2840387c19def52a5a0bff93f63e94b50453c16867b76036cceacbeb443525",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-url-check.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-url.js",
+      "sha256": "677d9858feac06816a6b69e6c346dbd1cd0f690c5b8c3ebe23910f24d0c41b6e",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-url.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-visibility.js",
+      "sha256": "ae9b218cc2daec1789743ed20ed2a9dae97b830088d4e2eb9c48b61502b0e3e0",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-visibility.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-recruiter-wait.js",
+      "sha256": "59957e3f5a9e8417e20c4e4e5e1138ab5a4bb635968e28816f8d37980b57a6d0",
+      "target": "runtime/packages/hunter-linkedin/dev/test-recruiter-wait.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-school-deep.js",
+      "sha256": "0160b55c05baeb78e0313a638e75a0addf38bd6436a5eb678d5493313a485b09",
+      "target": "runtime/packages/hunter-linkedin/dev/test-school-deep.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-school-direct.js",
+      "sha256": "b3cebb9e8e830098f3509f8ad08e4ab90473095c9d00127138557dfcde68ec6e",
+      "target": "runtime/packages/hunter-linkedin/dev/test-school-direct.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-school-extract.js",
+      "sha256": "0ef22e84c542c7adbcd58c6808f2dbfa7c45214c5327481610dd5f352216aca0",
+      "target": "runtime/packages/hunter-linkedin/dev/test-school-extract.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-school-filter.js",
+      "sha256": "6cd323d687a9481abdde6875aa0012853e7e58883efa11c34652101ad1100215",
+      "target": "runtime/packages/hunter-linkedin/dev/test-school-filter.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-school-id.js",
+      "sha256": "0515827114b788fb69a7d81880610afa49aff11998bf61fec65ad6a5051e2695",
+      "target": "runtime/packages/hunter-linkedin/dev/test-school-id.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-school-ids.js",
+      "sha256": "cc92e25cbba2ccf589b47ea2afaf210ad6b0a1e1ef99bbdfbfcc149134f29647",
+      "target": "runtime/packages/hunter-linkedin/dev/test-school-ids.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-scout-debug.js",
+      "sha256": "fa7b2c006798240f98360612ae89054d6672cad3ad1a9b6b346ea21332e06af1",
+      "target": "runtime/packages/hunter-linkedin/dev/test-scout-debug.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-search-and-pause.js",
+      "sha256": "2a7bc2405101d5c687e0433d9da9c881fa3c19603f2414ccd74912d2ea780b60",
+      "target": "runtime/packages/hunter-linkedin/dev/test-search-and-pause.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-sf2.js",
+      "sha256": "b26f96dccac19d13312187f281875b90d5d53edba9f8baaefc7fba13796b86ab",
+      "target": "runtime/packages/hunter-linkedin/dev/test-sf2.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-si-final.js",
+      "sha256": "bd2653423349d310e004bdf3f38a3c00f7bc9ecd06658462c34b6c3145c389b4",
+      "target": "runtime/packages/hunter-linkedin/dev/test-si-final.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-si-url.js",
+      "sha256": "1a6d0aea79bd7b62abc64caf940a0d1fe9632ef2384284c537dbb84417b66afb",
+      "target": "runtime/packages/hunter-linkedin/dev/test-si-url.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-stay.js",
+      "sha256": "6a5c00fd57d2f7e6d5c175340b2387ced3b46d7ccf37aee42d5d3f041eca3d03",
+      "target": "runtime/packages/hunter-linkedin/dev/test-stay.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/dev/test-url-params.js",
+      "sha256": "a68a01dc834193000732dac62c8893f4980a64fe2627093c9f018019dd410298",
+      "target": "runtime/packages/hunter-linkedin/dev/test-url-params.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/evaluate.js",
+      "sha256": "cb2d6a428fa4a6e56b98cfb8971a2ed08b3a812c94b99d7a7fd98566899f92df",
+      "target": "runtime/packages/hunter-linkedin/evaluate.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/first-message-safe.js",
+      "sha256": "352f3986c1dd2b85109a9c7b1f7404987fc8d7d8bf35d203d6d7042b940d924f",
+      "target": "runtime/packages/hunter-linkedin/first-message-safe.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/candidate-normalizer.js",
+      "sha256": "42257fdca3bfd7e714f079045a915e22ca443fc7416000da34afedfd783007a1",
+      "target": "runtime/packages/hunter-linkedin/lib/candidate-normalizer.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/capability-probe.js",
+      "sha256": "5ea158f04ce5b9788ed590286cd11d6e1ca34b21e001009b3878825244fc1b1f",
+      "target": "runtime/packages/hunter-linkedin/lib/capability-probe.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/company-employees.js",
+      "sha256": "16a1140307ac0a14cddb62464f8c0df605f7f80c304246ceb89f0ea502664194",
+      "target": "runtime/packages/hunter-linkedin/lib/company-employees.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/company-page.js",
+      "sha256": "0292e2446b825b1faf0d34077e74ad4b09275714fa9e2d44fd5a5fbd38efb414",
+      "target": "runtime/packages/hunter-linkedin/lib/company-page.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/compliance.js",
+      "sha256": "ee53ee5f4c746902c492caec54275eb9feeffa4d03ad486e6beeeaefae975b03",
+      "target": "runtime/packages/hunter-linkedin/lib/compliance.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/connect-safe.js",
+      "sha256": "f66ce910db507d8420958c723a5fac29af189ee75803961ba091368bfd4c0b25",
+      "target": "runtime/packages/hunter-linkedin/lib/connect-safe.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/first-message-safe.js",
+      "sha256": "5f172397778090e01481715b5f910e39145cb916f8560f3b21eb40d74103e504",
+      "target": "runtime/packages/hunter-linkedin/lib/first-message-safe.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/hunter-config.js",
+      "sha256": "27c9d04a8a8174189018a78e2309400b31f443df43b9b97d7b9ee1eadf22431d",
+      "target": "runtime/packages/hunter-linkedin/lib/hunter-config.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/index.js",
+      "sha256": "2dcfa676b8d277b22a4ceba3ef09f8bd2b32c67e99fc59923eb7fa3b13ed3dad",
+      "target": "runtime/packages/hunter-linkedin/lib/index.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/json-file.js",
+      "sha256": "32324c760453bfdec9d66502234a4ffb2ef9a6c00695285ed693b0d8b19648c6",
+      "target": "runtime/packages/hunter-linkedin/lib/json-file.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/linkedin-evaluator.js",
+      "sha256": "1685b0159b13e4c07823f2a92e6599b3425c5635a8f3622f6b1ee4119b51abf4",
+      "target": "runtime/packages/hunter-linkedin/lib/linkedin-evaluator.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/linkedin-message-templates.js",
+      "sha256": "e9254a59b50ad2ddf73b977943dc01f499ad46399d8fe28b7d525212266774d8",
+      "target": "runtime/packages/hunter-linkedin/lib/linkedin-message-templates.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/linkedin-relationship.js",
+      "sha256": "485048497401a3e07a88dc03cece7c93995324eee023eea90e96c7f344813f32",
+      "target": "runtime/packages/hunter-linkedin/lib/linkedin-relationship.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/linkedin-report-html.js",
+      "sha256": "a4e3a666d087b2f68713552718be86fa43431ed856b593801068fc0c9f44a6ad",
+      "target": "runtime/packages/hunter-linkedin/lib/linkedin-report-html.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/linkedin-session-validator.js",
+      "sha256": "eb50f8baa29774fd738e974ac329f03069e252c4c14a7c15e414109b61c7ae81",
+      "target": "runtime/packages/hunter-linkedin/lib/linkedin-session-validator.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/linkedin-tier.js",
+      "sha256": "5aee92804a0b58f66c97185319a0331d713b86fc456459043b21f13004a62f75",
+      "target": "runtime/packages/hunter-linkedin/lib/linkedin-tier.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/linkedin-urls.js",
+      "sha256": "bdb73b4ad4742b66cf86ed6be99f3abdce7ed982f71c5a9e0214b7d163dec34a",
+      "target": "runtime/packages/hunter-linkedin/lib/linkedin-urls.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/outreach-ledger.js",
+      "sha256": "a928a43b70b0a42a8a359d69141e20bfa7694a7e559045a795ad971dc8ac84e0",
+      "target": "runtime/packages/hunter-linkedin/lib/outreach-ledger.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/outreach-plan.js",
+      "sha256": "10836e2033147623a7eac36af85a5009a8945e628ae46fb08bdb4c2492aed367",
+      "target": "runtime/packages/hunter-linkedin/lib/outreach-plan.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/platform.js",
+      "sha256": "229dca439be2825ebf4becdf1bfd715c9b69811beabaf914de793ceac0e01bc6",
+      "target": "runtime/packages/hunter-linkedin/lib/platform.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/profile-url.js",
+      "sha256": "8e0a94d3efe1c1768c949529e083a86f6e88d1fe328ab8c85733b0e45e6e8665",
+      "target": "runtime/packages/hunter-linkedin/lib/profile-url.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/quota-tracker.js",
+      "sha256": "09fb7a2515e6d4cb5183504641dd072c98aab760d7c52d17ff7d1661a2d42f01",
+      "target": "runtime/packages/hunter-linkedin/lib/quota-tracker.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/rate-limiter.js",
+      "sha256": "be3f28cf3aa6064617774f54e1560f78f96ef1863a206a67dd96846aa6525549",
+      "target": "runtime/packages/hunter-linkedin/lib/rate-limiter.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/relationship-state.js",
+      "sha256": "5b3108974939e9b5f66cc07a8153ef9934ca0b107576ba1fc0601b1bbeb4a90a",
+      "target": "runtime/packages/hunter-linkedin/lib/relationship-state.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/thread-snapshot.js",
+      "sha256": "5a81be65929fbc7c7556c5df2b054678d8db98a57dded2e14280efb6de69e0e7",
+      "target": "runtime/packages/hunter-linkedin/lib/thread-snapshot.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/lib/xray-search.js",
+      "sha256": "84469bcc2e0ffae41dcaf61783f7154d422747ceb1b4d08e2251d03ff60d331f",
+      "target": "runtime/packages/hunter-linkedin/lib/xray-search.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/normalize.js",
+      "sha256": "4b1ddcbed6bc2e79175fc098a5ba3c3faf3993555f793a6cd17b4a061367d258",
+      "target": "runtime/packages/hunter-linkedin/normalize.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/outreach-ledger.js",
+      "sha256": "71282252453057f85ef8bd8ff9b327a5b4d1f0533b8f8a26853898355445e37f",
+      "target": "runtime/packages/hunter-linkedin/outreach-ledger.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/outreach-plan.js",
+      "sha256": "ccc6840fb7165603fcadf17e3f4e242bb316b57cc3a7f7cfbfbb4deee018379a",
+      "target": "runtime/packages/hunter-linkedin/outreach-plan.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/package.json",
+      "sha256": "d6dfd3b17b14bdce41c0890261623ddbb54d0fdb2db7294b2d4fa70bd344460e",
+      "target": "runtime/packages/hunter-linkedin/package.json"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/recruiter-scout.js",
+      "sha256": "eb7dc4e63552c88b0270143b54b8e3c455279019ed39be05a430806ef182583e",
+      "target": "runtime/packages/hunter-linkedin/recruiter-scout.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/relationship-state.js",
+      "sha256": "0e3118913194a082ceee06de7798440d5d2a0c983a0c3a918615c351b083b22d",
+      "target": "runtime/packages/hunter-linkedin/relationship-state.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/report.js",
+      "sha256": "1f43213159a856c92ed8cce5fa055f9d829c29805c2d3c46bdc60c2ac163ba84",
+      "target": "runtime/packages/hunter-linkedin/report.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/scout.js",
+      "sha256": "838f379b3aa8467293eb59c097daffb1174017133bdb5f30e27ca7cc338ec9fa",
+      "target": "runtime/packages/hunter-linkedin/scout.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/setup.js",
+      "sha256": "dff2671ce6fae6101c46d5b1bc07d96c9941ecbd1748a6d54a159e4609f54583",
+      "target": "runtime/packages/hunter-linkedin/setup.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin/thread-snapshot.js",
+      "sha256": "0b161a707be85238eef5984e738b29cc9a7cc8a8fda20271d6d43fa4477efa06",
+      "target": "runtime/packages/hunter-linkedin/thread-snapshot.js"
+    },
+    {
+      "source": "csk/hunter/packages/core/index.js",
+      "sha256": "f1216e377ceecc16b9f70817cca51529e84f92a0cf3089063592566d1d9dc2e4",
+      "target": "runtime/packages/core/index.js"
+    },
+    {
+      "source": "csk/hunter/packages/core/package.json",
+      "sha256": "e8dd21f50fdda2bf337a4475d93783eac7a05ad6dac8893888f3dae8b88fde2c",
+      "target": "runtime/packages/core/package.json"
+    },
+    {
+      "source": "csk/hunter/packages/core/utils/analyze-result.js",
+      "sha256": "aedd3c1364e493dc57df04f3abe0f81e1c94633ad5ad2c7b51601874519f0cf2",
+      "target": "runtime/packages/core/utils/analyze-result.js"
+    },
+    {
+      "source": "csk/hunter/packages/core/utils/evidence-evaluator.js",
+      "sha256": "2ed3e27a93bbe07f39b43c4f3d721a500403829c26a1a01f1dcfe4e1452ea197",
+      "target": "runtime/packages/core/utils/evidence-evaluator.js"
+    },
+    {
+      "source": "csk/hunter/packages/core/utils/jd-config-schema.js",
+      "sha256": "68b0a44b4239080bbcbf4be8faec88a4a65f8ef7acafef5a7482d5e4ccc64c30",
+      "target": "runtime/packages/core/utils/jd-config-schema.js"
+    },
+    {
+      "source": "csk/hunter/packages/core/utils/merge-candidates.js",
+      "sha256": "7c711568d9fb896d4a860286d6db48bcd2880ed5d95b60d9e654933451d18021",
+      "target": "runtime/packages/core/utils/merge-candidates.js"
+    },
+    {
+      "source": "csk/hunter/packages/core/utils/output-formatter.js",
+      "sha256": "c4f81499531ed2ab5989c7caffc73293bc5597fa44cac75ab935289fac4cd527",
+      "target": "runtime/packages/core/utils/output-formatter.js"
+    },
+    {
+      "source": "linkedin-workflow/src/account-check.mjs",
+      "sha256": "827dea60485c09f3f90639c3390edfb82be371218475204697e3bb6627d0feca",
+      "target": "runtime/packages/linkedin-workflow/src/account-check.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/account-read.mjs",
+      "sha256": "2c9180eac5d8bb453642db0d183693393f13c9a94c63967f86b0f6472f519441",
+      "target": "runtime/packages/linkedin-workflow/src/account-read.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/account-search.mjs",
+      "sha256": "93a181c9014be85be2cc92b91ba1811d7dd7d46e44e3d1ac32d3fe978bab572c",
+      "target": "runtime/packages/linkedin-workflow/src/account-search.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/batch.mjs",
+      "sha256": "ccee513ec8c617cc5a1248eb89bc401d39bb85647b155a8ba3b90f44bc1a03db",
+      "target": "runtime/packages/linkedin-workflow/src/batch.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/capabilities.mjs",
+      "sha256": "f0e434fc4dd33d6f1ffb64b866c82c46e05d11ba2d192a5d817c631c9d1fcfec",
+      "target": "runtime/packages/linkedin-workflow/src/capabilities.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/checkpoints.mjs",
+      "sha256": "e9b342e722e38b087dd0f8ec738de0e003dfc42614d3f4e641a750bf69e9b4fe",
+      "target": "runtime/packages/linkedin-workflow/src/checkpoints.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/cli.mjs",
+      "sha256": "ec45cf1be31ca2ccbe594342365e84d4bd73e22ce326437967e744ab765e33b0",
+      "target": "runtime/packages/linkedin-workflow/src/cli.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/core-filter-options.mjs",
+      "sha256": "651cece2cc758d2c2be6438b05b319de7a6909aa5b0554ed9be8f5e650426675",
+      "target": "runtime/packages/linkedin-workflow/src/core-filter-options.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/distribution-binding.mjs",
+      "sha256": "dec256313bfbab302b98cb433bd24f19f5f7dbdf57f88dbe470cef803ba1b8b5",
+      "target": "runtime/packages/linkedin-workflow/src/distribution-binding.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/doctor.mjs",
+      "sha256": "fc460624399acf0be28b59a703551e6d98a31617606a2e7749e2d38d2ab2ebae",
+      "target": "runtime/packages/linkedin-workflow/src/doctor.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/execution-context.mjs",
+      "sha256": "106f4cbabd463d552ba6e87b3a5dd369398736875fdd0958d9106528e9ef0a73",
+      "target": "runtime/packages/linkedin-workflow/src/execution-context.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/execution.mjs",
+      "sha256": "6160bc33bd6cb3be1d663efc4800fb4a9427f7e4b3f53e94138812ceb809c429",
+      "target": "runtime/packages/linkedin-workflow/src/execution.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/export.mjs",
+      "sha256": "a6cce1c4b9c4da1267fee03ffd7fe733c6806338c040adfb88636ca225205314",
+      "target": "runtime/packages/linkedin-workflow/src/export.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/extended-fields.mjs",
+      "sha256": "829abf1b9a7729d1ff6973e480ad5e7ca2015d7f1671cede000df7eee924f2f1",
+      "target": "runtime/packages/linkedin-workflow/src/extended-fields.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/fields.mjs",
+      "sha256": "e7f3693bb6125413d127c86e999f07574a7ae5ebe77d9af43fbdcfcd2d3a9089",
+      "target": "runtime/packages/linkedin-workflow/src/fields.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/filter-options.mjs",
+      "sha256": "a28ce95028befb36b76f7e5f104e9f02f3ee018315509362be686f52d7b54b05",
+      "target": "runtime/packages/linkedin-workflow/src/filter-options.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/filter-selection.mjs",
+      "sha256": "58733a4c4bd611202b7a652f9fe345e49824440d6f581b7c4cac6c140e7739e4",
+      "target": "runtime/packages/linkedin-workflow/src/filter-selection.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/identity.mjs",
+      "sha256": "036c1561bd5f8e77a3e70fd108c8b0e1075a99f18acdabaa6b1e1fd6a2940d22",
+      "target": "runtime/packages/linkedin-workflow/src/identity.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/lead-api.mjs",
+      "sha256": "2edbd1e97ea7b92db2d3c2d1293569c8335ce81cf1164b856ac57f3455521004",
+      "target": "runtime/packages/linkedin-workflow/src/lead-api.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/lead-read.mjs",
+      "sha256": "4be3e98f231d0936834229c4ddc4b394748724a731059b4acb0039fbcc9caf46",
+      "target": "runtime/packages/linkedin-workflow/src/lead-read.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/lead-roles.mjs",
+      "sha256": "2a31868f0726397aad00016b1d34244134ca3a63b106755e78e643ecb9532849",
+      "target": "runtime/packages/linkedin-workflow/src/lead-roles.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/lead-search.mjs",
+      "sha256": "f7ff3ea5169b744c2482280ff10523fab20597a0224afb7838bc42966984b85c",
+      "target": "runtime/packages/linkedin-workflow/src/lead-search.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/linkedin/account-inspect.mjs",
+      "sha256": "03fd48845e340aaa5c36285671797eb64e9ecc0916398d4eff2319f1ea19fde8",
+      "target": "runtime/packages/linkedin-workflow/src/linkedin/account-inspect.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/linkedin/gateway.mjs",
+      "sha256": "bd305ed60dfd467351bfb6e5a3c04ea61000de3e3f67e7c6f6bb93fd4b582450",
+      "target": "runtime/packages/linkedin-workflow/src/linkedin/gateway.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/linkedin/presentation.mjs",
+      "sha256": "af5f35ddb0c0aa0786cec42e2fec8ad31460504235cc39d1e9e5025b564e8661",
+      "target": "runtime/packages/linkedin-workflow/src/linkedin/presentation.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/linkedin/route-options.mjs",
+      "sha256": "fa6f053988b477bcd0c4ec75ead2aa1f470bc9a74f8e2ee077eb98bda5181ed4",
+      "target": "runtime/packages/linkedin-workflow/src/linkedin/route-options.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/linkedin/subscription-read.mjs",
+      "sha256": "df961cc00c22c7c05d271babeadb13172aaf66c08011cd2383792f9b051706bd",
+      "target": "runtime/packages/linkedin-workflow/src/linkedin/subscription-read.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/linkedin/task-closeout.mjs",
+      "sha256": "009750d7d475053007ed33961e1322b57402d19b7589a3716e15faf0090df791",
+      "target": "runtime/packages/linkedin-workflow/src/linkedin/task-closeout.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/linkedin/task-policy.mjs",
+      "sha256": "81f6e0d8662ba554a63e6c18b2f1383483b56c1acaec6d26106226c349d12f43",
+      "target": "runtime/packages/linkedin-workflow/src/linkedin/task-policy.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/linkedin/task-store.mjs",
+      "sha256": "ff15318241db3036d9a5fe73f8e524994fcf6130f66cd063c06da7142e95643a",
+      "target": "runtime/packages/linkedin-workflow/src/linkedin/task-store.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/linkedin-cli.mjs",
+      "sha256": "9ead2d08fd12f0d55e2b2f012e5a7d0c5d17d4c3ecb3073ee60f2b6409a7c5a1",
+      "target": "runtime/packages/linkedin-workflow/src/linkedin-cli.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/opencli.mjs",
+      "sha256": "8f648bb7af1527fcc2fc9658dc4cc2d015c9208b6d9bd85b818a34bf56fc6f67",
+      "target": "runtime/packages/linkedin-workflow/src/opencli.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/page-safety.mjs",
+      "sha256": "8d2a6aed0b725695abe9455eb08a3037e7c0ff7b36e1543061356f4c25d47c45",
+      "target": "runtime/packages/linkedin-workflow/src/page-safety.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/pagination.mjs",
+      "sha256": "72ddaae2f710f7d34a16694783cc34043a345cc7ffbb254230d780157d94b19e",
+      "target": "runtime/packages/linkedin-workflow/src/pagination.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/plugin/commands.json",
+      "sha256": "cb1fa7c6ac48b9c4802598c5b67e10888e230d6034387c8e6e89eb7b56bff3df",
+      "target": "runtime/packages/linkedin-workflow/src/plugin/commands.json"
+    },
+    {
+      "source": "linkedin-workflow/src/plugin/external-commands.json",
+      "sha256": "de219e5f266583efcd784431b06db684514042f6f13e6c9a77145371cf12151b",
+      "target": "runtime/packages/linkedin-workflow/src/plugin/external-commands.json"
+    },
+    {
+      "source": "linkedin-workflow/src/plugin/external.mjs",
+      "sha256": "db2f42fd3b37d8aeecb8b6be6cc854c0d1b88beb157a1301ccf15488927ee11c",
+      "target": "runtime/packages/linkedin-workflow/src/plugin/external.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/plugin/runner.mjs",
+      "sha256": "4d04549919b4f26404f3935ba74fd1923a09260dcf79367cb2743a3732036ccb",
+      "target": "runtime/packages/linkedin-workflow/src/plugin/runner.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/profile-lock.mjs",
+      "sha256": "7bd59c22696381e7d7d5a46f4cc22220406e2c3f59f8678ac1fd376c27932c90",
+      "target": "runtime/packages/linkedin-workflow/src/profile-lock.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/query.mjs",
+      "sha256": "43cd68dc84514cc4d0da044b8b48d6a022f57c893ac734e447a6d82dd22baf6d",
+      "target": "runtime/packages/linkedin-workflow/src/query.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/range-fields.mjs",
+      "sha256": "0d269124c35075372ce74bf8b463bba1d64bd0379802c12a7ee92933c2c4e4be",
+      "target": "runtime/packages/linkedin-workflow/src/range-fields.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/report.mjs",
+      "sha256": "49899056a69176c940bfc6ad7444fd93cd3f61aeee5a639caf1ec444d95110ad",
+      "target": "runtime/packages/linkedin-workflow/src/report.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/runtime-invocation.mjs",
+      "sha256": "0e3cfea9377f29afe6f0ec04f446c68893f4396b1cb821cedb01f047b1e6e5eb",
+      "target": "runtime/packages/linkedin-workflow/src/runtime-invocation.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/search-diagnostics.mjs",
+      "sha256": "c08d5efac9e8ee90be6cb96a525d1e8c0c23188d183215768c2e068df97afcd4",
+      "target": "runtime/packages/linkedin-workflow/src/search-diagnostics.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/search-empty.mjs",
+      "sha256": "16612211eed5307f24e46371ef8fcf6c9911081dea939b26bfebe0814421df5b",
+      "target": "runtime/packages/linkedin-workflow/src/search-empty.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/search-evidence.mjs",
+      "sha256": "df1803dad5086fcf038e3d3f5dc4e9f2792bf6a55409a4ec3d1ecc51d65907da",
+      "target": "runtime/packages/linkedin-workflow/src/search-evidence.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/search.mjs",
+      "sha256": "e5961d69b390b4ee6fcf4ad54628b0074b1df97813ef84b9119c917eb4d62f51",
+      "target": "runtime/packages/linkedin-workflow/src/search.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/session-lifecycle.mjs",
+      "sha256": "9f0ab6d23686f7d023bf09848a399f187da7f49ae4ba5b98e0aecb646cd100ab",
+      "target": "runtime/packages/linkedin-workflow/src/session-lifecycle.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/typed-fields.mjs",
+      "sha256": "72a7cbf3e315c553230635f5d463d335b407c48b3cd7dcc4572a241d754d5ed3",
+      "target": "runtime/packages/linkedin-workflow/src/typed-fields.mjs"
+    },
+    {
+      "source": "linkedin-workflow/src/version.mjs",
+      "sha256": "96bf96d334317fde2e57b3673f96971012305c839c5cd218cc8a08077f5865c9",
+      "target": "runtime/packages/linkedin-workflow/src/version.mjs"
+    },
+    {
+      "source": "linkedin-workflow/docs/ACCEPTANCE.md",
+      "sha256": "8d21ba8c9a0e9eddda99db0db100b99f351115d7501c88a66d735c18bf7c48e3",
+      "target": "runtime/packages/linkedin-workflow/docs/ACCEPTANCE.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/ACCEPTANCE_HISTORY.md",
+      "sha256": "bb35bbc5a45f102e85f1636979afaf5b5323766f6ea2789b837ac1e04602341d",
+      "target": "runtime/packages/linkedin-workflow/docs/ACCEPTANCE_HISTORY.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/ALL_FILTERS.md",
+      "sha256": "0b4726bdcd62937d6e2123d72644ca3f61d249a9de97e7bf09e6549c3f683343",
+      "target": "runtime/packages/linkedin-workflow/docs/ALL_FILTERS.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/ATOMIC_CAPABILITIES.md",
+      "sha256": "cc317014d4cfa4f2122195e309a5934be5a60b97616fc773fa2c348b3962aeb0",
+      "target": "runtime/packages/linkedin-workflow/docs/ATOMIC_CAPABILITIES.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/BUSINESS_CAPABILITY_MAP.html",
+      "sha256": "68e910c7974fe2722852ffdb535040b8f9c8ebae9c6ac64d6607688725ae8897",
+      "target": "runtime/packages/linkedin-workflow/docs/BUSINESS_CAPABILITY_MAP.html"
+    },
+    {
+      "source": "linkedin-workflow/docs/COMPANY_FIELD_VERIFICATION.md",
+      "sha256": "c5af0a0e3c07ca80054a12617d2c72c904e7a131aceac167f250fbf5e9704861",
+      "target": "runtime/packages/linkedin-workflow/docs/COMPANY_FIELD_VERIFICATION.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/CONTROLLED_ACCEPTANCE.md",
+      "sha256": "0b1b6bfdaaa5031d11ed574f5420b333688d382d1c9cb1b14175a67624d8f90e",
+      "target": "runtime/packages/linkedin-workflow/docs/CONTROLLED_ACCEPTANCE.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/DELIVERY_DEV13.md",
+      "sha256": "aee4c2333ab270a63308b5ebb866a989ae00f1111b69988ecd759bddff2b74e7",
+      "target": "runtime/packages/linkedin-workflow/docs/DELIVERY_DEV13.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/DELIVERY_DEV14.md",
+      "sha256": "f26787719b98842eb5f300547d7e7368edc3e4b63f0aa03c1cdb34540ea97142",
+      "target": "runtime/packages/linkedin-workflow/docs/DELIVERY_DEV14.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/DEVELOPMENT_REVIEW.md",
+      "sha256": "c38c698de3aef7fcb91e199990f085b1e7fb29aa06c7206fc89d2d0f74c814f5",
+      "target": "runtime/packages/linkedin-workflow/docs/DEVELOPMENT_REVIEW.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/E2E_TEST_PLAN.md",
+      "sha256": "7fa6870d8c13d4a109970cb5f1c5260322297aca25218f228241b87f15a2d594",
+      "target": "runtime/packages/linkedin-workflow/docs/E2E_TEST_PLAN.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/EXPORT_AND_SEARCH_REPLAY_VERIFICATION.md",
+      "sha256": "39b5614b1fa74042e5d5cef80ba79116fbf02b067cc4884437fd9bfd4f6b8cf9",
+      "target": "runtime/packages/linkedin-workflow/docs/EXPORT_AND_SEARCH_REPLAY_VERIFICATION.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/FINAL_AUDIT.md",
+      "sha256": "c608914984213081096ae9256b2133879873300524bfd748fe33686e0a756c80",
+      "target": "runtime/packages/linkedin-workflow/docs/FINAL_AUDIT.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/INSTALL.md",
+      "sha256": "e8c0ba452085d30a46465c76b4b44df95ac3489db6e6b3cc58818d4628f2395f",
+      "target": "runtime/packages/linkedin-workflow/docs/INSTALL.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/LEAD_FIELD_VERIFICATION.md",
+      "sha256": "e1b7b80417aed790d6785b200b21c2cb24de9f6e2d6b17254261182b4a8f068d",
+      "target": "runtime/packages/linkedin-workflow/docs/LEAD_FIELD_VERIFICATION.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/LINKEDIN_GATEWAY.md",
+      "sha256": "a9d362d49e744853d059cfecaef4ea4755d78ac7510ba628e131038afe8c71d2",
+      "target": "runtime/packages/linkedin-workflow/docs/LINKEDIN_GATEWAY.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/LINKEDIN_GLOBAL_AUDIT.md",
+      "sha256": "43dd55e86b077e03788b4044b56d07705c335a81796206cb755f5ebecea7ec5b",
+      "target": "runtime/packages/linkedin-workflow/docs/LINKEDIN_GLOBAL_AUDIT.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/LINKEDIN_ROUTE_OPTIONS.md",
+      "sha256": "14a57f20866d94bd3b6d85091b5b8caf3dff2eb65c861c7aaad443789800a3da",
+      "target": "runtime/packages/linkedin-workflow/docs/LINKEDIN_ROUTE_OPTIONS.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/NAVIGATION_REVIEW.md",
+      "sha256": "e1e377dbddceb64465b01266f08bbff0d492d5415af6c6d27047909e1e648e0e",
+      "target": "runtime/packages/linkedin-workflow/docs/NAVIGATION_REVIEW.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/OPENCLI_PLUGIN.md",
+      "sha256": "4a4ec4a49c929d0b827a5fd9a79c5056771fda4231c4e72327bb0bf6b20a5545",
+      "target": "runtime/packages/linkedin-workflow/docs/OPENCLI_PLUGIN.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/PLATFORM_OPERATIONS.md",
+      "sha256": "4eb6b707c4f235d19d22509b93376af784f7f3cda5dadc07ce499ace324be6ae",
+      "target": "runtime/packages/linkedin-workflow/docs/PLATFORM_OPERATIONS.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/PRD.md",
+      "sha256": "4a02c7fc2aa9b2fd7a064f2c8bbc90e66049826e016d16ca6eafe52a5de0c79c",
+      "target": "runtime/packages/linkedin-workflow/docs/PRD.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/RELEASE_READINESS.md",
+      "sha256": "f14664e0983c8d379c062680096949753ac4e45971057f0c7620bb3a96ea0cd9",
+      "target": "runtime/packages/linkedin-workflow/docs/RELEASE_READINESS.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/RESULT_DELIVERY.md",
+      "sha256": "6b881560138f4d0159f4858af145e985aa4f8ea2251612133490798aeae2a1c0",
+      "target": "runtime/packages/linkedin-workflow/docs/RESULT_DELIVERY.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/SALESNAV_UPSTREAM_COMPARISON.md",
+      "sha256": "5cdaff81703dbb45b26162fa57a913f6e0070527cc83805d4b9e7e28b1ae6dd7",
+      "target": "runtime/packages/linkedin-workflow/docs/SALESNAV_UPSTREAM_COMPARISON.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/SEARCH_CARD_RECOVERY_DEV17.md",
+      "sha256": "201b9d9669541a99776c8e18b9f25fdb159da895a9d1d10183950b1c882662f7",
+      "target": "runtime/packages/linkedin-workflow/docs/SEARCH_CARD_RECOVERY_DEV17.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/SEARCH_CLOSURE_DEV20.md",
+      "sha256": "e70823f20182e4ace36eda8ed5b8e2f533b6d04fe7a22033a703ce3c158eeba5",
+      "target": "runtime/packages/linkedin-workflow/docs/SEARCH_CLOSURE_DEV20.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/SEARCH_REPAIR_DEV18.md",
+      "sha256": "73e76f37c16b9f5376813711a3abc0e5c394ee9764c95a046c4f7441300ad5e5",
+      "target": "runtime/packages/linkedin-workflow/docs/SEARCH_REPAIR_DEV18.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/SEARCH_TIMING_20261025.md",
+      "sha256": "f7fd985e9d4290076d0e9fb677cf3b1c12ef4f356189b2de2f6b168c4642040d",
+      "target": "runtime/packages/linkedin-workflow/docs/SEARCH_TIMING_20261025.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/STATUS.md",
+      "sha256": "5db7f96b5534be16d537ac1bb00b6f6d08976bc6f895d882ec14d087d3bb1143",
+      "target": "runtime/packages/linkedin-workflow/docs/STATUS.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/design/LINKEDIN_INTEGRATION.html",
+      "sha256": "0b65a373e563f3379f27215d9df4f7a86ad76ebb6ed1d3d21836572a78991c68",
+      "target": "runtime/packages/linkedin-workflow/docs/design/LINKEDIN_INTEGRATION.html"
+    },
+    {
+      "source": "linkedin-workflow/docs/design/LINKEDIN_INTEGRATION.md",
+      "sha256": "4a9586af8e3bffc821e11a838a40c8d1f1b9c6c64d8ac45afbf93ca9b4b4add0",
+      "target": "runtime/packages/linkedin-workflow/docs/design/LINKEDIN_INTEGRATION.md"
+    },
+    {
+      "source": "linkedin-workflow/docs/filter-inventory.json",
+      "sha256": "d997003466d002b47692e69ae4d8be6c76424d69d61dc7ef289586d0417f7072",
+      "target": "runtime/packages/linkedin-workflow/docs/filter-inventory.json"
+    },
+    {
+      "source": "linkedin-workflow/docs/reference/linkedin-cli-catalog.json",
+      "sha256": "c3bc6bdefd076628ce6a690a1014de30ef1392b0e84d746be5a015e0ed7b3182",
+      "target": "runtime/packages/linkedin-workflow/docs/reference/linkedin-cli-catalog.json"
+    },
+    {
+      "source": "linkedin-workflow/docs/reference/linkedin-command-inventory.json",
+      "sha256": "1d54255215e6b64121452aea96734106d7e1f4f5bdab8473241a50e2a7c60ba9",
+      "target": "runtime/packages/linkedin-workflow/docs/reference/linkedin-command-inventory.json"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-linkedin/SKILL.md",
+      "sha256": "eb72c74a6880dafcac18772726ee20841c2494c9243f3f697c21253722412cea",
+      "target": "runtime/packages/linkedin-workflow/skills/cskh-linkedin/SKILL.md"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-linkedin/references/account-entitlements.md",
+      "sha256": "0a7ec89492a0f9034c1859c3fadc011d72b14977bd3b660df739128350875488",
+      "target": "runtime/packages/linkedin-workflow/skills/cskh-linkedin/references/account-entitlements.md"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-linkedin/references/account-observations.md",
+      "sha256": "018c78f6fc35ec95c04c812d94d22db418384ba721862eb4822c22318f0ce920",
+      "target": "runtime/packages/linkedin-workflow/skills/cskh-linkedin/references/account-observations.md"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-linkedin/references/account-plans.md",
+      "sha256": "ec18c571805114ace9a9b6f20002970e44386d5b78837b545dd5ee299ac87861",
+      "target": "runtime/packages/linkedin-workflow/skills/cskh-linkedin/references/account-plans.md"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-linkedin/references/entitlement-maintenance.md",
+      "sha256": "2327113e406ec8a9f080ab11915734e95a030ef4ddd4542af8f74d28f1fabe25",
+      "target": "runtime/packages/linkedin-workflow/skills/cskh-linkedin/references/entitlement-maintenance.md"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-linkedin/references/messaging-entitlements.md",
+      "sha256": "abd9bb5904fe7fecd120d19faba1f2c1d19342cd10d70fda73b7dd1e49907ea4",
+      "target": "runtime/packages/linkedin-workflow/skills/cskh-linkedin/references/messaging-entitlements.md"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-linkedin/references/search-entitlements.md",
+      "sha256": "71dde6d2535ebc56bd5f653eed357fd781c9d65b29ac83ee509768ed06bcc2de",
+      "target": "runtime/packages/linkedin-workflow/skills/cskh-linkedin/references/search-entitlements.md"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-linkedin-salesnav/SKILL.md",
+      "sha256": "e3618fa85fb7d4703badbebb6edb723045c9eacb49370833426313da719b1ff1",
+      "target": "runtime/packages/linkedin-workflow/skills/cskh-linkedin-salesnav/SKILL.md"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-linkedin-salesnav/references/progress-and-resume.md",
+      "sha256": "ac9709780265bb7f18f5f8d0dd37a726716e8abc1685e67dfef10f8314f6237f",
+      "target": "runtime/packages/linkedin-workflow/skills/cskh-linkedin-salesnav/references/progress-and-resume.md"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-sourcing-linkedin/SKILL.md",
+      "sha256": "f2b434e44fc588e0f7cfaa5d3956aebef04ae2a20476ff153ef2668fd82699fc",
+      "target": "runtime/packages/linkedin-workflow/skills/cskh-sourcing-linkedin/SKILL.md"
+    },
+    {
+      "source": "linkedin-workflow/README.md",
+      "sha256": "f6f3efabab26595496f1e3ebf66b36b1fd35160f871bb3de153e83dddc5f86fb",
+      "target": "runtime/packages/linkedin-workflow/README.md"
+    },
+    {
+      "source": "linkedin-workflow/opencli-commands.js",
+      "sha256": "182fbe837797635d6bc990485c34a7e1b4017efd13d6af36bb644f3479556da8",
+      "target": "runtime/packages/linkedin-workflow/opencli-commands.js"
+    },
+    {
+      "source": "linkedin-workflow/opencli-plugin.json",
+      "sha256": "780288fef0527efe8e4437311ea7536f36c7a6980e3315dbb2f7efd1d6f4adec",
+      "target": "runtime/packages/linkedin-workflow/opencli-plugin.json"
+    },
+    {
+      "source": "linkedin-workflow/package.json",
+      "sha256": "6a80d1200e694f784910c5b6260ffd6be6004d9b60cc03cec382790e53a30fdc",
+      "target": "runtime/packages/linkedin-workflow/package.json"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin-cli/bin/run-opencli.js",
+      "sha256": "aefb3cb06a410aa7feee259c3ca2fafbfe5667c6f64aed36e008b27c1d416842",
+      "target": "runtime/run-opencli.js"
+    },
+    {
+      "source": "csk/hunter/packages/hunter-linkedin-cli/bin/linkedin-compat.js",
+      "sha256": "b6d0d0e8cb99ca9d03ae9c1034b75ebd0d423a863a594400039b7b478731a78c",
+      "target": "runtime/linkedin-compat.js"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-align/SKILL.md",
+      "sha256": "5fc23940cf166cde91074d3233a10bedfc8bde8cf6826d44922a9debbdd3b8f6",
+      "target": "skills/cskh-align/SKILL.md"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-align/package.json",
+      "sha256": "c8b0d66436df0da3402a78843d46a44d84a8e06322583663e9f9fba829216de0",
+      "target": "skills/cskh-align/package.json"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-align/references/jbf-completion-workflow.md",
+      "sha256": "fbd4b041c121b7fa4be73581cc2b92ec124a38469a33832dd450e14b84a701db",
+      "target": "skills/cskh-align/references/jbf-completion-workflow.md"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-align/references/jbf-schema.md",
+      "sha256": "d3b775d3c2cf0b9914d5738a64d777612106b492e22e19df826db0d4c33e14fc",
+      "target": "skills/cskh-align/references/jbf-schema.md"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-align/references/sourcing-request.md",
+      "sha256": "ab4c7cd417c6755b0af0daa5e73c95a1a9d1910c1d62e8a0ccb0dceb46c4bebd",
+      "target": "skills/cskh-align/references/sourcing-request.md"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-align/references/supplementary-sourcing-channels.md",
+      "sha256": "f087cd0699d6592261d9234cb775d7d5c6e76a7da64af485c18ee63dd33ceeab",
+      "target": "skills/cskh-align/references/supplementary-sourcing-channels.md"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-align/scripts/render-align-report.mjs",
+      "sha256": "20e458a231bc4ed361669ce51ad583e3bd8439ce036177f2e9785acc4228468c",
+      "target": "skills/cskh-align/scripts/render-align-report.mjs"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-align/scripts/render-sourcing-plan.mjs",
+      "sha256": "a8dd3a534acef77155bdef7aa3dd3b1b0732b2045c490eb7021a3cb9c69216d6",
+      "target": "skills/cskh-align/scripts/render-sourcing-plan.mjs"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-align/test-prompts.json",
+      "sha256": "010324fa15023932e5e65ddbd0544288d2caee744968d43a73a0ca34e0937dd0",
+      "target": "skills/cskh-align/test-prompts.json"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-sourcing/SKILL.md",
+      "sha256": "6750efb121c9bafdb7d4bbdb78817d6dba1a1216eefd36dfe3593d948efa77dc",
+      "target": "skills/cskh-sourcing/SKILL.md"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-sourcing/package.json",
+      "sha256": "bb0096d375d382235d84f569b16cd55617b5ef4a823d6288dcb4e10f00feed88",
+      "target": "skills/cskh-sourcing/package.json"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-sourcing/test-prompts.json",
+      "sha256": "06eaa43c03beba1c2ed178470600d8e08f216967325fd53dd39daa9b9fa82f0f",
+      "target": "skills/cskh-sourcing/test-prompts.json"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-sourcing-linkedin/SKILL.md",
+      "sha256": "bee393fd71f575193cc91f9683d47c030b7c7a5e804f6e8cbe343e1d8779487c",
+      "target": "skills/cskh-sourcing-linkedin/SKILL.md"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-sourcing-linkedin/darwin-assessment.md",
+      "sha256": "c7f4946b4d6b5cceb5e18cb976ca7276d916429ff32414b8044ecb650660b897",
+      "target": "skills/cskh-sourcing-linkedin/darwin-assessment.md"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-sourcing-linkedin/darwin-results.tsv",
+      "sha256": "93ecf72d923960cdb54cc035c94ad55ad35014faec1c8bd9ef8cb0c61e934762",
+      "target": "skills/cskh-sourcing-linkedin/darwin-results.tsv"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-sourcing-linkedin/package.json",
+      "sha256": "6e8b9fddbf01cb11f758b135f8f98d60b6c85af223cca7609d3cfe1d83bb6d56",
+      "target": "skills/cskh-sourcing-linkedin/package.json"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-sourcing-linkedin/references/shortlist-contract.md",
+      "sha256": "204041a5400e99f8f57dff859df55952fe0b8ee3e6ff3de290121dec2786f768",
+      "target": "skills/cskh-sourcing-linkedin/references/shortlist-contract.md"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-sourcing-linkedin/scripts/discover-linkedin-xray.mjs",
+      "sha256": "8daa0001489946cbefcc7f2a4975476d8f5bebc2a8eae37da1eccae4f3f6f5a0",
+      "target": "skills/cskh-sourcing-linkedin/scripts/discover-linkedin-xray.mjs"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-sourcing-linkedin/scripts/enrich-linkedin-profiles.mjs",
+      "sha256": "c53ade36c1da2c9910a3d032eccef6c71083d5036ae5ada38f786751fe61b8ac",
+      "target": "skills/cskh-sourcing-linkedin/scripts/enrich-linkedin-profiles.mjs"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-sourcing-linkedin/scripts/opencli-output.mjs",
+      "sha256": "c4e76bb6a57a262da015c2ef8cd9afbf1e15d213e466752a1a5b2f72a0358be9",
+      "target": "skills/cskh-sourcing-linkedin/scripts/opencli-output.mjs"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-sourcing-linkedin/scripts/opencli-runtime.mjs",
+      "sha256": "adae57048640e5779b3b5bec127d5ab531b06204b7485434d85db21b0fcfa2ae",
+      "target": "skills/cskh-sourcing-linkedin/scripts/opencli-runtime.mjs"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-sourcing-linkedin/test-prompts.json",
+      "sha256": "d03f696c3474c46a4ab994e9627fd01b9695cedb1e80cea34385afd44214f23e",
+      "target": "skills/cskh-sourcing-linkedin/test-prompts.json"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-outreach/SKILL.md",
+      "sha256": "a522054ea52dfa6aa1c0f0949810281da8e239e7abf2199cb5e2fa82e73e362f",
+      "target": "skills/cskh-outreach/SKILL.md"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-outreach/darwin-assessment.md",
+      "sha256": "28230e3bab6f23bfa26c29e9ba0e0fdeeca42bbfc17c33446c239403a3b4cc71",
+      "target": "skills/cskh-outreach/darwin-assessment.md"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-outreach/darwin-results.tsv",
+      "sha256": "81d19a11b9d26971b9339e9e032cb0a517b139c5d419e7a5da06505d35dad857",
+      "target": "skills/cskh-outreach/darwin-results.tsv"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-outreach/package.json",
+      "sha256": "855c58b62bad355b1c09929084f442ad307043221e4a2ceee3803aee6f35e9b1",
+      "target": "skills/cskh-outreach/package.json"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-outreach/references/outreach-contract.md",
+      "sha256": "c01351d8c7eac55b2d94bb16a4b41b4a3af4ac6de97c59d26687f616240b0be1",
+      "target": "skills/cskh-outreach/references/outreach-contract.md"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-outreach/scripts/collect-outreach-context.mjs",
+      "sha256": "a3606cff52ae91086e624f11c7d71c7556eb02974ea32e375dafd9a24233528e",
+      "target": "skills/cskh-outreach/scripts/collect-outreach-context.mjs"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-outreach/scripts/create-email-draft.mjs",
+      "sha256": "2bb28e8dce949a5261213b090d7f5e7f83c1031655b502416f9d5d2384584fed",
+      "target": "skills/cskh-outreach/scripts/create-email-draft.mjs"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-outreach/scripts/execute-approved-outreach.mjs",
+      "sha256": "5ac3f19274ca49d838d4e81bf5ab0599a615291fef730b3d5ea4a505de354318",
+      "target": "skills/cskh-outreach/scripts/execute-approved-outreach.mjs"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-outreach/scripts/opencli-output.mjs",
+      "sha256": "c4e76bb6a57a262da015c2ef8cd9afbf1e15d213e466752a1a5b2f72a0358be9",
+      "target": "skills/cskh-outreach/scripts/opencli-output.mjs"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-outreach/scripts/opencli-runtime.mjs",
+      "sha256": "adae57048640e5779b3b5bec127d5ab531b06204b7485434d85db21b0fcfa2ae",
+      "target": "skills/cskh-outreach/scripts/opencli-runtime.mjs"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-outreach/scripts/summarize-outreach-batch.mjs",
+      "sha256": "0cc1fbaece940597e720763f0847cb1c35d3ea324c3d01a50cd0635cd050fa42",
+      "target": "skills/cskh-outreach/scripts/summarize-outreach-batch.mjs"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-outreach/test-prompts.json",
+      "sha256": "1b5ae4d05065b90ad7afdc64f4f259d4b0b4954f612f1ecd2797452973923681",
+      "target": "skills/cskh-outreach/test-prompts.json"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-update/SKILL.md",
+      "sha256": "cd55ed5d2de1940d016840c691e8982a77511a59959dc1fa4cfd577bdac4738a",
+      "target": "skills/cskh-update/SKILL.md"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-update/package.json",
+      "sha256": "ea0e05c1818e28f861c85e259432744486c74e1777e3557bf7a116c5e208af0f",
+      "target": "skills/cskh-update/package.json"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-update/scripts/run-update.mjs",
+      "sha256": "16a54b6d1a6e8a349e27f8a99fc64ff64e1e861f61f0c7e9ddb6c3938b89e362",
+      "target": "skills/cskh-update/scripts/run-update.mjs"
+    },
+    {
+      "source": "csk/hunter/skills/cskh-update/test-prompts.json",
+      "sha256": "1192d1d8191f6ef8ee05ce5c1198c34852f46f5f166b9173645ff4f49a2c13f8",
+      "target": "skills/cskh-update/test-prompts.json"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-linkedin/SKILL.md",
+      "sha256": "eb72c74a6880dafcac18772726ee20841c2494c9243f3f697c21253722412cea",
+      "target": "skills/cskh-linkedin/SKILL.md"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-linkedin/references/account-entitlements.md",
+      "sha256": "0a7ec89492a0f9034c1859c3fadc011d72b14977bd3b660df739128350875488",
+      "target": "skills/cskh-linkedin/references/account-entitlements.md"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-linkedin/references/account-observations.md",
+      "sha256": "018c78f6fc35ec95c04c812d94d22db418384ba721862eb4822c22318f0ce920",
+      "target": "skills/cskh-linkedin/references/account-observations.md"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-linkedin/references/account-plans.md",
+      "sha256": "ec18c571805114ace9a9b6f20002970e44386d5b78837b545dd5ee299ac87861",
+      "target": "skills/cskh-linkedin/references/account-plans.md"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-linkedin/references/entitlement-maintenance.md",
+      "sha256": "2327113e406ec8a9f080ab11915734e95a030ef4ddd4542af8f74d28f1fabe25",
+      "target": "skills/cskh-linkedin/references/entitlement-maintenance.md"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-linkedin/references/messaging-entitlements.md",
+      "sha256": "abd9bb5904fe7fecd120d19faba1f2c1d19342cd10d70fda73b7dd1e49907ea4",
+      "target": "skills/cskh-linkedin/references/messaging-entitlements.md"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-linkedin/references/search-entitlements.md",
+      "sha256": "71dde6d2535ebc56bd5f653eed357fd781c9d65b29ac83ee509768ed06bcc2de",
+      "target": "skills/cskh-linkedin/references/search-entitlements.md"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-linkedin-salesnav/SKILL.md",
+      "sha256": "e3618fa85fb7d4703badbebb6edb723045c9eacb49370833426313da719b1ff1",
+      "target": "skills/cskh-linkedin-salesnav/SKILL.md"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-linkedin-salesnav/references/progress-and-resume.md",
+      "sha256": "ac9709780265bb7f18f5f8d0dd37a726716e8abc1685e67dfef10f8314f6237f",
+      "target": "skills/cskh-linkedin-salesnav/references/progress-and-resume.md"
+    },
+    {
+      "source": "linkedin-workflow/skills/cskh-sourcing-linkedin/SKILL.md",
+      "sha256": "f2b434e44fc588e0f7cfaa5d3956aebef04ae2a20476ff153ef2668fd82699fc",
+      "target": "skills/cskh-sourcing-linkedin/SKILL.md"
+    }
+  ]
+}

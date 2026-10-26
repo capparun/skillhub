@@ -1,0 +1,13 @@
+{
+  "name": "@hunter/core",
+  "version": "2.0.8",
+  "type": "module",
+  "description": "Hunter 渠道无关共享库：JD 配置、候选人合并、报告与分析",
+  "main": "index.js",
+  "scripts": {
+    "test": "for t in test/*.test.js; do node \"$t\" || exit 1; done"
+  },
+  "exports": {
+    ".": "./index.js"
+  }
+}

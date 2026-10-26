@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "type": "confirmed_handoff",
+    "prompt": "收到 SourcingRequest：requestType=hunter-sourcing，nextAction=start_sourcing，confirmedChannels=[linkedin:xray,browser]。",
+    "expected": "验证请求后才检查 OpenCLI、LinkedIn 插件、登录态和输出目录，并把只读对齐结果交给 cskh-sourcing-linkedin。"
+  },
+  {
+    "id": 2,
+    "type": "missing_alignment",
+    "prompt": "帮我招一个做过抽水蓄能项目的副总经济师。",
+    "expected": "不启动搜索初始化，先交给 cskh-align 完成人才画像、渠道策略和开始搜索确认。"
+  },
+  {
+    "id": 3,
+    "type": "unconfirmed_channels",
+    "prompt": "画像已经有了，但渠道还没确认，先开始搜吧。",
+    "expected": "停止初始化并返回 cskh-align 完成渠道确认，不自行选择或替换渠道。"
+  },
+  {
+    "id": 4,
+    "type": "update_hunter",
+    "prompt": "更新猎策。",
+    "expected": "不要求 SourcingRequest，直接进入 cskh-update 并执行安装时登记的更新器。"
+  },
+  {
+    "id": 5,
+    "type": "check_update_only",
+    "prompt": "猎策有新版本吗？",
+    "expected": "进入 cskh-update 的只检查模式；发现新版本时报告版本，但不安装。"
+  }
+]

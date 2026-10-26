@@ -1,0 +1,4836 @@
+[
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin company",
+    "params": "<company> 必填\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "公司资料读取",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "company位置参数：实际公司vanity标识；不要从展示名称猜slug；返回unavailable页面不算成功",
+    "output": "name、industry、size、headquarters、founded、website、specialties、followers、about、url",
+    "parameters": [
+      {
+        "name": "<company>",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "Company universal name (nvidia), /company/<name> path, or full URL",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin connect",
+    "params": "<profile-url> 必填\n--expected-name 必填\n--note · 默认 \n--send · bool · 默认 False\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "连接邀请",
+    "status": "排除",
+    "note": "用户排除：发送邀请",
+    "input": "profile-url（必填）；expected-name（必填）；note；send",
+    "output": "status、recipient、reason、profile_url、note_chars、connectable、delivery_verified、matched_invitation_name、matched_invitation_url、actualValue、blockReason、expectedValue、observedUrl、safety",
+    "parameters": [
+      {
+        "name": "<profile-url>",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "Exact LinkedIn profile URL to open and verify",
+        "location": "CLI"
+      },
+      {
+        "name": "--expected-name",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "Expected visible profile name",
+        "location": "CLI"
+      },
+      {
+        "name": "--note",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "Optional connection note, max 300 chars",
+        "location": "CLI"
+      },
+      {
+        "name": "--send",
+        "type": "bool",
+        "required": "可选",
+        "default": false,
+        "description": "Actually click Send. Default is dry-run verification only.",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "excluded",
+      "label": "按范围排除，未执行",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin connections",
+    "params": "--limit · int · 默认 20\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "已有连接",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "limit",
+    "output": "rank、name、occupation、public_id、connected_at、url",
+    "parameters": [
+      {
+        "name": "--limit",
+        "type": "int",
+        "required": "可选",
+        "default": 20,
+        "description": "Number of connections to return (max 500)",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin inbox",
+    "params": "--limit · int · 默认 40\n--unread-only · bool · 默认 False\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "收件箱列表",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "limit；unread-only",
+    "output": "rank、thread_url、thread_id、person_name、last_message_preview、unread、counterparty_type、category、timestamp",
+    "parameters": [
+      {
+        "name": "--limit",
+        "type": "int",
+        "required": "可选",
+        "default": 40,
+        "description": "Maximum conversations to return (1-100)",
+        "location": "CLI"
+      },
+      {
+        "name": "--unread-only",
+        "type": "bool",
+        "required": "可选",
+        "default": false,
+        "description": "Return only conversations with unread messages",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin job-detail",
+    "params": "<job-url> 必填\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "职位详情",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "job-url（必填）",
+    "output": "title、company、location、workplace_type、job_type、applicants、listed、apply_url、company_url、url、description",
+    "parameters": [
+      {
+        "name": "<job-url>",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "Exact LinkedIn job URL, e.g. https://www.linkedin.com/jobs/view/123/",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin jobs-preferences",
+    "params": "共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "求职偏好/提醒读取",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "无业务参数",
+    "output": "open_to_work、job_titles、locations、job_alerts、preferences_url、alerts_url、raw_preferences",
+    "parameters": [],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin login",
+    "params": "--timeout · int · 默认 300\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "登录引导",
+    "status": "排除",
+    "note": "会改变登录状态，不属于本次只读复测",
+    "input": "timeout",
+    "output": "status、logged_in、site、public_id、plain_id、name",
+    "parameters": [
+      {
+        "name": "--timeout",
+        "type": "int",
+        "required": "可选",
+        "default": 300,
+        "description": "Maximum seconds to wait for the user to finish login",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "excluded",
+      "label": "按范围排除，未执行",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin people-search",
+    "params": "<keywords> 必填\n--limit · int · 默认 5\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "普通人员关键词搜索",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "keywords（必填）；limit",
+    "output": "rank、name、headline、location、profile_url",
+    "parameters": [
+      {
+        "name": "<keywords>",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "People search keywords, e.g. \"site reliability engineer berlin\"",
+        "location": "CLI"
+      },
+      {
+        "name": "--limit",
+        "type": "int",
+        "required": "可选",
+        "default": 5,
+        "description": "Maximum people to return (1-10); each query counts toward LinkedIn's monthly CUL",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin post-analytics",
+    "params": "--profile-url\n--limit · int · 默认 30\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "动态指标汇总",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "profile-url；limit",
+    "output": "posts_analyzed、total_reactions、total_comments、total_reposts、total_impressions、posts_with_media、posts_with_urls、latest_posted_at、latest_reactions、latest_comments、latest_reposts、latest_impressions、latest_url",
+    "parameters": [
+      {
+        "name": "--profile-url",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "LinkedIn /in/<handle>/ profile URL. Defaults to /in/me/.",
+        "location": "CLI"
+      },
+      {
+        "name": "--limit",
+        "type": "int",
+        "required": "可选",
+        "default": 30,
+        "description": "Maximum posts to summarize (1-100)",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin posts",
+    "params": "--profile-url\n--limit · int · 默认 20\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "个人动态读取",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "profile-url；limit",
+    "output": "rank、author、posted_at、body、reactions、comments、reposts、impressions、media、media_urls、url、raw_text",
+    "parameters": [
+      {
+        "name": "--profile-url",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "LinkedIn /in/<handle>/ profile URL. Defaults to /in/me/.",
+        "location": "CLI"
+      },
+      {
+        "name": "--limit",
+        "type": "int",
+        "required": "可选",
+        "default": 20,
+        "description": "Maximum posts to return (1-100)",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin profile-analytics",
+    "params": "--profile-url\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "本人主页指标",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "profile-url",
+    "output": "profile_url、profile_views、post_impressions、search_appearances、followers、connections、raw_analytics",
+    "parameters": [
+      {
+        "name": "--profile-url",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "LinkedIn /in/<handle>/ profile URL. Defaults to /in/me/.",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin profile-experience",
+    "params": "--profile-url\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "独立经历读取",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "profile-url",
+    "output": "rank、total_count、title、employment_type、company、date_range、start_date、end_date、location、location_type、description、skills、media、urls、skill_url、media_url、profile_url、raw_text、overlay_details",
+    "parameters": [
+      {
+        "name": "--profile-url",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "LinkedIn /in/<handle>/ profile URL. Defaults to /in/me/.",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin profile-projects",
+    "params": "--profile-url\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "独立项目读取",
+    "status": "空结果",
+    "note": "EMPTY_RESULT",
+    "input": "profile-url",
+    "output": "rank、title、date_range、associated_with、description、skills、media、urls、profile_url、raw_text",
+    "parameters": [
+      {
+        "name": "--profile-url",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "LinkedIn /in/<handle>/ profile URL. Defaults to /in/me/.",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_empty",
+      "label": "记录过空结果；不代表有结果链路通过",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin profile-read",
+    "params": "--profile-url\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "个人资料读取",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "profile-url",
+    "output": "profile_url、name、headline、location、about、about_character_count、about_skills、experience、education、services、featured",
+    "parameters": [
+      {
+        "name": "--profile-url",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "LinkedIn /in/<handle>/ profile URL. Defaults to /in/me/.",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin safe-send",
+    "params": "--thread-url 必填 · str\n--expected-name 必填 · str\n--message 必填 · str\n--expected-last-text · str\n--expected-last-hash · str\n--send · bool · 默认 False\n--screenshot · bool · 默认 False\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "已有线程消息",
+    "status": "排除",
+    "note": "用户排除：发送消息",
+    "input": "thread-url（必填）；expected-name（必填）；message（必填）；expected-last-text；expected-last-hash；send；screenshot",
+    "output": "status、recipient、reason、thread_url、message_chars、screenshot",
+    "parameters": [
+      {
+        "name": "--thread-url",
+        "type": "str",
+        "required": "必填",
+        "default": "—",
+        "description": "Exact LinkedIn messaging thread URL to open and verify",
+        "location": "CLI"
+      },
+      {
+        "name": "--expected-name",
+        "type": "str",
+        "required": "必填",
+        "default": "—",
+        "description": "Expected visible recipient name in the active thread header",
+        "location": "CLI"
+      },
+      {
+        "name": "--message",
+        "type": "str",
+        "required": "必填",
+        "default": "—",
+        "description": "Message body to send or dry-run",
+        "location": "CLI"
+      },
+      {
+        "name": "--expected-last-text",
+        "type": "str",
+        "required": "可选",
+        "default": "—",
+        "description": "Substring expected in the currently visible latest conversation context",
+        "location": "CLI"
+      },
+      {
+        "name": "--expected-last-hash",
+        "type": "str",
+        "required": "可选",
+        "default": "—",
+        "description": "SHA-256 hash of expected latest visible message text",
+        "location": "CLI"
+      },
+      {
+        "name": "--send",
+        "type": "bool",
+        "required": "可选",
+        "default": false,
+        "description": "Actually click Send. Default is dry-run verification only.",
+        "location": "CLI"
+      },
+      {
+        "name": "--screenshot",
+        "type": "bool",
+        "required": "可选",
+        "default": false,
+        "description": "Capture a screenshot during verification",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "excluded",
+      "label": "按范围排除，未执行",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin salesnav-inbox",
+    "params": "--limit · number · 默认 40\n--max-pages · number · 默认 30\n--unread-only · bool · 默认 False\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "SN收件箱（API路径）",
+    "status": "本轮空结果",
+    "note": "2026-10-25：limit=1、max-pages=1，约2.97秒返回EMPTY_RESULT/退出66；当前无可用会话样本，不能据此验证非空列表。",
+    "input": "limit；max-pages；unread-only",
+    "output": "rank、thread_id、thread_url、person_name、last_message_snippet、last_activity_time、unread、unread_count、total_message_count、archived、participants、next_page_starts_at",
+    "parameters": [
+      {
+        "name": "--limit",
+        "type": "number",
+        "required": "可选",
+        "default": 40,
+        "description": "Maximum conversations to return (1-500)",
+        "location": "CLI"
+      },
+      {
+        "name": "--max-pages",
+        "type": "number",
+        "required": "可选",
+        "default": 30,
+        "description": "Maximum Sales Navigator API pages to fetch",
+        "location": "CLI"
+      },
+      {
+        "name": "--unread-only",
+        "type": "bool",
+        "required": "可选",
+        "default": false,
+        "description": "Return only unread conversations",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_empty",
+      "label": "记录过空结果；不代表有结果链路通过",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin salesnav-message",
+    "params": "<recipient> 必填\n--subject 必填\n--body 必填\n--send · bool · 默认 False\n--copy-to-crm · bool · 默认 False\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "SN InMail发送/演练（API路径）",
+    "status": "隔离dry-run通过／真实发送未测",
+    "note": "本轮用模拟page执行上游原函数：send=false返回validated_dry_run，2次模拟读取、0次POST；无浏览器/网络发送。上游不等同Hunter审批链，也未纳入自研统一网关。",
+    "input": "recipient（必填）；subject（必填）；body（必填）；send；copy-to-crm",
+    "output": "status、recipient、title、company、credits_remaining、credits_before、credits_after、sent_in_salesnav、message_chars、subject_chars、recipient_urn、degree、inmail_restriction、open_link",
+    "parameters": [
+      {
+        "name": "<recipient>",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "Sales Navigator lead URL, LinkedIn /in/ URL from salesnav-search, or urn:li:fs_salesProfile:(...)",
+        "location": "CLI"
+      },
+      {
+        "name": "--subject",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "InMail subject",
+        "location": "CLI"
+      },
+      {
+        "name": "--body",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "InMail body",
+        "location": "CLI"
+      },
+      {
+        "name": "--send",
+        "type": "bool",
+        "required": "可选",
+        "default": false,
+        "description": "Actually send the InMail. Default is dry-run validation only.",
+        "location": "CLI"
+      },
+      {
+        "name": "--copy-to-crm",
+        "type": "bool",
+        "required": "可选",
+        "default": false,
+        "description": "Set Sales Navigator copyToCrm on the message request",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "safety_only",
+      "label": "仅预演或安全拦截；发送未验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin salesnav-search",
+    "params": "<keywords> 必填\n--limit · number · 默认 25\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "SN人员关键词搜索（旧适配器）",
+    "status": "本轮上游真实实测通过",
+    "note": "2026-10-25：指定账号，关键词SPD Scientific，limit=1，约5.59秒返回1人；包含职位、公司、地点、profile_url、lead_url、recipient_urn。内部按25条API批次读取，输出截取1条。",
+    "input": "keywords（必填）；limit",
+    "output": "rank、name、title、company、location、degree、profile_url、lead_url、recipient_urn",
+    "parameters": [
+      {
+        "name": "<keywords>",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "People search keywords, e.g. \"quality manager food manufacturing\"",
+        "location": "CLI"
+      },
+      {
+        "name": "--limit",
+        "type": "number",
+        "required": "可选",
+        "default": 25,
+        "description": "Maximum leads to return (1-500, fetched 25 per request)",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin salesnav-thread",
+    "params": "<thread-or-recipient> 必填\n--limit · number · 默认 200\n--max-pages · number · 默认 30\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "SN线程历史",
+    "status": "无真实会话样本",
+    "note": "本轮SalesNav收件箱为空，未编造thread id或扩大私有记录采集；仅核对源码/参数，不算真实历史读取通过。",
+    "input": "thread-or-recipient（必填）；limit；max-pages",
+    "output": "index、thread_id、thread_url、sender、text、timestamp、subject、message_id、sender_urn、delivered_at、type、total_message_count",
+    "parameters": [
+      {
+        "name": "<thread-or-recipient>",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "Sales Navigator inbox URL/thread id, Sales Navigator lead URL, recipient urn, or exact participant name",
+        "location": "CLI"
+      },
+      {
+        "name": "--limit",
+        "type": "number",
+        "required": "可选",
+        "default": 200,
+        "description": "Maximum messages to return (1-500)",
+        "location": "CLI"
+      },
+      {
+        "name": "--max-pages",
+        "type": "number",
+        "required": "可选",
+        "default": 30,
+        "description": "Maximum inbox pages to scan when resolving a recipient",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "no_sample",
+      "label": "无真实样本，未验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin search",
+    "params": "<query> 必填\n--location\n--limit · int · 默认 10\n--start · int · 默认 0\n--details · bool · 默认 False\n--company\n--experience-level\n--job-type\n--date-posted\n--remote\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "职位搜索（不是人员搜索）",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "query（必填）；location；limit；start；details；company；experience-level；job-type；date-posted；remote",
+    "output": "rank、title、company、location、listed、salary、url",
+    "parameters": [
+      {
+        "name": "<query>",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "Job search keywords",
+        "location": "CLI"
+      },
+      {
+        "name": "--location",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "Location text such as San Francisco Bay Area",
+        "location": "CLI"
+      },
+      {
+        "name": "--limit",
+        "type": "int",
+        "required": "可选",
+        "default": 10,
+        "description": "Number of jobs to return (max 100)",
+        "location": "CLI"
+      },
+      {
+        "name": "--start",
+        "type": "int",
+        "required": "可选",
+        "default": 0,
+        "description": "Result offset for pagination",
+        "location": "CLI"
+      },
+      {
+        "name": "--details",
+        "type": "bool",
+        "required": "可选",
+        "default": false,
+        "description": "Include full job description and apply URL (slower)",
+        "location": "CLI"
+      },
+      {
+        "name": "--company",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "Comma-separated company names or LinkedIn company IDs",
+        "location": "CLI"
+      },
+      {
+        "name": "--experience-level",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "Comma-separated: internship, entry, associate, mid-senior, director, executive",
+        "location": "CLI"
+      },
+      {
+        "name": "--job-type",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "Comma-separated: full-time, part-time, contract, temporary, volunteer, internship, other",
+        "location": "CLI"
+      },
+      {
+        "name": "--date-posted",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "One of: any, month, week, 24h",
+        "location": "CLI"
+      },
+      {
+        "name": "--remote",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "Comma-separated: on-site, hybrid, remote",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin sent-invitations",
+    "params": "共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "已发邀请",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "无业务参数",
+    "output": "rank、name、profile_url、invited_date_text",
+    "parameters": [],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin services-read",
+    "params": "--profile-url\n--services-url\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "服务页读取",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "profile-url；services-url",
+    "output": "service_url、page_title、overview、availability、work_locations、pricing、services_provided、services_count、media、media_count、messages、reviews_visibility",
+    "parameters": [
+      {
+        "name": "--profile-url",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "LinkedIn /in/<handle>/ profile URL. Defaults to /in/me/.",
+        "location": "CLI"
+      },
+      {
+        "name": "--services-url",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "LinkedIn /services/page/<id>/ URL. If omitted, it is discovered from the profile.",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin thread-snapshot",
+    "params": "--thread-url 必填 · str\n--max-scrolls · number · 默认 30\n--json · bool · 默认 False\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "精确会话快照",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "thread-url（必填）；max-scrolls；json",
+    "output": "thread_url、recipient、message_count、latest_text、snapshot_json",
+    "parameters": [
+      {
+        "name": "--thread-url",
+        "type": "str",
+        "required": "必填",
+        "default": "—",
+        "description": "Exact LinkedIn messaging thread URL to open and snapshot",
+        "location": "CLI"
+      },
+      {
+        "name": "--max-scrolls",
+        "type": "number",
+        "required": "可选",
+        "default": 30,
+        "description": "Maximum upward scroll attempts used to request older message pages",
+        "location": "CLI"
+      },
+      {
+        "name": "--json",
+        "type": "bool",
+        "required": "可选",
+        "default": false,
+        "description": "Return only JSON snapshot string in the snapshot_json field",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin timeline",
+    "params": "--limit · int · 默认 20\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "首页动态",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "limit",
+    "output": "rank、author、author_url、headline、text、posted_at、reactions、comments、url",
+    "parameters": [
+      {
+        "name": "--limit",
+        "type": "int",
+        "required": "可选",
+        "default": 20,
+        "description": "Number of posts to return (max 100)",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli linkedin whoami",
+    "params": "共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "账号身份",
+    "status": "真实返回通过",
+    "note": "当前身份与预期一致",
+    "input": "无业务参数",
+    "output": "logged_in、site、public_id、plain_id、name",
+    "parameters": [],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli hunter-linkedin capability-probe",
+    "params": "<profileUrl> 必填\n--expectedName 必填\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "目标页面触达能力探测",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "profileUrl（必填）；expectedName（必填）",
+    "output": "authenticated、searchAvailable、connectionsAvailable、inboxAvailable、profileUrl、profileName、connectionDegree、connectEntry、messageEntry、invitationPending、inMailVisible、advisoryOnly、executionAllowed、snapshotJson",
+    "parameters": [
+      {
+        "name": "<profileUrl>",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--expectedName",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "以命令help为准",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli hunter-linkedin company",
+    "params": "--company 必填\n--keyword · 默认 \n--location · 默认 \n--limit · int · 默认 20\n--autoTag · boolean · 默认 True\n--tagPrefix · 默认 LC\n--skipTierCheck · boolean · 默认 False\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "按公司查找员工（旧版，含固定规则打分）",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "公司名称必填；可加关键词和读取人数。--location当前仅用于本地记录，源码未将它用于地区筛选。",
+    "output": "返回公司名称/链接、已读人数total、规则达标人数matched、本地标签及前10名员工记录；每人包含姓名、职位、主页标识、分数和规则达标标记。limit控制读取量，不保证结果完整。",
+    "parameters": [
+      {
+        "name": "--company",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "要查员工的公司名称。命令先找公司，再打开员工页面。",
+        "location": "CLI"
+      },
+      {
+        "name": "--keyword",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "传入员工页搜索，并对姓名、职位、所在地文字按词命中算分；不是大模型业务判断。",
+        "location": "CLI"
+      },
+      {
+        "name": "--location",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "源码当前只保存为本地标签记录信息，未实际用于地区筛选；不能依赖它限定员工所在地。",
+        "location": "CLI"
+      },
+      {
+        "name": "--limit",
+        "type": "int",
+        "required": "可选",
+        "default": 20,
+        "description": "最多尝试读取的人数，默认20。结果结构只回传前10人，终端表格最多展示20人；不代表全量员工。",
+        "location": "CLI"
+      },
+      {
+        "name": "--autoTag",
+        "type": "boolean",
+        "required": "可选",
+        "default": true,
+        "description": "默认开启，将规则匹配人员写入本地标签CSV；false关闭。不是给LinkedIn上的人员加标签。",
+        "location": "CLI"
+      },
+      {
+        "name": "--tagPrefix",
+        "type": "字符串",
+        "required": "可选",
+        "default": "LC",
+        "description": "本地生成标签的前缀；autoTag=false时不写标签。",
+        "location": "CLI"
+      },
+      {
+        "name": "--skipTierCheck",
+        "type": "boolean",
+        "required": "可选",
+        "default": false,
+        "description": "跳过旧版账号档位检查，默认false；跳过不等于获得Premium或SalesNav权限。",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    },
+    "when_to_use": "想先找到某家公司，再查看其员工名单时使用；不是搜索符合规模/行业条件的公司名单。",
+    "effects": "打开LinkedIn公司搜索及员工页。默认autoTag=true会把规则匹配人员写入本地标签CSV；关闭该选项可避免打标签。不发送消息。它使用旧档位判断和内置评分，不等同新版SalesNav精确筛选。",
+    "example": "opencli hunter-linkedin company --company \"Example Medical\" --keyword \"Director\" --limit 20 --autoTag false"
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli hunter-linkedin company-id-lookup",
+    "params": "--company 必填\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "公司数字ID查询",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面；company必须是实际vanity标识，如spd-scientific-pte-ltd，不能传展示名称",
+    "input": "--company 公司主页vanity标识（如spd-scientific-pte-ltd），不是展示名称；数字ID可用于验证，名称搜索必须先解析实际公司链接",
+    "output": "结构化结果/输出文件；以源码为准",
+    "parameters": [
+      {
+        "name": "--company",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "以命令help为准",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli hunter-linkedin connect-safe",
+    "params": "<profileUrl> 必填\n--expectedName 必填\n--note · 默认 \n--send · boolean · 默认 False\n--approval · 默认 \n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "带审批的连接邀请",
+    "status": "排除",
+    "note": "用户排除：安全邀请",
+    "input": "profileUrl（必填）；expectedName（必填）；note；send；approval",
+    "output": "status、profileUrl、recipientName、noteLength、verifiedState、sent",
+    "parameters": [
+      {
+        "name": "<profileUrl>",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--expectedName",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--note",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--send",
+        "type": "boolean",
+        "required": "可选",
+        "default": false,
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--approval",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "excluded",
+      "label": "按范围排除，未执行",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli hunter-linkedin evaluate",
+    "params": "<input> 必填\n--jd · 默认 \n--plan · 默认 \n--channel · 默认 linkedin\n--keywords · 默认 \n--targetCompanies · 默认 \n--targetLocations · 默认 \n--minScore · int\n--output · 默认 \n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help",
+    "purpose": "给已搜到的人选算初筛分数（旧版固定规则）",
+    "status": "合成通过",
+    "note": "不操作真实平台；台账仅check，不伪造发送记录",
+    "input": "一份已保存的人选名单JSON（必须含candidates数组），再提供关键词、公司、地区或JD/寻访方案。新SalesNav原始data.results回执不能直接作为此输入。",
+    "output": "写出带evaluation字段的人选文件：每人0–100分、分数等级、规则命中理由和是否达到门槛；命令返回总人数、达标人数及文件路径。规则达标不等于业务上已确认合适。",
+    "parameters": [
+      {
+        "name": "<input>",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "已保存的人选名单文件，必须含candidates数组。不是直接传公司名称或一段自然语言需求。",
+        "location": "CLI"
+      },
+      {
+        "name": "--jd",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "读取JD配置JSON里的要求，构建规则评估条件；不是直接输入一段JD原文。",
+        "location": "CLI"
+      },
+      {
+        "name": "--plan",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "读取寻访方案JSON的channelPlans.<channel>条件；与--jd同时提供时优先采用plan。",
+        "location": "CLI"
+      },
+      {
+        "name": "--channel",
+        "type": "字符串",
+        "required": "可选",
+        "default": "linkedin",
+        "description": "从方案文件选择哪一渠道的条件；仅配合--plan时起作用。",
+        "location": "CLI"
+      },
+      {
+        "name": "--keywords",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "额外匹配词，按逗号或空格分隔，用于固定规则打分。",
+        "location": "CLI"
+      },
+      {
+        "name": "--targetCompanies",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "目标公司匹配词，按逗号或空格分隔。不是去LinkedIn搜索这些公司。",
+        "location": "CLI"
+      },
+      {
+        "name": "--targetLocations",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "目标地区匹配词，按逗号或空格分隔，用已有名单资料打分。",
+        "location": "CLI"
+      },
+      {
+        "name": "--minScore",
+        "type": "int",
+        "required": "可选",
+        "default": "JD/方案门槛，否则25",
+        "description": "0–100分的通过门槛；显式值覆盖JD/方案门槛；未提供其他门槛时默认25分。",
+        "location": "CLI"
+      },
+      {
+        "name": "--output",
+        "type": "字符串",
+        "required": "可选",
+        "default": "固定本地结果文件（见说明）",
+        "description": "评估结果JSON写入路径；建议明确指定。默认~/.hunter/channels/linkedin/linkedin-evaluated-result.json，可能覆盖已有文件。",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "synthetic",
+      "label": "本地合成证据；非真实网站",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    },
+    "when_to_use": "已经有一份人选名单，希望按一组明确条件做机械初筛时使用。它不搜索LinkedIn、不读取新资料，也不调用大模型判断。",
+    "effects": "会写本地评估JSON文件；未指定--output时使用固定默认路径，可能覆盖上次结果。不发送消息或修改LinkedIn。属于旧规则工具，不替代新流程的大模型业务评估。",
+    "example": "opencli hunter-linkedin evaluate candidates.json --keywords \"sales,medtech\" --targetLocations \"Singapore\" --minScore 40 --output evaluated.json"
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli hunter-linkedin first-message-safe",
+    "params": "<profileUrl> 必填\n--expectedName 必填\n--message 必填\n--send · boolean · 默认 False\n--approval · 默认 \n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "首条消息",
+    "status": "排除",
+    "note": "用户排除：首条消息",
+    "input": "profileUrl（必填）；expectedName（必填）；message（必填）；send；approval",
+    "output": "status、recipient、messageChars、sent",
+    "parameters": [
+      {
+        "name": "<profileUrl>",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--expectedName",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--message",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--send",
+        "type": "boolean",
+        "required": "可选",
+        "default": false,
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--approval",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "excluded",
+      "label": "按范围排除，未执行",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli hunter-linkedin normalize",
+    "params": "--input · 默认 \n--source · 默认 \n--output · 默认 \n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help",
+    "purpose": "候选格式标准化",
+    "status": "合成通过",
+    "note": "不操作真实平台；台账仅check，不伪造发送记录",
+    "input": "input；source；output",
+    "output": "结构化结果/输出文件；以源码为准",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--source",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--output",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "synthetic",
+      "label": "本地合成证据；非真实网站",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli hunter-linkedin outreach-ledger",
+    "params": "<input> 必填\n--action · 默认 check\n--ledger · 默认 \n--output · 默认 \n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help",
+    "purpose": "触达防重台账",
+    "status": "合成通过",
+    "note": "不操作真实平台；台账仅check，不伪造发送记录",
+    "input": "input（必填）；action；ledger；output",
+    "output": "结构化结果/输出文件；以源码为准",
+    "parameters": [
+      {
+        "name": "<input>",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--action",
+        "type": "字符串",
+        "required": "可选",
+        "default": "check",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--ledger",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--output",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "synthetic",
+      "label": "本地合成证据；非真实网站",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli hunter-linkedin outreach-plan",
+    "params": "<input> 必填\n--output · 默认 \n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help",
+    "purpose": "渠道计划",
+    "status": "合成通过",
+    "note": "不操作真实平台；台账仅check，不伪造发送记录",
+    "input": "input（必填）；output",
+    "output": "结构化结果/输出文件；以源码为准",
+    "parameters": [
+      {
+        "name": "<input>",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--output",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "synthetic",
+      "label": "本地合成证据；非真实网站",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli hunter-linkedin recruiter-scout",
+    "params": "--keyword · 默认 \n--searchUrl · 默认 \n--jobTitles · 默认 \n--location · 默认 \n--companies · 默认 \n--skills · 默认 \n--keywords · 默认 \n--limit · int · 默认 25\n--tagPrefix · 默认 \n--raw · boolean · 默认 False\n--output · 默认 \n--skipTierCheck · boolean · 默认 False\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "Recruiter寻访",
+    "status": "排除",
+    "note": "RPS/Recruiter未开发整合；当前账号无独立权益证据",
+    "input": "keyword；searchUrl；jobTitles；location；companies；skills；keywords；limit；tagPrefix；raw；output；skipTierCheck",
+    "output": "结构化结果/输出文件；以源码为准",
+    "parameters": [
+      {
+        "name": "--keyword",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--searchUrl",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--jobTitles",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--location",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--companies",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--skills",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--keywords",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--limit",
+        "type": "int",
+        "required": "可选",
+        "default": 25,
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--tagPrefix",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--raw",
+        "type": "boolean",
+        "required": "可选",
+        "default": false,
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--output",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--skipTierCheck",
+        "type": "boolean",
+        "required": "可选",
+        "default": false,
+        "description": "以命令help为准",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "excluded",
+      "label": "按范围排除，未执行",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli hunter-linkedin relationship-state",
+    "params": "<input> 必填\n--output · 默认 \n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help",
+    "purpose": "关系证据归并",
+    "status": "合成通过",
+    "note": "不操作真实平台；台账仅check，不伪造发送记录",
+    "input": "input（必填）；output",
+    "output": "结构化结果/输出文件；以源码为准",
+    "parameters": [
+      {
+        "name": "<input>",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--output",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "synthetic",
+      "label": "本地合成证据；非真实网站",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli hunter-linkedin report",
+    "params": "<input> 必填\n--formats · 默认 html,csv,md\n--tag · 默认 \n--title · 默认 \n--outputDir · 默认 \n--fields · 默认 \n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help",
+    "purpose": "旧寻访报告导出",
+    "status": "合成通过",
+    "note": "不操作真实平台；台账仅check，不伪造发送记录",
+    "input": "input（必填）；formats；tag；title；outputDir；fields",
+    "output": "结构化结果/输出文件；以源码为准",
+    "parameters": [
+      {
+        "name": "<input>",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--formats",
+        "type": "字符串",
+        "required": "可选",
+        "default": "html,csv,md",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--tag",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--title",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--outputDir",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--fields",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "synthetic",
+      "label": "本地合成证据；非真实网站",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli hunter-linkedin scout",
+    "params": "--keyword 必填\n--location · 默认 \n--connection · 默认 \n--currentCompany · 默认 \n--pastCompany · 默认 \n--school · 默认 \n--industry · 默认 \n--language · 默认 \n--limit · int · 默认 20\n--output · 默认 \n--skipTierCheck · boolean · 默认 True\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "增强普通人员搜索",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "keyword（必填）；location；connection；currentCompany；pastCompany；school；industry；language；limit；output；skipTierCheck",
+    "output": "结构化结果/输出文件；以源码为准",
+    "parameters": [
+      {
+        "name": "--keyword",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--location",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--connection",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--currentCompany",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--pastCompany",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--school",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--industry",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--language",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--limit",
+        "type": "int",
+        "required": "可选",
+        "default": 20,
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--output",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--skipTierCheck",
+        "type": "boolean",
+        "required": "可选",
+        "default": true,
+        "description": "以命令help为准",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli hunter-linkedin setup",
+    "params": "--tier · 默认 \n--preferredDiscovery · 默认 \n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "账号档位/发现路径配置",
+    "status": "排除",
+    "note": "会修改本地账号配置，不属于本次只读复测",
+    "input": "tier；preferredDiscovery",
+    "output": "结构化结果/输出文件；以源码为准",
+    "parameters": [
+      {
+        "name": "--tier",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--preferredDiscovery",
+        "type": "字符串",
+        "required": "可选",
+        "default": "",
+        "description": "以命令help为准",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "excluded",
+      "label": "按范围排除，未执行",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "旧平台 / Hunter",
+    "command": "opencli hunter-linkedin thread-snapshot",
+    "params": "<threadUrl> 必填\n--expectedName 必填\n--maxScrolls · int · 默认 30\n共用：--profile；-f/--format、--trace、-v/--verbose、-h/--help\n浏览器：--window、--site-session、--keep-tab",
+    "purpose": "Hunter精确线程快照",
+    "status": "真实返回通过",
+    "note": "最小样本返回；不外推所有账号/所有页面",
+    "input": "threadUrl（必填）；expectedName（必填）；maxScrolls",
+    "output": "threadUrl、recipient、profileUrl、messageCount、latestText、snapshotJson",
+    "parameters": [
+      {
+        "name": "<threadUrl>",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--expectedName",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "以命令help为准",
+        "location": "CLI"
+      },
+      {
+        "name": "--maxScrolls",
+        "type": "int",
+        "required": "可选",
+        "default": 30,
+        "description": "以命令help为准",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin capabilities",
+    "params": "无输入参数",
+    "purpose": "列出已接入平台操作",
+    "status": "本地实测",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：dev.14解压CLI加载通过",
+    "input": "无",
+    "output": "operations：平台与操作映射；mode、runtime_status",
+    "parameters": [],
+    "verification": {
+      "level": "local_contract",
+      "label": "本地入口或参数已验；非网站全流程",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin account-inspect --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：account、candidates[]；include_subscription?",
+    "purpose": "账号/订阅诊断",
+    "status": "历史真实验证",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：本轮身份回执；订阅读取此前实测，不等同余额永远有效",
+    "input": "JSON文件（字段见下表）",
+    "output": "账号身份、套餐观察、能力观察、路由建议、诊断回执",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "account",
+        "type": "对象",
+        "required": "必填",
+        "default": "—",
+        "description": "账号绑定：profile、expected_identity、expected_profile_url",
+        "location": "JSON字段"
+      },
+      {
+        "name": "account.profile",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "已连接的Chrome Profile标识",
+        "location": "JSON字段"
+      },
+      {
+        "name": "account.expected_identity",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "预期站内显示姓名，用于核对账号",
+        "location": "JSON字段"
+      },
+      {
+        "name": "account.expected_profile_url",
+        "type": "URL",
+        "required": "必填",
+        "default": "—",
+        "description": "预期账号精确LinkedIn主页URL",
+        "location": "JSON字段"
+      },
+      {
+        "name": "candidates",
+        "type": "数组",
+        "required": "必填",
+        "default": "—",
+        "description": "候选平台操作：provider、operation、input；只用于能力诊断/路由比较",
+        "location": "JSON字段"
+      },
+      {
+        "name": "include_subscription",
+        "type": "布尔",
+        "required": "可选",
+        "default": "false",
+        "description": "是否额外读取套餐/余额观察",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin route-options --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：candidates[]、observations[]",
+    "purpose": "根据已有证据比较路由",
+    "status": "合成验证",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：不自动派发或自动换平台",
+    "input": "JSON文件（字段见下表）",
+    "output": "可选平台路由及可用／受阻／未知原因",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "candidates",
+        "type": "数组",
+        "required": "必填",
+        "default": "—",
+        "description": "候选平台操作：provider、operation、input；只用于能力诊断/路由比较",
+        "location": "JSON字段"
+      },
+      {
+        "name": "observations",
+        "type": "数组",
+        "required": "必填",
+        "default": "—",
+        "description": "已有能力观察证据及有效时间",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "synthetic",
+      "label": "本地合成证据；非真实网站",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin task-create --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：directory、task{task_id,intent,criteria[],target,budgets?,coverage?,evidence_scope?,source?}",
+    "purpose": "建立一项找公司/找人的任务记录",
+    "status": "真实流程通过",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：医疗研究及恢复任务已调用",
+    "input": "Agent整理好的任务定义文件：保存目录、任务名称、业务条件、目标数量等。",
+    "output": "本地任务记录及task_id，后续搜索回执、判断和报告归入同一任务。",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "directory",
+        "type": "绝对路径",
+        "required": "必填",
+        "default": "—",
+        "description": "任务账本所在目录",
+        "location": "JSON字段"
+      },
+      {
+        "name": "task",
+        "type": "对象",
+        "required": "可选",
+        "default": "—",
+        "description": "task_id、intent、criteria、target；可含budgets、coverage、evidence_scope、source",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    },
+    "when_to_use": "开始一项需要分批搜索、保存证据和输出名单的任务时，由Agent登记目标及条件。",
+    "effects": "只创建本地任务文件；此命令本身不搜索LinkedIn。",
+    "example": "opencli hunter-linkedin task-create --input task-definition.json"
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin task-validate --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：task_id、intent、criteria[]、target；budgets?、coverage?",
+    "purpose": "校验任务定义",
+    "status": "合成验证",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：顶层直接传task对象",
+    "input": "JSON文件（字段见下表）",
+    "output": "任务定义校验结果；失败返回错误码",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "task_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "任务唯一标识，与账本一致",
+        "location": "JSON字段"
+      },
+      {
+        "name": "intent",
+        "type": "枚举",
+        "required": "必填",
+        "default": "—",
+        "description": "任务目的，由任务契约校验",
+        "location": "JSON字段"
+      },
+      {
+        "name": "criteria",
+        "type": "数组",
+        "required": "必填",
+        "default": "—",
+        "description": "业务条件及强度，不能由平台适配器写死",
+        "location": "JSON字段"
+      },
+      {
+        "name": "target",
+        "type": "对象",
+        "required": "必填",
+        "default": "—",
+        "description": "count与meaning，说明目标数量和计数口径",
+        "location": "JSON字段"
+      },
+      {
+        "name": "budgets",
+        "type": "对象",
+        "required": "可选",
+        "default": "—",
+        "description": "任务级搜索/详情等预算",
+        "location": "JSON字段"
+      },
+      {
+        "name": "coverage",
+        "type": "对象",
+        "required": "可选",
+        "default": "—",
+        "description": "查询覆盖要求",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "synthetic",
+      "label": "本地合成证据；非真实网站",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin plan --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：provider、operation、account、input",
+    "purpose": "编译平台请求",
+    "status": "合成验证",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：不执行浏览器",
+    "input": "JSON文件（字段见下表）",
+    "output": "执行计划及dispatched:false；不访问平台",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "provider",
+        "type": "枚举",
+        "required": "必填",
+        "default": "—",
+        "description": "linkedin 或 salesnav",
+        "location": "JSON字段"
+      },
+      {
+        "name": "operation",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "capabilities返回的操作名称，如company.search",
+        "location": "JSON字段"
+      },
+      {
+        "name": "account",
+        "type": "对象",
+        "required": "必填",
+        "default": "—",
+        "description": "账号绑定：profile、expected_identity、expected_profile_url",
+        "location": "JSON字段"
+      },
+      {
+        "name": "account.profile",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "已连接的Chrome Profile标识",
+        "location": "JSON字段"
+      },
+      {
+        "name": "account.expected_identity",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "预期站内显示姓名，用于核对账号",
+        "location": "JSON字段"
+      },
+      {
+        "name": "account.expected_profile_url",
+        "type": "URL",
+        "required": "必填",
+        "default": "—",
+        "description": "预期账号精确LinkedIn主页URL",
+        "location": "JSON字段"
+      },
+      {
+        "name": "input",
+        "type": "对象",
+        "required": "必填",
+        "default": "—",
+        "description": "所选平台原子操作的输入字段",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "synthetic",
+      "label": "本地合成证据；非真实网站",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin execute --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：provider、operation、account、input",
+    "purpose": "执行单项平台请求",
+    "status": "真实实测通过",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：公司/人员搜索详情、筛选及续页",
+    "input": "JSON文件（字段见下表）",
+    "output": "status、data、coverage、error、resume等标准化平台回执",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "provider",
+        "type": "枚举",
+        "required": "必填",
+        "default": "—",
+        "description": "linkedin 或 salesnav",
+        "location": "JSON字段"
+      },
+      {
+        "name": "operation",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "capabilities返回的操作名称，如company.search",
+        "location": "JSON字段"
+      },
+      {
+        "name": "account",
+        "type": "对象",
+        "required": "必填",
+        "default": "—",
+        "description": "账号绑定：profile、expected_identity、expected_profile_url",
+        "location": "JSON字段"
+      },
+      {
+        "name": "account.profile",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "已连接的Chrome Profile标识",
+        "location": "JSON字段"
+      },
+      {
+        "name": "account.expected_identity",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "预期站内显示姓名，用于核对账号",
+        "location": "JSON字段"
+      },
+      {
+        "name": "account.expected_profile_url",
+        "type": "URL",
+        "required": "必填",
+        "default": "—",
+        "description": "预期账号精确LinkedIn主页URL",
+        "location": "JSON字段"
+      },
+      {
+        "name": "input",
+        "type": "对象",
+        "required": "必填",
+        "default": "—",
+        "description": "所选平台原子操作的输入字段",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin task-execute --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：directory、task_id、operation_id、request",
+    "purpose": "记账后执行平台请求",
+    "status": "真实流程通过",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：幂等、预算、身份绑定亦有合成测试",
+    "input": "JSON文件（字段见下表）",
+    "output": "操作回执及任务账本；重复操作返回replayed",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "directory",
+        "type": "绝对路径",
+        "required": "必填",
+        "default": "—",
+        "description": "任务账本所在目录",
+        "location": "JSON字段"
+      },
+      {
+        "name": "task_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "任务唯一标识，与账本一致",
+        "location": "JSON字段"
+      },
+      {
+        "name": "operation_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "操作唯一标识，用于账本和幂等控制",
+        "location": "JSON字段"
+      },
+      {
+        "name": "request",
+        "type": "对象",
+        "required": "必填",
+        "default": "—",
+        "description": "provider、operation、account、input完整平台请求",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin task-status --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：directory、task_id",
+    "purpose": "查看任务已搜到什么、还差什么",
+    "status": "本地实测",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：恢复真实历史账本",
+    "input": "文件中指定任务保存目录和task_id。",
+    "output": "任务目标、已收集对象、操作/中断记录、证据版本和当前状态。",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "directory",
+        "type": "绝对路径",
+        "required": "必填",
+        "default": "—",
+        "description": "任务账本所在目录",
+        "location": "JSON字段"
+      },
+      {
+        "name": "task_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "任务唯一标识，与账本一致",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "local_contract",
+      "label": "本地入口或参数已验；非网站全流程",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    },
+    "when_to_use": "任务执行中或中断后，查看已有公司/人员、操作回执和证据版本。",
+    "effects": "读取本地任务记录，不重新搜索网站，也不自动判断候选是否合格。",
+    "example": "opencli hunter-linkedin task-status --input task-reference.json"
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin task-assess --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：directory、task_id、assessment_id、assessments[{key,status,reason,evidence[]}]",
+    "purpose": "保存大模型已做出的合格判断及依据",
+    "status": "真实流程通过",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：qualified要求逐硬条件证据；不是自动评分",
+    "input": "Agent准备的判断文件：任务位置、本轮判断编号、每个已有对象的结论、原因和证据引用。input.json只是示意文件名，不是一份能通用于所有命令的文件。",
+    "output": "保存本轮assessment记录，返回判断编号、记录条数及recorded状态。后续task-report将这些结论显示成表格。",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "Agent已准备的本轮判断文件路径；命令读取文件，不是读取一段自然语言需求。",
+        "location": "CLI"
+      },
+      {
+        "name": "directory",
+        "type": "绝对路径",
+        "required": "必填",
+        "default": "—",
+        "description": "这项搜索任务的本地保存目录，用来找到已有对象和证据。",
+        "location": "JSON字段"
+      },
+      {
+        "name": "task_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "把判断归到哪项任务；必须与该目录中保存的任务一致。",
+        "location": "JSON字段"
+      },
+      {
+        "name": "assessment_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "给本轮判断记录起一个编号，供生成报告时选用；不是自动生成的AI评分。",
+        "location": "JSON字段"
+      },
+      {
+        "name": "assessments",
+        "type": "数组",
+        "required": "必填",
+        "default": "—",
+        "description": "逐个已有公司/人员的判断。key为已有对象标识；status为qualified（符合）、not_qualified（不符合）或insufficient_evidence（证据不足）；reason写原因，evidence列证据来源。",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    },
+    "when_to_use": "搜索/详情读取后，大模型已判断哪些公司或人员符合、不符合、或证据不足，需要把结论保留下来供报告使用。",
+    "effects": "只校验并写入本地判断记录，不搜索LinkedIn、不调用大模型、不自动评分。标为符合时，检查每项必需条件是否带已有操作的证据引用；这不等于程序验证了业务结论真假。",
+    "example": "opencli hunter-linkedin task-assess --input assessment.json"
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin task-report --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：directory、task_id、assessment_id、report_id",
+    "purpose": "把已搜索资料和已保存判断整理成名单报告",
+    "status": "真实流程通过",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：查询覆盖和人员评估分别显示",
+    "input": "任务位置、task_id、本轮assessment_id和报告编号。",
+    "output": "可打开的HTML表格及CSV名单，并列出符合/不符合/证据不足/未评估数量、任务及覆盖状态。",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "directory",
+        "type": "绝对路径",
+        "required": "必填",
+        "default": "—",
+        "description": "任务账本所在目录",
+        "location": "JSON字段"
+      },
+      {
+        "name": "task_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "任务唯一标识，与账本一致",
+        "location": "JSON字段"
+      },
+      {
+        "name": "assessment_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "本轮评估记录标识",
+        "location": "JSON字段"
+      },
+      {
+        "name": "report_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "报告标识，不覆盖已存在交付",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    },
+    "when_to_use": "已有搜索结果和task-assess判断后，生成用户能查看的表格名单及汇总。",
+    "effects": "写本地HTML/CSV报告，不上LinkedIn搜索，也不替模型补判断；未评估项仍应显示未评估。",
+    "example": "opencli hunter-linkedin task-report --input report-request.json"
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin task-recovery --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：directory、task_id",
+    "purpose": "已读/待读及中断清单",
+    "status": "本地实测",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：真实回执恢复7/19等状态",
+    "input": "JSON文件（字段见下表）",
+    "output": "已读取／待处理对象、中断原因及恢复建议",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "directory",
+        "type": "绝对路径",
+        "required": "必填",
+        "default": "—",
+        "description": "任务账本所在目录",
+        "location": "JSON字段"
+      },
+      {
+        "name": "task_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "任务唯一标识，与账本一致",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "local_contract",
+      "label": "本地入口或参数已验；非网站全流程",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin task-resume --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：directory、task_id、operation_id、evidence_revision、person_keys[]；include_about?、request_budget?",
+    "purpose": "原账本内续跑待处理详情",
+    "status": "合成验证",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：真实自动续跑尚未独立验收；未诊断中断拒绝执行",
+    "input": "JSON文件（字段见下表）",
+    "output": "续跑操作回执及账本更新；不自动忽略中断",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "directory",
+        "type": "绝对路径",
+        "required": "必填",
+        "default": "—",
+        "description": "任务账本所在目录",
+        "location": "JSON字段"
+      },
+      {
+        "name": "task_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "任务唯一标识，与账本一致",
+        "location": "JSON字段"
+      },
+      {
+        "name": "operation_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "操作唯一标识，用于账本和幂等控制",
+        "location": "JSON字段"
+      },
+      {
+        "name": "evidence_revision",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "当前task-status的证据版本，拒绝过期续跑",
+        "location": "JSON字段"
+      },
+      {
+        "name": "person_keys",
+        "type": "字符串数组",
+        "required": "必填",
+        "default": "—",
+        "description": "精确选中的人员键，不能把已完成对象重新续跑",
+        "location": "JSON字段"
+      },
+      {
+        "name": "include_about",
+        "type": "布尔",
+        "required": "可选",
+        "default": "true",
+        "description": "true尝试读取完整简介；false只读任职等无需展开的内容",
+        "location": "JSON字段"
+      },
+      {
+        "name": "request_budget",
+        "type": "整数",
+        "required": "可选",
+        "default": "不设隐含上限",
+        "description": "本地OpenCLI调用预算，不是平台官方额度；未提供时只统计本地适配器操作，不自行设任务停止上限；提供时保留该显式预算。",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "synthetic",
+      "label": "本地合成证据；非真实网站",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin task-consolidate --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：directory、report_id、sources[{directory,task_id,assessment_id}]",
+    "purpose": "跨批次正式汇总",
+    "status": "本地实测",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：解压包汇总26=6+8+12+0；不额外访问平台",
+    "input": "JSON文件（字段见下表）",
+    "output": "合并HTML/CSV路径、去重计数及评估完整性",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "directory",
+        "type": "绝对路径",
+        "required": "必填",
+        "default": "—",
+        "description": "任务账本所在目录",
+        "location": "JSON字段"
+      },
+      {
+        "name": "report_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "报告标识，不覆盖已存在交付",
+        "location": "JSON字段"
+      },
+      {
+        "name": "sources",
+        "type": "对象数组",
+        "required": "必填",
+        "default": "—",
+        "description": "每个来源含directory、task_id、assessment_id",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "local_contract",
+      "label": "本地入口或参数已验；非网站全流程",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin task-resolve --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：directory、task_id、operation_id、replacement_id、reason",
+    "purpose": "登记局部失败替代",
+    "status": "合成验证",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：仅支持受限局部参数错误，不能清除账号限制",
+    "input": "JSON文件（字段见下表）",
+    "output": "局部失败与替代操作的关联记录",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "directory",
+        "type": "绝对路径",
+        "required": "必填",
+        "default": "—",
+        "description": "任务账本所在目录",
+        "location": "JSON字段"
+      },
+      {
+        "name": "task_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "任务唯一标识，与账本一致",
+        "location": "JSON字段"
+      },
+      {
+        "name": "operation_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "操作唯一标识，用于账本和幂等控制",
+        "location": "JSON字段"
+      },
+      {
+        "name": "replacement_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "用来替代局部失败的成功操作标识",
+        "location": "JSON字段"
+      },
+      {
+        "name": "reason",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "评估/替代原因，不得用来清除账号限制",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "synthetic",
+      "label": "本地合成证据；非真实网站",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin task-import-sourcing --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：directory、task、confirmed:true、sourcing_request；mapping_note?",
+    "purpose": "导入已确认寻访需求",
+    "status": "合成验证",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：不替代模型条件映射",
+    "input": "JSON文件（字段见下表）",
+    "output": "导入后的任务、来源与条件映射",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "directory",
+        "type": "绝对路径",
+        "required": "必填",
+        "default": "—",
+        "description": "任务账本所在目录",
+        "location": "JSON字段"
+      },
+      {
+        "name": "task",
+        "type": "对象",
+        "required": "必填",
+        "default": "—",
+        "description": "task_id、intent、criteria、target；可含budgets、coverage、evidence_scope、source",
+        "location": "JSON字段"
+      },
+      {
+        "name": "confirmed:true",
+        "type": "见字段说明",
+        "required": "依命令契约",
+        "default": "未声明",
+        "description": "confirmed:true",
+        "location": "JSON字段"
+      },
+      {
+        "name": "sourcing_request",
+        "type": "对象",
+        "required": "必填",
+        "default": "—",
+        "description": "原有寻访需求及条件",
+        "location": "JSON字段"
+      },
+      {
+        "name": "mapping_note",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "条件映射说明",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "synthetic",
+      "label": "本地合成证据；非真实网站",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin task-company-people --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：parent{directory,task_id}、directory、task、company_keys[]",
+    "purpose": "公司任务转人员任务",
+    "status": "历史真实流程",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：与当前公司负责人流程属于不同批次证据",
+    "input": "JSON文件（字段见下表）",
+    "output": "子任务及选中公司来源，尚未自动搜索",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "parent",
+        "type": "对象",
+        "required": "必填",
+        "default": "—",
+        "description": "父任务directory和task_id",
+        "location": "JSON字段"
+      },
+      {
+        "name": "directory",
+        "type": "绝对路径",
+        "required": "必填",
+        "default": "—",
+        "description": "任务账本所在目录",
+        "location": "JSON字段"
+      },
+      {
+        "name": "task",
+        "type": "对象",
+        "required": "必填",
+        "default": "—",
+        "description": "task_id、intent、criteria、target；可含budgets、coverage、evidence_scope、source",
+        "location": "JSON字段"
+      },
+      {
+        "name": "company_keys",
+        "type": "字符串数组",
+        "required": "必填",
+        "default": "—",
+        "description": "来源公司对象键",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin task-prepare-outreach --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：directory、task_id、handoff_id、assessment_id、person_keys[]、purpose",
+    "purpose": "生成待批准联系名单",
+    "status": "合成验证",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：仅本地交接；未发送",
+    "input": "JSON文件（字段见下表）",
+    "output": "本地待审批联系名单及交接文件；未发送",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "directory",
+        "type": "绝对路径",
+        "required": "必填",
+        "default": "—",
+        "description": "任务账本所在目录",
+        "location": "JSON字段"
+      },
+      {
+        "name": "task_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "任务唯一标识，与账本一致",
+        "location": "JSON字段"
+      },
+      {
+        "name": "handoff_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "本地联系交接标识",
+        "location": "JSON字段"
+      },
+      {
+        "name": "assessment_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "本轮评估记录标识",
+        "location": "JSON字段"
+      },
+      {
+        "name": "person_keys",
+        "type": "字符串数组",
+        "required": "必填",
+        "default": "—",
+        "description": "精确选中的人员键，不能把已完成对象重新续跑",
+        "location": "JSON字段"
+      },
+      {
+        "name": "purpose",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "本次联系目的",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "synthetic",
+      "label": "本地合成证据；非真实网站",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "统一入口",
+    "command": "opencli hunter-linkedin task-outreach-input --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：directory、task_id、handoff_id、person_key、recruiting_context{confirmed,description,source}",
+    "purpose": "转换旧招聘触达输入",
+    "status": "合成验证",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：要求真实招聘背景，不冒充通用商务适配",
+    "input": "JSON文件（字段见下表）",
+    "output": "旧触达流程输入；仅适用已确认招聘背景",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "directory",
+        "type": "绝对路径",
+        "required": "必填",
+        "default": "—",
+        "description": "任务账本所在目录",
+        "location": "JSON字段"
+      },
+      {
+        "name": "task_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "任务唯一标识，与账本一致",
+        "location": "JSON字段"
+      },
+      {
+        "name": "handoff_id",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "本地联系交接标识",
+        "location": "JSON字段"
+      },
+      {
+        "name": "person_key",
+        "type": "见字段说明",
+        "required": "依命令契约",
+        "default": "未声明",
+        "description": "person_key",
+        "location": "JSON字段"
+      },
+      {
+        "name": "recruiting_context",
+        "type": "对象",
+        "required": "必填",
+        "default": "—",
+        "description": "confirmed、description、source；仅支持已确认招聘背景",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "synthetic",
+      "label": "本地合成证据；非真实网站",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "SalesNav底层",
+    "command": "opencli hunter-linkedin salesnav-doctor --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：profile?",
+    "purpose": "环境与桥接诊断",
+    "status": "本轮真实诊断通过",
+    "note": "在允许访问本地桥接的执行环境中确认指定Profile在线；沙箱中曾出现假性断连，不应直接认定用户未连接。",
+    "input": "JSON文件（字段见下表）",
+    "output": "Node/OpenCLI版本、bridge状态、next_action",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "可选",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "profile",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "已连接的Chrome Profile标识",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "SalesNav底层",
+    "command": "opencli hunter-linkedin salesnav-capabilities",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：无；账号感知形式：绑定字段",
+    "purpose": "能力与筛选字段目录",
+    "status": "本地实测",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：静态字段目录已读取；账号感知形式未逐项真实复测",
+    "input": "JSON文件（字段见下表）",
+    "output": "operations：平台与操作映射；mode、runtime_status",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "可选",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "profile",
+        "type": "字符串",
+        "required": "提供输入时必填",
+        "default": "—",
+        "description": "已连接的Chrome Profile标识",
+        "location": "JSON字段"
+      },
+      {
+        "name": "expected_identity",
+        "type": "字符串",
+        "required": "提供输入时必填",
+        "default": "—",
+        "description": "预期站内显示姓名，用于核对账号",
+        "location": "JSON字段"
+      },
+      {
+        "name": "expected_profile_url",
+        "type": "URL",
+        "required": "提供输入时必填",
+        "default": "—",
+        "description": "预期账号精确LinkedIn主页URL",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "local_contract",
+      "label": "本地入口或参数已验；非网站全流程",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "SalesNav底层",
+    "command": "opencli hunter-linkedin salesnav-account-check --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：共同JSON字段：profile、expected_identity、expected_profile_url；request_budget?、execution_context?（account-check不接受缓存）",
+    "purpose": "完整账号检查",
+    "status": "真实实测通过",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：身份、工作区、公司/人员搜索分开检查",
+    "input": "JSON文件（字段见下表）",
+    "output": "身份匹配、搜索权限观察、execution_context",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "profile",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "已连接的Chrome Profile标识",
+        "location": "JSON字段"
+      },
+      {
+        "name": "expected_identity",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "预期站内显示姓名，用于核对账号",
+        "location": "JSON字段"
+      },
+      {
+        "name": "expected_profile_url",
+        "type": "URL",
+        "required": "必填",
+        "default": "—",
+        "description": "预期账号精确LinkedIn主页URL",
+        "location": "JSON字段"
+      },
+      {
+        "name": "request_budget",
+        "type": "整数",
+        "required": "可选",
+        "default": "不设隐含上限",
+        "description": "本地OpenCLI调用预算，不是平台官方额度；未提供时只统计本地适配器操作，不自行设任务停止上限；提供时保留该显式预算。",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "SalesNav底层",
+    "command": "opencli hunter-linkedin salesnav-filter-options --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：共同JSON字段：profile、expected_identity、expected_profile_url；request_budget?、execution_context?（account-check不接受缓存）；search_type、field、query?",
+    "purpose": "解析筛选选项",
+    "status": "真实实测通过",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：Current company样本；不等同所有字段均实测",
+    "input": "JSON文件（字段见下表）",
+    "output": "字段匹配选项、标识及适用模式",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "profile",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "已连接的Chrome Profile标识",
+        "location": "JSON字段"
+      },
+      {
+        "name": "expected_identity",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "预期站内显示姓名，用于核对账号",
+        "location": "JSON字段"
+      },
+      {
+        "name": "expected_profile_url",
+        "type": "URL",
+        "required": "必填",
+        "default": "—",
+        "description": "预期账号精确LinkedIn主页URL",
+        "location": "JSON字段"
+      },
+      {
+        "name": "request_budget",
+        "type": "整数",
+        "required": "可选",
+        "default": "不设隐含上限",
+        "description": "本地OpenCLI调用预算，不是平台官方额度；未提供时只统计本地适配器操作，不自行设任务停止上限；提供时保留该显式预算。",
+        "location": "JSON字段"
+      },
+      {
+        "name": "execution_context",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "完整账号检查返回的短期opaque id；仍进行身份/目标校验",
+        "location": "JSON字段"
+      },
+      {
+        "name": "search_type",
+        "type": "枚举",
+        "required": "必填",
+        "default": "—",
+        "description": "account 或 lead",
+        "location": "JSON字段"
+      },
+      {
+        "name": "field",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "平台筛选字段标签，如Current company",
+        "location": "JSON字段"
+      },
+      {
+        "name": "query",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "筛选选项搜索词",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "SalesNav底层",
+    "command": "opencli hunter-linkedin salesnav-account-search --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：共同JSON字段：profile、expected_identity、expected_profile_url；request_budget?、execution_context?（account-check不接受缓存）；keywords?、filters、limit、max_pages?\nfilters键：industry, headquarters_location, company_headcount, number_of_followers, fortune, job_opportunities, recent_activities, connection, saved_accounts, account_lists, annual_revenue, company_headcount_growth, department_headcount, department_headcount_growth, companies_in_crm\n实体筛选值：lookup_query? 指定候选查找词；label仍精确匹配。\n可选 evidence_directory：新建私有截图证据目录。",
+    "purpose": "公司搜索",
+    "status": "新候选ab84f3b4e1de：指定公司规模搜索通过",
+    "note": "2026-10-25：dental+company_headcount=51-200，limit=3，返回3家公司，39.47秒，会话关闭；请求与实际条件一致。代理通过Chrome窗口菜单选择了本次自有SalesNav窗口。三次未就绪/隐藏失败继续保留；不能称为纯CLI后台或所有条件稳定通过。256项本地测试通过。 最新按操作预检验收：dental+51–200，3家公司，21.12秒，3次导航，请求/实际条件一致，会话已关闭。仅为单次功能样本。 候选69d9b7e20cc5包内入口：18.41秒返回3家公司，dental+51–200，请求/实际一致，3次导航，closed，无人工窗口操作。 最终dev.20固定包尚未独立复验本命令，不借用人员搜索通过结论。 新固定候选ab84f3b4e1de解包入口18.33秒返回3家（页面3.5K+，partial）；请求/实际筛选一致，截图已核对，cleanup closed。受限沙箱假断连单独保留，不计为真实账号未连接。",
+    "input": "JSON文件（字段见下表）",
+    "output": "公司results、返回数量、完整性、游标及预算",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "profile",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "已连接的Chrome Profile标识",
+        "location": "JSON字段"
+      },
+      {
+        "name": "expected_identity",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "预期站内显示姓名，用于核对账号",
+        "location": "JSON字段"
+      },
+      {
+        "name": "expected_profile_url",
+        "type": "URL",
+        "required": "必填",
+        "default": "—",
+        "description": "预期账号精确LinkedIn主页URL",
+        "location": "JSON字段"
+      },
+      {
+        "name": "request_budget",
+        "type": "整数",
+        "required": "可选",
+        "default": "不设隐含上限",
+        "description": "本地OpenCLI调用预算，不是平台官方额度；未提供时只统计本地适配器操作，不自行设任务停止上限；提供时保留该显式预算。",
+        "location": "JSON字段"
+      },
+      {
+        "name": "execution_context",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "完整账号检查返回的短期opaque id；仍进行身份/目标校验",
+        "location": "JSON字段"
+      },
+      {
+        "name": "keywords",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "平台关键词/布尔搜索表达式，不由插件决定业务词",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters",
+        "type": "对象",
+        "required": "必填",
+        "default": "—",
+        "description": "按以下filters.*字段传值；{}代表不加字段筛选",
+        "location": "JSON字段"
+      },
+      {
+        "name": "limit",
+        "type": "整数",
+        "required": "必填",
+        "default": "—",
+        "description": "最大返回数量；通用搜索1–2500，续页须大于已读取数",
+        "location": "JSON字段"
+      },
+      {
+        "name": "max_pages",
+        "type": "整数",
+        "required": "可选",
+        "default": "1",
+        "description": "最多读取页数，1–10；达到上限不代表采集完整",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.industry",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Industry；模式：include,exclude",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.headquarters_location",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Headquarters location；模式：include,exclude",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.company_headcount",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Company headcount；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.number_of_followers",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Number of followers；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.fortune",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Fortune；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.job_opportunities",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Job opportunities；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.recent_activities",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Recent activities；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.connection",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Connection；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.saved_accounts",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Saved accounts；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.account_lists",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Account lists；模式：include,exclude",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.annual_revenue",
+        "type": "范围对象",
+        "required": "可选",
+        "default": "—",
+        "description": "Annual revenue；模式：；min/max及适用currency或department",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.company_headcount_growth",
+        "type": "范围对象",
+        "required": "可选",
+        "default": "—",
+        "description": "Company headcount growth；模式：；min/max及适用currency或department",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.department_headcount",
+        "type": "范围对象",
+        "required": "可选",
+        "default": "—",
+        "description": "Department headcount；模式：；min/max及适用currency或department",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.department_headcount_growth",
+        "type": "范围对象",
+        "required": "可选",
+        "default": "—",
+        "description": "Department headcount growth；模式：；min/max及适用currency或department",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.companies_in_crm",
+        "type": "当前受限",
+        "required": "可选",
+        "default": "—",
+        "description": "Companies in CRM；模式：；字段存在不代表账号可用，受限时明确拒绝",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.<entity>[].lookup_query",
+        "type": "string",
+        "required": false,
+        "default": "label",
+        "description": "仅实体候选查找词；最终选中的label和平台筛选不变。回执回显该输入，但不作为平台查询条件。",
+        "location": "JSON"
+      },
+      {
+        "name": "evidence_directory",
+        "type": "string",
+        "required": false,
+        "default": "不截图",
+        "location": "JSON",
+        "description": "仅UI搜索：新建绝对路径私有目录；结果就绪后截图并核对查询；失败保存现场。ui_evidence.status单独标识证据是否完成。API结果不能用工作区截图代替。"
+      }
+    ],
+    "verification": {
+      "level": "candidate_case",
+      "label": "候选ab84f3b4e1de：dental＋51–200通过",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": ".local/release-readiness/account-search-connected-receipt.json; verification.json"
+    }
+  },
+  {
+    "group": "SalesNav底层",
+    "command": "opencli hunter-linkedin salesnav-lead-search --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：共同JSON字段：profile、expected_identity、expected_profile_url；request_budget?、execution_context?（account-check不接受缓存）；keywords?、filters、limit、max_pages?\nfilters键：geography, current_company, function, title, seniority, company_headcount, past_company, company_type, company_headquarters_location, past_title, years_in_current_company, years_in_current_position, industry, profile_language, years_of_experience, groups, school, connection, connections_of, persona, account_lists, lead_lists, people_interacted_with, saved_leads_and_accounts, following_your_company, viewed_your_profile_recently, past_colleague, shared_experiences, changed_jobs, posted_on_linkedin, first_name, last_name, people_in_crm\n实体筛选值：lookup_query? 指定候选查找词；label仍精确匹配。\n可选 evidence_directory：新建私有截图证据目录。",
+    "purpose": "人员搜索",
+    "status": "最终dev.20候选包：指定零匹配与地区筛选通过",
+    "note": "2026-10-25：完整预检、无缓存，limit=1/10/25均正确返回，34.59/47.74/24.68秒；1人样本接口前后页面hidden、筛选控件0仍通过。纯关键词filters={}采用同账号只读接口，实际响应验证权限；高级筛选仍走原DOM，不忽略条件。支持游标续读，25→26人跨页无重复，28.29秒。会话均关闭。251项本地测试通过；历史失败保留。未证明所有高级筛选或性能优化通过。 dev.19追加：SPD Scientific+geography=Singapore返回3人，32.97秒，请求与实际条件一致，会话关闭；256项测试通过。 最新按操作预检验收：纯关键词1人，15.65秒，3次导航，会话已关闭；完整account-check保持原范围，搜索不读取其他搜索页/套餐。 最新候选69d9b7e20cc5包内入口真实地区筛选：19.67秒3人；首次selector_not_found后仅局部重新观察一次恢复成功，条件一致，cleanup closed。265测试通过，未发布；不推导所有窗口场景稳定。 最终dev.20候选d0834914dea4：公司实体零匹配28.69秒；关键词加地区返回3/177人21.47秒（partial）；两项均截图核对、会话关闭。277项测试通过。旧候选编号仅为历史证据；未穷尽高级条件。",
+    "input": "JSON文件（字段见下表）",
+    "output": "人员results、摘要、完整性、游标及预算",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "profile",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "已连接的Chrome Profile标识",
+        "location": "JSON字段"
+      },
+      {
+        "name": "expected_identity",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "预期站内显示姓名，用于核对账号",
+        "location": "JSON字段"
+      },
+      {
+        "name": "expected_profile_url",
+        "type": "URL",
+        "required": "必填",
+        "default": "—",
+        "description": "预期账号精确LinkedIn主页URL",
+        "location": "JSON字段"
+      },
+      {
+        "name": "request_budget",
+        "type": "整数",
+        "required": "可选",
+        "default": "不设隐含上限",
+        "description": "本地OpenCLI调用预算，不是平台官方额度；未提供时只统计本地适配器操作，不自行设任务停止上限；提供时保留该显式预算。",
+        "location": "JSON字段"
+      },
+      {
+        "name": "execution_context",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "完整账号检查返回的短期opaque id；仍进行身份/目标校验",
+        "location": "JSON字段"
+      },
+      {
+        "name": "keywords",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "平台关键词/布尔搜索表达式，不由插件决定业务词",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters",
+        "type": "对象",
+        "required": "必填",
+        "default": "—",
+        "description": "按以下filters.*字段传值；{}代表不加字段筛选",
+        "location": "JSON字段"
+      },
+      {
+        "name": "limit",
+        "type": "整数",
+        "required": "必填",
+        "default": "—",
+        "description": "最大返回数量；通用搜索1–2500，续页须大于已读取数",
+        "location": "JSON字段"
+      },
+      {
+        "name": "max_pages",
+        "type": "整数",
+        "required": "可选",
+        "default": "1",
+        "description": "最多读取页数，1–10；达到上限不代表采集完整",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.geography",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Geography；模式：include,exclude",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.current_company",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Current company；模式：include,exclude",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.function",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Function；模式：include,exclude",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.title",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Current job title；模式：include,exclude",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.seniority",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Seniority level；模式：include,exclude",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.company_headcount",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Company headcount；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.past_company",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Past company；模式：include,exclude",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.company_type",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Company type；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.company_headquarters_location",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Company headquarters location；模式：include,exclude",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.past_title",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Past job title；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.years_in_current_company",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Years in current company；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.years_in_current_position",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Years in current position；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.industry",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Industry；模式：include,exclude",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.profile_language",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Profile language；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.years_of_experience",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Years of experience；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.groups",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Groups；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.school",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "School；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.connection",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Connection；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.connections_of",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Connections of；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.persona",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Persona；模式：include",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.account_lists",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Account lists；模式：include,exclude",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.lead_lists",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Lead lists；模式：include,exclude",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.people_interacted_with",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "People you interacted with；模式：include,exclude",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.saved_leads_and_accounts",
+        "type": "[{label,mode}]",
+        "required": "可选",
+        "default": "—",
+        "description": "Saved leads and accounts；模式：include,exclude",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.following_your_company",
+        "type": "布尔",
+        "required": "可选",
+        "default": "—",
+        "description": "Following your company；模式：",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.viewed_your_profile_recently",
+        "type": "布尔",
+        "required": "可选",
+        "default": "—",
+        "description": "Viewed your profile recently；模式：",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.past_colleague",
+        "type": "布尔",
+        "required": "可选",
+        "default": "—",
+        "description": "Past colleague；模式：",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.shared_experiences",
+        "type": "布尔",
+        "required": "可选",
+        "default": "—",
+        "description": "Shared experiences；模式：",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.changed_jobs",
+        "type": "布尔",
+        "required": "可选",
+        "default": "—",
+        "description": "Changed jobs；模式：",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.posted_on_linkedin",
+        "type": "布尔",
+        "required": "可选",
+        "default": "—",
+        "description": "Posted on LinkedIn；模式：",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.first_name",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "First name；模式：",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.last_name",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "Last name；模式：",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.people_in_crm",
+        "type": "当前受限",
+        "required": "可选",
+        "default": "—",
+        "description": "People in CRM；模式：；字段存在不代表账号可用，受限时明确拒绝",
+        "location": "JSON字段"
+      },
+      {
+        "name": "filters.<entity>[].lookup_query",
+        "type": "string",
+        "required": false,
+        "default": "label",
+        "description": "仅实体候选查找词；最终选中的label和平台筛选不变。回执回显该输入，但不作为平台查询条件。",
+        "location": "JSON"
+      },
+      {
+        "name": "evidence_directory",
+        "type": "string",
+        "required": false,
+        "default": "不截图",
+        "location": "JSON",
+        "description": "仅UI搜索：新建绝对路径私有目录；结果就绪后截图并核对查询；失败保存现场。ui_evidence.status单独标识证据是否完成。API结果不能用工作区截图代替。"
+      }
+    ],
+    "verification": {
+      "level": "candidate_case",
+      "label": "最终候选d0834914dea4：两项人员搜索通过",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": ".local/goal-search-closure/final-package-verification.json; final-package-positive-summary.json; final-package-zero-summary.json"
+    }
+  },
+  {
+    "group": "SalesNav底层",
+    "command": "opencli hunter-linkedin salesnav-search-page --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：共同JSON字段：profile、expected_identity、expected_profile_url；request_budget?、execution_context?（account-check不接受缓存）；cursor、limit?、max_pages?\n可选 evidence_directory：新建私有截图证据目录。",
+    "purpose": "游标续读",
+    "status": "dev.18关键词跨页续读实测通过",
+    "note": "2026-10-25：使用25人搜索游标续读，limit=26为累计目标，新增1人、累计26个唯一ID，会话关闭。验证账号和查询绑定、API部分页顺序；DOM筛选游标沿用原路径，本轮未扩大验证。 最新纯关键词API续读：原1人→累计2人，新增1人、唯一ID2个，17.27秒，3次导航，会话closed。按操作预检固定后台；其他DOM续读未纳入本次提速验收。260项本地测试通过。",
+    "input": "JSON文件（字段见下表）",
+    "output": "下一批results、游标及停止原因",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "profile",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "已连接的Chrome Profile标识",
+        "location": "JSON字段"
+      },
+      {
+        "name": "expected_identity",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "预期站内显示姓名，用于核对账号",
+        "location": "JSON字段"
+      },
+      {
+        "name": "expected_profile_url",
+        "type": "URL",
+        "required": "必填",
+        "default": "—",
+        "description": "预期账号精确LinkedIn主页URL",
+        "location": "JSON字段"
+      },
+      {
+        "name": "request_budget",
+        "type": "整数",
+        "required": "可选",
+        "default": "不设隐含上限",
+        "description": "本地OpenCLI调用预算，不是平台官方额度；未提供时只统计本地适配器操作，不自行设任务停止上限；提供时保留该显式预算。",
+        "location": "JSON字段"
+      },
+      {
+        "name": "execution_context",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "完整账号检查返回的短期opaque id；仍进行身份/目标校验",
+        "location": "JSON字段"
+      },
+      {
+        "name": "cursor",
+        "type": "对象",
+        "required": "必填",
+        "default": "—",
+        "description": "上一搜索返回的完整游标，包含版本/查询绑定；不可手造",
+        "location": "JSON字段"
+      },
+      {
+        "name": "limit",
+        "type": "整数",
+        "required": "可选",
+        "default": "上一查询上限",
+        "description": "最大返回数量；通用搜索1–2500，续页须大于已读取数",
+        "location": "JSON字段"
+      },
+      {
+        "name": "max_pages",
+        "type": "整数",
+        "required": "可选",
+        "default": "1",
+        "description": "最多读取页数，1–10；达到上限不代表采集完整",
+        "location": "JSON字段"
+      },
+      {
+        "name": "evidence_directory",
+        "type": "string",
+        "required": false,
+        "default": "不截图",
+        "location": "JSON",
+        "description": "仅UI搜索：新建绝对路径私有目录；结果就绪后截图并核对查询；失败保存现场。ui_evidence.status单独标识证据是否完成。API结果不能用工作区截图代替。"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "SalesNav底层",
+    "command": "opencli hunter-linkedin salesnav-account-read --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：共同JSON字段：profile、expected_identity、expected_profile_url；request_budget?、execution_context?（account-check不接受缓存）；company",
+    "purpose": "公司详情",
+    "status": "真实实测通过",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：SalesNav数字ID或支持的公司URL；本轮亦通过已安装salesnav-batch复用同一执行器成功，非逐条独立命令再跑。",
+    "input": "JSON文件（字段见下表）",
+    "output": "公司资料results、字段状态与来源",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "profile",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "已连接的Chrome Profile标识",
+        "location": "JSON字段"
+      },
+      {
+        "name": "expected_identity",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "预期站内显示姓名，用于核对账号",
+        "location": "JSON字段"
+      },
+      {
+        "name": "expected_profile_url",
+        "type": "URL",
+        "required": "必填",
+        "default": "—",
+        "description": "预期账号精确LinkedIn主页URL",
+        "location": "JSON字段"
+      },
+      {
+        "name": "request_budget",
+        "type": "整数",
+        "required": "可选",
+        "default": "不设隐含上限",
+        "description": "本地OpenCLI调用预算，不是平台官方额度；未提供时只统计本地适配器操作，不自行设任务停止上限；提供时保留该显式预算。",
+        "location": "JSON字段"
+      },
+      {
+        "name": "execution_context",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "完整账号检查返回的短期opaque id；仍进行身份/目标校验",
+        "location": "JSON字段"
+      },
+      {
+        "name": "company",
+        "type": "字符串或URL",
+        "required": "必填",
+        "default": "—",
+        "description": "准确SalesNav公司ID或支持的公司URL",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "SalesNav底层",
+    "command": "opencli hunter-linkedin salesnav-lead-read --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：共同JSON字段：profile、expected_identity、expected_profile_url；request_budget?、execution_context?（account-check不接受缓存）；lead、include_about?（默认true）",
+    "purpose": "人员详情",
+    "status": "真实实测通过",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：完整简介曾通过但可见性不稳定；false读取任职实测通过；本轮亦通过已安装salesnav-batch复用同一执行器成功，非逐条独立命令再跑。",
+    "input": "JSON文件（字段见下表）",
+    "output": "人员资料／任职results、字段状态与来源",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "profile",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "已连接的Chrome Profile标识",
+        "location": "JSON字段"
+      },
+      {
+        "name": "expected_identity",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "预期站内显示姓名，用于核对账号",
+        "location": "JSON字段"
+      },
+      {
+        "name": "expected_profile_url",
+        "type": "URL",
+        "required": "必填",
+        "default": "—",
+        "description": "预期账号精确LinkedIn主页URL",
+        "location": "JSON字段"
+      },
+      {
+        "name": "request_budget",
+        "type": "整数",
+        "required": "可选",
+        "default": "不设隐含上限",
+        "description": "本地OpenCLI调用预算，不是平台官方额度；未提供时只统计本地适配器操作，不自行设任务停止上限；提供时保留该显式预算。",
+        "location": "JSON字段"
+      },
+      {
+        "name": "execution_context",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "完整账号检查返回的短期opaque id；仍进行身份/目标校验",
+        "location": "JSON字段"
+      },
+      {
+        "name": "lead",
+        "type": "字符串或URL",
+        "required": "必填",
+        "default": "—",
+        "description": "准确SalesNav人员标识或URL",
+        "location": "JSON字段"
+      },
+      {
+        "name": "include_about",
+        "type": "布尔",
+        "required": "可选",
+        "default": "true",
+        "description": "true尝试读取完整简介；false只读任职等无需展开的内容",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "SalesNav底层",
+    "command": "opencli hunter-linkedin salesnav-batch --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：共同JSON字段：profile、expected_identity、expected_profile_url；request_budget?、execution_context?（account-check不接受缓存）；operations[{command,input}]",
+    "purpose": "同会话批量操作",
+    "status": "本轮插件真实实测通过",
+    "note": "2026-10-25：原生插件批次执行公司详情、人员任职、公司搜索、人员搜索共4项成功；搜索各限1条，属于部分采集。1个自有会话，结束已关闭。",
+    "input": "JSON文件（字段见下表）",
+    "output": "每步receipts、completeness、interruption、navigation及预算",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "profile",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "已连接的Chrome Profile标识",
+        "location": "JSON字段"
+      },
+      {
+        "name": "expected_identity",
+        "type": "字符串",
+        "required": "必填",
+        "default": "—",
+        "description": "预期站内显示姓名，用于核对账号",
+        "location": "JSON字段"
+      },
+      {
+        "name": "expected_profile_url",
+        "type": "URL",
+        "required": "必填",
+        "default": "—",
+        "description": "预期账号精确LinkedIn主页URL",
+        "location": "JSON字段"
+      },
+      {
+        "name": "request_budget",
+        "type": "整数",
+        "required": "可选",
+        "default": "不设隐含上限",
+        "description": "本地OpenCLI调用预算，不是平台官方额度；未提供时只统计本地适配器操作，不自行设任务停止上限；提供时保留该显式预算。",
+        "location": "JSON字段"
+      },
+      {
+        "name": "execution_context",
+        "type": "字符串",
+        "required": "可选",
+        "default": "—",
+        "description": "完整账号检查返回的短期opaque id；仍进行身份/目标校验",
+        "location": "JSON字段"
+      },
+      {
+        "name": "operations",
+        "type": "数组",
+        "required": "必填",
+        "default": "—",
+        "description": "批次步骤：command与input；最多50步，共享账号绑定",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "recorded_live",
+      "label": "已记录的真实场景；非新包逐条复验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "SalesNav底层",
+    "command": "opencli hunter-linkedin salesnav-export --input input.json",
+    "params": "--input <JSON文件路径>（salesnav-capabilities、salesnav-doctor可省略）\n文件字段：input_path、output_path、format(json/csv/md/html)",
+    "purpose": "本地导出",
+    "status": "合成验证",
+    "note": "插件入口：已安装；原生OpenCLI help和参数门槛已验。本地任务创建/查询已通过；网站执行器证据：底层导出有测试；真实报告由任务命令验收",
+    "input": "JSON文件（字段见下表）",
+    "output": "导出文件路径及格式；内容可为CSV/Markdown/HTML等",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件；不是JSON字符串",
+        "location": "CLI"
+      },
+      {
+        "name": "input_path",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "已有原始回执/数据文件",
+        "location": "JSON字段"
+      },
+      {
+        "name": "output_path",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "导出目标文件，不覆盖既有文件",
+        "location": "JSON字段"
+      },
+      {
+        "name": "format",
+        "type": "枚举",
+        "required": "必填",
+        "default": "—",
+        "description": "json、csv、markdown、html；不是md缩写",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "synthetic",
+      "label": "本地合成证据；非真实网站",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "Hunter组合能力",
+    "command": "opencli hunter-linkedin discover-linkedin-xray --input input.json",
+    "params": "--keyword 或 --plan；--title、--location、--company、--exclude、--limit、--output、--normalized-output、--opencli-bin、--channel、--skip-google、--no-human-assist",
+    "purpose": "搜索引擎发现",
+    "status": "已安装／参数路由验证通过",
+    "note": "复用已安装Hunter Skill脚本；缺失依赖明确报错。未声称已实测整套网站流程。；本轮原生OpenCLI help已逐条通过。",
+    "input": "keyword或plan及筛选选项",
+    "output": "搜索引擎候选、各引擎尝试状态及输出文件",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件",
+        "location": "CLI"
+      },
+      {
+        "name": "keyword",
+        "type": "字符串",
+        "required": "与plan至少一项",
+        "default": "见要求",
+        "description": "检索关键词",
+        "location": "JSON字段"
+      },
+      {
+        "name": "plan",
+        "type": "路径",
+        "required": "与keyword至少一项",
+        "default": "见要求",
+        "description": "搜索计划文件",
+        "location": "JSON字段"
+      },
+      {
+        "name": "title",
+        "type": "字符串",
+        "required": "可选",
+        "default": "见要求",
+        "description": "职位",
+        "location": "JSON字段"
+      },
+      {
+        "name": "location",
+        "type": "字符串",
+        "required": "可选",
+        "default": "见要求",
+        "description": "地区",
+        "location": "JSON字段"
+      },
+      {
+        "name": "company",
+        "type": "字符串",
+        "required": "可选",
+        "default": "见要求",
+        "description": "公司",
+        "location": "JSON字段"
+      },
+      {
+        "name": "exclude",
+        "type": "字符串",
+        "required": "可选",
+        "default": "见要求",
+        "description": "排除词",
+        "location": "JSON字段"
+      },
+      {
+        "name": "limit",
+        "type": "整数",
+        "required": "默认10",
+        "default": "见要求",
+        "description": "1–100",
+        "location": "JSON字段"
+      },
+      {
+        "name": "output",
+        "type": "路径",
+        "required": "可选",
+        "default": "见要求",
+        "description": "原始输出",
+        "location": "JSON字段"
+      },
+      {
+        "name": "normalized-output",
+        "type": "路径",
+        "required": "可选",
+        "default": "见要求",
+        "description": "标准化输出",
+        "location": "JSON字段"
+      },
+      {
+        "name": "opencli-bin",
+        "type": "路径",
+        "required": "可选",
+        "default": "见要求",
+        "description": "已有OpenCLI运行入口",
+        "location": "JSON字段"
+      },
+      {
+        "name": "channel",
+        "type": "字符串",
+        "required": "默认linkedin",
+        "default": "见要求",
+        "description": "渠道",
+        "location": "JSON字段"
+      },
+      {
+        "name": "skip-google",
+        "type": "布尔",
+        "required": "默认false",
+        "default": "见要求",
+        "description": "跳过Google",
+        "location": "JSON字段"
+      },
+      {
+        "name": "no-human-assist",
+        "type": "布尔",
+        "required": "默认false",
+        "default": "见要求",
+        "description": "关闭人工协助等待",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "local_contract",
+      "label": "本地入口或参数已验；非网站全流程",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "Hunter组合能力",
+    "command": "opencli hunter-linkedin enrich-linkedin-profiles --input input.json",
+    "params": "<input.json>；--output、--include、--limit、--min-score、--delay-ms、--command-timeout-ms、--opencli-bin、--all",
+    "purpose": "批量深读",
+    "status": "已安装／参数路由验证通过",
+    "note": "复用已安装Hunter Skill脚本；缺失依赖明确报错。未声称已实测整套网站流程。；本轮原生OpenCLI help已逐条通过。",
+    "input": "已有候选文件和读取范围",
+    "output": "outputPath、selected、completed、failed；候选文件补充detail",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件",
+        "location": "CLI"
+      },
+      {
+        "name": "input_path",
+        "type": "路径",
+        "required": "必填",
+        "default": "见要求",
+        "description": "已有评估结果JSON文件",
+        "location": "JSON字段"
+      },
+      {
+        "name": "output",
+        "type": "路径",
+        "required": "可选",
+        "default": "见要求",
+        "description": "补充后的输出文件",
+        "location": "JSON字段"
+      },
+      {
+        "name": "include",
+        "type": "逗号分隔字符串",
+        "required": "默认profile,experience",
+        "default": "见要求",
+        "description": "profile/experience/projects/posts/services",
+        "location": "JSON字段"
+      },
+      {
+        "name": "limit",
+        "type": "整数",
+        "required": "默认20",
+        "default": "见要求",
+        "description": "1–50",
+        "location": "JSON字段"
+      },
+      {
+        "name": "min-score",
+        "type": "数字",
+        "required": "默认0",
+        "default": "见要求",
+        "description": "最低分",
+        "location": "JSON字段"
+      },
+      {
+        "name": "delay-ms",
+        "type": "整数",
+        "required": "默认5000",
+        "default": "见要求",
+        "description": "读取间隔",
+        "location": "JSON字段"
+      },
+      {
+        "name": "command-timeout-ms",
+        "type": "整数",
+        "required": "默认120000",
+        "default": "见要求",
+        "description": "至少1000",
+        "location": "JSON字段"
+      },
+      {
+        "name": "opencli-bin",
+        "type": "路径",
+        "required": "可选",
+        "default": "见要求",
+        "description": "已有OpenCLI运行入口",
+        "location": "JSON字段"
+      },
+      {
+        "name": "all",
+        "type": "布尔",
+        "required": "默认false",
+        "default": "见要求",
+        "description": "不只处理qualified候选",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "local_contract",
+      "label": "本地入口或参数已验；非网站全流程",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "Hunter组合能力",
+    "command": "opencli hunter-linkedin collect-outreach-context --input input.json --output-dir <目录>",
+    "params": "<input.json> --output-dir <目录>",
+    "purpose": "收集触达上下文",
+    "status": "已安装／参数路由验证通过",
+    "note": "复用已安装Hunter Skill脚本；缺失依赖明确报错。未声称已实测整套网站流程。；本轮原生OpenCLI help已逐条通过。",
+    "input": "候选人、候选审批与联系目的",
+    "output": "关系/渠道上下文、outreach-plan输入及本地回执",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件",
+        "location": "CLI"
+      },
+      {
+        "name": "--output-dir",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "本地输出目录",
+        "location": "CLI"
+      },
+      {
+        "name": "candidate",
+        "type": "对象",
+        "required": "必填",
+        "default": "见要求",
+        "description": "name和精确profileUrl",
+        "location": "JSON字段"
+      },
+      {
+        "name": "candidateApproval",
+        "type": "对象",
+        "required": "必填",
+        "default": "见要求",
+        "description": "approved、source、approvedAt、profileUrl",
+        "location": "JSON字段"
+      },
+      {
+        "name": "purpose",
+        "type": "字符串",
+        "required": "必填",
+        "default": "见要求",
+        "description": "联系目的",
+        "location": "JSON字段"
+      },
+      {
+        "name": "relationshipHint",
+        "type": "对象或文本",
+        "required": "可选",
+        "default": "见要求",
+        "description": "已有关系线索",
+        "location": "JSON字段"
+      },
+      {
+        "name": "verifiedEmail",
+        "type": "字符串",
+        "required": "可选",
+        "default": "见要求",
+        "description": "已验证邮箱",
+        "location": "JSON字段"
+      },
+      {
+        "name": "ledgerPath",
+        "type": "路径",
+        "required": "可选",
+        "default": "见要求",
+        "description": "联系账本",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "local_contract",
+      "label": "本地入口或参数已验；非网站全流程",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "Hunter组合能力",
+    "command": "opencli hunter-linkedin execute-approved-outreach --input input.json --output-dir <目录>",
+    "params": "<input.json> --output-dir <目录>",
+    "purpose": "审批后发送",
+    "status": "安全拦截通过／发送未测",
+    "note": "execute缺失及上游审批缺失均拦截；未发送、未创建发送目录。；本轮原生OpenCLI help已逐条通过。",
+    "input": "获准对象、内容、渠道及审批证据",
+    "output": "执行状态、recorded与账本路径；blocked不代表发送成功",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件",
+        "location": "CLI"
+      },
+      {
+        "name": "--output-dir",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "本地输出目录",
+        "location": "CLI"
+      },
+      {
+        "name": "execute",
+        "type": "布尔",
+        "required": "必须true",
+        "default": "见要求",
+        "description": "仅显式允许进入上游审批校验",
+        "location": "JSON字段"
+      },
+      {
+        "name": "candidate",
+        "type": "对象",
+        "required": "必填",
+        "default": "见要求",
+        "description": "name与精确profileUrl",
+        "location": "JSON字段"
+      },
+      {
+        "name": "route",
+        "type": "枚举",
+        "required": "必填",
+        "default": "见要求",
+        "description": "connect/first_message/existing_thread",
+        "location": "JSON字段"
+      },
+      {
+        "name": "channel",
+        "type": "枚举",
+        "required": "必填",
+        "default": "见要求",
+        "description": "与route一致的linkedin_connect/linkedin_message",
+        "location": "JSON字段"
+      },
+      {
+        "name": "content",
+        "type": "字符串",
+        "required": "必填",
+        "default": "见要求",
+        "description": "完整已批准内容",
+        "location": "JSON字段"
+      },
+      {
+        "name": "contentHash",
+        "type": "字符串",
+        "required": "必填",
+        "default": "见要求",
+        "description": "完整内容哈希",
+        "location": "JSON字段"
+      },
+      {
+        "name": "executionApproval",
+        "type": "对象",
+        "required": "必填",
+        "default": "见要求",
+        "description": "当前对话批准、目标/渠道/内容/hash及15分钟内approvedAt",
+        "location": "JSON字段"
+      },
+      {
+        "name": "connectPreparation",
+        "type": "对象",
+        "required": "connect必填",
+        "default": "见要求",
+        "description": "当前对话准备确认及时间",
+        "location": "JSON字段"
+      },
+      {
+        "name": "threadUrl",
+        "type": "URL",
+        "required": "existing_thread必填",
+        "default": "见要求",
+        "description": "精确会话",
+        "location": "JSON字段"
+      },
+      {
+        "name": "conversationStatus",
+        "type": "枚举",
+        "required": "existing_thread必填",
+        "default": "见要求",
+        "description": "candidate_replied",
+        "location": "JSON字段"
+      },
+      {
+        "name": "threadSnapshot",
+        "type": "对象",
+        "required": "existing_thread必填",
+        "default": "见要求",
+        "description": "最新消息证据",
+        "location": "JSON字段"
+      },
+      {
+        "name": "ledgerPath",
+        "type": "路径",
+        "required": "可选",
+        "default": "见要求",
+        "description": "联系账本",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "safety_only",
+      "label": "仅预演或安全拦截；发送未验",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "Hunter组合能力",
+    "command": "opencli hunter-linkedin summarize-outreach-batch --input input.json --output-dir <目录>",
+    "params": "<input.json> --output-dir <目录>",
+    "purpose": "汇总触达批次",
+    "status": "本地合成闭环通过",
+    "note": "原生OpenCLI执行真实汇总脚本；1条合成记录生成JSON/Markdown，非真实触达结果。；本轮原生OpenCLI help已逐条通过。",
+    "input": "已有联系状态记录，不能虚构发送结果",
+    "output": "counts、candidates及outreach-summary.json/.md路径",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件",
+        "location": "CLI"
+      },
+      {
+        "name": "--output-dir",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "本地输出目录",
+        "location": "CLI"
+      },
+      {
+        "name": "projectId",
+        "type": "字符串",
+        "required": "可选",
+        "default": "见要求",
+        "description": "项目标识",
+        "location": "JSON字段"
+      },
+      {
+        "name": "candidates",
+        "type": "数组",
+        "required": "必填",
+        "default": "见要求",
+        "description": "至少一个对象",
+        "location": "JSON字段"
+      },
+      {
+        "name": "candidates[].candidate",
+        "type": "对象",
+        "required": "必填",
+        "default": "见要求",
+        "description": "name与精确profileUrl",
+        "location": "JSON字段"
+      },
+      {
+        "name": "candidates[].status",
+        "type": "枚举",
+        "required": "必填",
+        "default": "见要求",
+        "description": "success/explicit_failure/uncertain/draft_ready/awaiting_candidate_reply/invitation_pending/awaiting_candidate_approval/awaiting_execution_approval/blocked/not_started",
+        "location": "JSON字段"
+      },
+      {
+        "name": "candidates[].relationshipState",
+        "type": "字符串",
+        "required": "可选",
+        "default": "见要求",
+        "description": "默认unknown",
+        "location": "JSON字段"
+      },
+      {
+        "name": "candidates[].suggestedChannel",
+        "type": "字符串",
+        "required": "可选",
+        "default": "见要求",
+        "description": "建议渠道",
+        "location": "JSON字段"
+      },
+      {
+        "name": "candidates[].actualChannel",
+        "type": "字符串",
+        "required": "可选",
+        "default": "见要求",
+        "description": "实际渠道",
+        "location": "JSON字段"
+      },
+      {
+        "name": "candidates[].contentStatus",
+        "type": "字符串",
+        "required": "可选",
+        "default": "见要求",
+        "description": "内容状态",
+        "location": "JSON字段"
+      },
+      {
+        "name": "candidates[].approvalStatus",
+        "type": "字符串",
+        "required": "可选",
+        "default": "见要求",
+        "description": "审批状态",
+        "location": "JSON字段"
+      },
+      {
+        "name": "candidates[].blocker",
+        "type": "字符串",
+        "required": "可选",
+        "default": "见要求",
+        "description": "阻塞原因",
+        "location": "JSON字段"
+      },
+      {
+        "name": "candidates[].nextStep",
+        "type": "字符串",
+        "required": "可选",
+        "default": "见要求",
+        "description": "下一步",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "synthetic",
+      "label": "本地合成证据；非真实网站",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "Hunter组合能力",
+    "command": "opencli hunter-linkedin create-email-draft --input input.json --output-dir <目录>",
+    "params": "<input.json> --output-dir <目录>",
+    "purpose": "本地邮件草稿",
+    "status": "已安装／参数路由验证通过",
+    "note": "复用已安装Hunter Skill脚本；缺失依赖明确报错。未声称已实测整套网站流程。；本轮原生OpenCLI help已逐条通过。",
+    "input": "已验证邮箱、现有邮件内容及个性化事实",
+    "output": "仅本地email-draft.json/.md、内容哈希；不连接邮箱或发送",
+    "parameters": [
+      {
+        "name": "--input",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "JSON输入文件",
+        "location": "CLI"
+      },
+      {
+        "name": "--output-dir",
+        "type": "路径",
+        "required": "必填",
+        "default": "—",
+        "description": "本地输出目录",
+        "location": "CLI"
+      },
+      {
+        "name": "candidate",
+        "type": "对象",
+        "required": "必填",
+        "default": "见要求",
+        "description": "name与profileUrl",
+        "location": "JSON字段"
+      },
+      {
+        "name": "email",
+        "type": "对象",
+        "required": "必填",
+        "default": "见要求",
+        "description": "address、verificationStatus=verified、source、verificationMethod、verifiedAt",
+        "location": "JSON字段"
+      },
+      {
+        "name": "draft",
+        "type": "对象",
+        "required": "必填",
+        "default": "见要求",
+        "description": "subject、body；使用已有内容",
+        "location": "JSON字段"
+      },
+      {
+        "name": "personalization",
+        "type": "对象",
+        "required": "必填",
+        "default": "见要求",
+        "description": "jdFact及非空candidateFacts数组",
+        "location": "JSON字段"
+      }
+    ],
+    "verification": {
+      "level": "local_contract",
+      "label": "本地入口或参数已验；非网站全流程",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "交付工具",
+    "command": "node scripts/build-candidate.mjs",
+    "params": "--source?、--output?",
+    "purpose": "固定源码测试与打包",
+    "status": "本地实测",
+    "note": "dev.14制品与3个Skill隔离安装通过；非平台原子操作",
+    "input": "--source?、--output?",
+    "output": "候选tgz与manifest、源码哈希和测试回执",
+    "parameters": [
+      {
+        "name": "--source?",
+        "type": "路径/选项",
+        "required": "见说明",
+        "default": "—",
+        "description": "--source?",
+        "location": "CLI"
+      },
+      {
+        "name": "--output?",
+        "type": "路径/选项",
+        "required": "见说明",
+        "default": "—",
+        "description": "--output?",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "local_contract",
+      "label": "本地入口或参数已验；非网站全流程",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  },
+  {
+    "group": "交付工具",
+    "command": "node scripts/install-skill.mjs",
+    "params": "--project <绝对路径>；--skill、--remove",
+    "purpose": "项目级安装/移除Skill",
+    "status": "本地实测",
+    "note": "dev.14制品与3个Skill隔离安装通过；非平台原子操作",
+    "input": "--project <绝对路径>；--skill、--remove",
+    "output": "Skill安装/移除状态、目录及runtime路径",
+    "parameters": [
+      {
+        "name": "--project <绝对路径>",
+        "type": "路径/选项",
+        "required": "见说明",
+        "default": "—",
+        "description": "--project <绝对路径>",
+        "location": "CLI"
+      },
+      {
+        "name": "--skill",
+        "type": "路径/选项",
+        "required": "见说明",
+        "default": "—",
+        "description": "--skill",
+        "location": "CLI"
+      },
+      {
+        "name": "--remove",
+        "type": "路径/选项",
+        "required": "见说明",
+        "default": "—",
+        "description": "--remove",
+        "location": "CLI"
+      }
+    ],
+    "verification": {
+      "level": "local_contract",
+      "label": "本地入口或参数已验；非网站全流程",
+      "scope": "只支持本行说明中的场景，不推导整个命令全部参数或跨账号可用",
+      "source": "existing catalog evidence narrative; no new execution in this audit"
+    }
+  }
+]

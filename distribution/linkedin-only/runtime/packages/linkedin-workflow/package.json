@@ -1,0 +1,28 @@
+{
+  "name": "@cskh/linkedin-salesnav",
+  "version": "2.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "cskh-linkedin-salesnav": "./src/cli.mjs",
+    "cskh-linkedin": "./src/linkedin-cli.mjs"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "package:candidate": "node scripts/build-candidate.mjs",
+    "test:controlled": "node test/acceptance/verify-controlled.mjs"
+  },
+  "files": [
+    "src/",
+    "skills/",
+    "scripts/",
+    "docs/",
+    "README.md",
+    "AGENTS.md",
+    "opencli-plugin.json",
+    "opencli-commands.js"
+  ]
+}

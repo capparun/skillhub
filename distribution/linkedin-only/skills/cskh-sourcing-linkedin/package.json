@@ -1,0 +1,24 @@
+{
+  "name": "@cappa/cskh-sourcing-linkedin",
+  "version": "1.7.1",
+  "description": "LinkedIn 寻访 pipeline 编排 skill。接收已确认画像 → 发现与初评 → 两级短名单 → 报告",
+  "main": "SKILL.md",
+  "files": [
+    "SKILL.md",
+    "test-prompts.json",
+    "references/",
+    "scripts/"
+  ],
+  "keywords": [
+    "claude-skill",
+    "hunter",
+    "recruitment",
+    "sourcing",
+    "linkedin"
+  ],
+  "author": "cappa",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://skillshub8302.zeabur.app/"
+  }
+}

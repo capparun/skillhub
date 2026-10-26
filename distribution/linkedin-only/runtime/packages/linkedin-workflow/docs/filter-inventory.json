@@ -1,0 +1,408 @@
+{
+  "observed_on": "2026-10-21",
+  "scope": "visible_fields_on_verified_account_not_all_subscription_tiers",
+  "fields": {
+    "account": {
+      "ANNUAL_REVENUE": {
+        "label": "Annual revenue",
+        "control": "range",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "COMPANY_HEADCOUNT": {
+        "label": "Company headcount",
+        "control": "values",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "COMPANY_HEADCOUNT_GROWTH": {
+        "label": "Company headcount growth",
+        "control": "range",
+        "placeholder": "Min (%)",
+        "modes": [
+          "include"
+        ]
+      },
+      "HEADQUARTERS_LOCATION": {
+        "label": "Headquarters location",
+        "control": "values",
+        "placeholder": "Add locations",
+        "modes": [
+          "include",
+          "exclude"
+        ]
+      },
+      "INDUSTRY": {
+        "label": "Industry",
+        "control": "values",
+        "placeholder": "Add industries",
+        "modes": [
+          "include",
+          "exclude"
+        ]
+      },
+      "NUM_OF_FOLLOWERS": {
+        "label": "Number of followers",
+        "control": "values",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "DEPARTMENT_HEADCOUNT": {
+        "label": "Department headcount",
+        "control": "range",
+        "placeholder": "Min",
+        "modes": [
+          "include"
+        ]
+      },
+      "DEPARTMENT_HEADCOUNT_GROWTH": {
+        "label": "Department headcount growth",
+        "control": "range",
+        "placeholder": "Min (%)",
+        "modes": [
+          "include"
+        ]
+      },
+      "FORTUNE": {
+        "label": "Fortune",
+        "control": "values",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "JOB_OPPORTUNITIES": {
+        "label": "Job opportunities",
+        "control": "values",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "ACCOUNT_ACTIVITIES": {
+        "label": "Recent activities",
+        "control": "values",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "RELATIONSHIP": {
+        "label": "Connection",
+        "control": "values",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "ACCOUNTS_IN_CRM": {
+        "label": "Companies in CRM",
+        "control": "restricted",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "SAVED_ACCOUNTS": {
+        "label": "Saved accounts",
+        "control": "values",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "ACCOUNT_LIST": {
+        "label": "Account lists",
+        "control": "values",
+        "placeholder": "Search for custom account lists",
+        "modes": [
+          "include",
+          "exclude"
+        ]
+      }
+    },
+    "lead": {
+      "CURRENT_COMPANY": {
+        "label": "Current company",
+        "control": "values",
+        "placeholder": "Add current companies and account lists",
+        "modes": [
+          "include",
+          "exclude"
+        ]
+      },
+      "COMPANY_HEADCOUNT": {
+        "label": "Company headcount",
+        "control": "values",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "PAST_COMPANY": {
+        "label": "Past company",
+        "control": "values",
+        "placeholder": "Add past companies and account lists",
+        "modes": [
+          "include",
+          "exclude"
+        ]
+      },
+      "COMPANY_TYPE": {
+        "label": "Company type",
+        "control": "values",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "COMPANY_HEADQUARTERS": {
+        "label": "Company headquarters location",
+        "control": "values",
+        "placeholder": "Add locations",
+        "modes": [
+          "include",
+          "exclude"
+        ]
+      },
+      "FUNCTION": {
+        "label": "Function",
+        "control": "values",
+        "placeholder": "Add functions",
+        "modes": [
+          "include",
+          "exclude"
+        ]
+      },
+      "CURRENT_TITLE": {
+        "label": "Current job title",
+        "control": "values",
+        "placeholder": "Add current titles",
+        "modes": [
+          "include"
+        ]
+      },
+      "SENIORITY_LEVEL": {
+        "label": "Seniority level",
+        "control": "values",
+        "placeholder": null,
+        "modes": [
+          "include",
+          "exclude"
+        ]
+      },
+      "PAST_TITLE": {
+        "label": "Past job title",
+        "control": "values",
+        "placeholder": "Add past titles",
+        "modes": [
+          "include"
+        ]
+      },
+      "YEARS_AT_CURRENT_COMPANY": {
+        "label": "Years in current company",
+        "control": "values",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "YEARS_IN_CURRENT_POSITION": {
+        "label": "Years in current position",
+        "control": "values",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "INDUSTRY": {
+        "label": "Industry",
+        "control": "values",
+        "placeholder": "Add industries",
+        "modes": [
+          "include",
+          "exclude"
+        ]
+      },
+      "FIRST_NAME": {
+        "label": "First name",
+        "control": "text",
+        "placeholder": "Add names",
+        "modes": [
+          "include"
+        ]
+      },
+      "LAST_NAME": {
+        "label": "Last name",
+        "control": "text",
+        "placeholder": "Add names",
+        "modes": [
+          "include"
+        ]
+      },
+      "PROFILE_LANGUAGE": {
+        "label": "Profile language",
+        "control": "values",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "YEARS_OF_EXPERIENCE": {
+        "label": "Years of experience",
+        "control": "values",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "GROUP": {
+        "label": "Groups",
+        "control": "values",
+        "placeholder": "Add groups",
+        "modes": [
+          "include"
+        ]
+      },
+      "SCHOOL": {
+        "label": "School",
+        "control": "values",
+        "placeholder": "Add schools",
+        "modes": [
+          "include"
+        ]
+      },
+      "FOLLOWS_YOUR_COMPANY": {
+        "label": "Following your company",
+        "control": "boolean",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "VIEWED_YOUR_PROFILE": {
+        "label": "Viewed your profile recently",
+        "control": "boolean",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "RELATIONSHIP": {
+        "label": "Connection",
+        "control": "values",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "CONNECTION_OF": {
+        "label": "Connections of",
+        "control": "values",
+        "placeholder": "Search for your connection",
+        "modes": [
+          "include"
+        ]
+      },
+      "PAST_COLLEAGUE": {
+        "label": "Past colleague",
+        "control": "boolean",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "WITH_SHARED_EXPERIENCES": {
+        "label": "Shared experiences",
+        "control": "boolean",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "RECENTLY_CHANGED_JOBS": {
+        "label": "Changed jobs",
+        "control": "boolean",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "POSTED_ON_LINKEDIN": {
+        "label": "Posted on LinkedIn",
+        "control": "boolean",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "PERSONA": {
+        "label": "Persona",
+        "control": "values",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "ACCOUNT_LIST": {
+        "label": "Account lists",
+        "control": "values",
+        "placeholder": "Search for custom account lists",
+        "modes": [
+          "include",
+          "exclude"
+        ]
+      },
+      "LEAD_LIST": {
+        "label": "Lead lists",
+        "control": "values",
+        "placeholder": "Search for custom lead lists",
+        "modes": [
+          "include",
+          "exclude"
+        ]
+      },
+      "LEADS_IN_CRM": {
+        "label": "People in CRM",
+        "control": "restricted",
+        "placeholder": null,
+        "modes": [
+          "include"
+        ]
+      },
+      "LEAD_INTERACTIONS": {
+        "label": "People you interacted with",
+        "control": "values",
+        "placeholder": null,
+        "modes": [
+          "include",
+          "exclude"
+        ]
+      },
+      "SAVED_LEADS_AND_ACCOUNTS": {
+        "label": "Saved leads and accounts",
+        "control": "values",
+        "placeholder": null,
+        "modes": [
+          "include",
+          "exclude"
+        ]
+      },
+      "REGION": {
+        "label": "Geography",
+        "control": "values",
+        "placeholder": "Add locations",
+        "modes": [
+          "include",
+          "exclude"
+        ]
+      }
+    }
+  }
+}

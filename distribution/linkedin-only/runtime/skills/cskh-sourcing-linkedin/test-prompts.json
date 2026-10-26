@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "type": "confirmed_xray",
+    "prompt": "画像已经确认：在 LinkedIn 上寻找约 30 名 base Shanghai、5-10 年经验、熟悉 CUDA/TensorRT 的 AI Inference Engineer。",
+    "expected": "读取已确认画像 → 确认本轮量级与是否深评 → 生成英文关键词 → 优先执行 Google X-Ray → normalize → LLM 初评 → 输出报告；不得重新解析 JD 或改写画像。"
+  },
+  {
+    "id": 2,
+    "type": "xray_without_linkedin_login",
+    "prompt": "我现在没有登录 LinkedIn，按已确认画像先用 Google X-Ray 找候选人。",
+    "expected": "检查 OpenCLI 实时命令和 Browser Bridge，但不检查 LinkedIn 登录态；直接调用 Skill 的 X-Ray 脚本编排 opencli google search，失败时按既定顺序有限降级。"
+  },
+  {
+    "id": 3,
+    "type": "deep_review",
+    "prompt": "对当前初评最高分的候选人做详情页深度复评。",
+    "expected": "先从初评结果生成 preliminaryShortlist；确认已开启详情复评并具备 LinkedIn 登录态，只对初选候选人以官方 profile-read 为基础串行读取；保留 initialEvaluation，另存 finalEvaluation，并生成 finalShortlist。"
+  },
+  {
+    "id": 4,
+    "type": "raw_request_boundary",
+    "prompt": "帮我在 LinkedIn 招一个 AI 工程师。",
+    "expected": "因为缺少已确认 SourcingRequest，先转交 cskh-align，不启动任何 LinkedIn 或 OpenCLI 命令。"
+  },
+  {
+    "id": 5,
+    "type": "skip_deep_review",
+    "prompt": "这轮不用看详情页，直接按列表初评给我最终短名单。",
+    "expected": "记录当前对话明确放弃深读的 detailReviewDecision；先产生 preliminaryShortlist，再生成 finalShortlist；每人标记 evidenceLevel=list_only 并保留证据缺口，不声称完成详情核验。"
+  },
+  {
+    "id": 6,
+    "type": "detail_conflict",
+    "prompt": "候选人列表简介说他在目标公司，但详情经历显示已经离职两年，请完成复评。",
+    "expected": "保留 initialEvaluation，以详情证据为准生成 finalEvaluation，记录分数或结论变化原因；只有最终仍合格者进入 finalShortlist，初选结果不得直接交给触达。"
+  }
+]

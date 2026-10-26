@@ -1,0 +1,8 @@
+timestamp	commit	skill	old_score	new_score	status	dimension	note	eval_mode
+2026-09-20T11:15:41+08:00	baseline	cskh-outreach	-	92.2	baseline	-	3 个确认后的测试场景均通过模拟推演；未执行真实 LinkedIn 写入	dry_run
+2026-09-20T11:38:57+08:00	working-tree	cskh-outreach	92.2	93.7	keep	资源整合度	新增官方只读证据采集到 ledger check 的安全编排；3 个新增场景通过	dry_run
+2026-09-20T15:52:51+08:00	working-tree	cskh-outreach	93.7	95.2	keep	边界条件覆盖	接入插件线程快照与候选人回复状态；6 个确认场景及 Shawn 真实只读链通过	dry_run
+2026-09-20T17:28:38+08:00	working-tree	cskh-outreach	95.2	96.7	keep	整体架构	统一执行器接入；Connect 准备、线程最新消息、官方状态和内容哈希保护通过	full_test
+2026-09-20T18:08:24+08:00	working-tree	cskh-outreach	96.7	97.2	keep	资源整合度	已验证邮箱的本地 JSON/Markdown 草稿导出；不接发送器或真实台账	full_test
+2026-09-20T21:23:43+08:00	working-tree	cskh-outreach	97.2	97.7	keep	边界条件覆盖	只读批次汇总；严格 LinkedIn 主机校验；Hunter 81/81 与所有工作区插件测试通过	full_test
+2026-09-20T21:54:11+08:00	working-tree	cskh-outreach	97.7	98.7	keep	检查点设计	两层能力探测、严格主页绑定、15 分钟审批和执行前 5 分钟快照；Hunter 84/84	full_test

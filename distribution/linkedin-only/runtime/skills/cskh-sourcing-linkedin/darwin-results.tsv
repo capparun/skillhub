@@ -1,0 +1,2 @@
+timestamp	commit	skill	old_score	new_score	status	dimension	note	eval_mode
+2026-09-20T11:31:36+08:00	baseline	cskh-sourcing-linkedin	-	89.0	baseline	-	两级短名单 3 个确认场景均通过模拟推演；未访问真实 LinkedIn 页面	dry_run

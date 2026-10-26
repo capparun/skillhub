@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "type": "update",
+    "prompt": "更新猎策。",
+    "expected": "读取安装器登记的真实路径并执行官方更新器，等待 Doctor 后报告真实结果。"
+  },
+  {
+    "id": 2,
+    "type": "check_only",
+    "prompt": "检查一下猎策有没有新版本。",
+    "expected": "使用 --check 只比较版本；即使发现新版也不安装。"
+  },
+  {
+    "id": 3,
+    "type": "missing_pointer",
+    "prompt": "更新猎策，但当前 Skill 没有安装路径指针。",
+    "expected": "如实说明缺少安装登记，不猜测固定目录，也不声称更新成功。"
+  },
+  {
+    "id": 4,
+    "type": "windows_no_bash",
+    "prompt": "我在 Windows WorkBuddy 里更新猎策，Bash 环境不可用。",
+    "expected": "不探测或调用 Bash/WSL；直接通过 Node 进程或 PowerShell 执行 run-update.mjs。"
+  }
+]

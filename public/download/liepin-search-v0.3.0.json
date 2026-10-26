@@ -1,0 +1,12 @@
+{
+  "product": "liepin-search",
+  "version": "0.3.0",
+  "file": "liepin-search-v0.3.0.tar.gz",
+  "sha256": "e7c1d1a595b06adae50edcf2883434e805bf4b2e2658769710a9f81446de78ef",
+  "sizeBytes": 230993,
+  "sourceFingerprint": "4b8552bcea956f4d6dbacafdd3646122ce2f568004b97c7beadcd247e1498296",
+  "transport": "opencli-mcp-site-adapter",
+  "channel": "release-candidate",
+  "approved": false,
+  "published": false
+}

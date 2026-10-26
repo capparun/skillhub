@@ -8,6 +8,34 @@ param([Parameter(Mandatory=$true)][string]$Product, [string]$Token = '', [string
 $ErrorActionPreference = 'Stop'
 $Server = '${appUrl}'
 if ($Product -eq 'maimai-only') { throw '当前脉脉寻访包仅支持 macOS / Linux；Windows 不支持实际寻访。' }
+# Use Node's HTTPS stack, with ordinary certificate validation, on Windows too.
+# Never retry token redemption automatically: a failed response can be ambiguous.
+function Save-HunterResponse([string]$Uri, [string]$OutFile, [string]$Method = 'GET') {
+  $code = @'
+const fs = require('node:fs');
+const [url, output, method] = process.argv.slice(1);
+(async () => {
+  const parsed = new URL(url);
+  const loopback = ['127.0.0.1', 'localhost', '[::1]'].includes(parsed.hostname);
+  if ((parsed.protocol !== 'https:' && !(parsed.protocol === 'http:' && loopback)) || parsed.username || parsed.password) throw Error('Expected HTTPS download URL without credentials');
+  const response = await fetch(url, {method, signal: AbortSignal.timeout(120000)});
+  if (!response.ok) throw Error('Download HTTP ' + response.status);
+  fs.writeFileSync(output, Buffer.from(await response.arrayBuffer()), {flag: 'wx'});
+})().catch(error => { console.error(error.message); process.exitCode = 1; });
+'@
+  $requestLog = $OutFile + '.request.log'
+  $savedPreference = $ErrorActionPreference
+  try {
+    $ErrorActionPreference = 'Continue'
+    & node -e $code $Uri $OutFile $Method *> $requestLog
+    $requestExit = $LASTEXITCODE
+  } finally { $ErrorActionPreference = $savedPreference }
+  if ($requestExit -ne 0) {
+    Get-Content $requestLog -Encoding UTF8
+    throw '服务器请求未完成，已停止；不要重复兑换令牌。'
+  }
+}
+
 $originalLocation = Get-Location
 $logDir = Join-Path ([System.IO.Path]::GetTempPath()) ('hunter-install-log-' + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $logDir | Out-Null
@@ -37,12 +65,12 @@ Set-Location $workDir
 
 $stage = 'release-metadata'
 if ($Token) {
-  Invoke-RestMethod -Method Post -Uri "$Server/api/install-tokens/$Token/redeem" | ConvertTo-Json -Depth 10 | Set-Content redeem.json -Encoding utf8
+  Save-HunterResponse "$Server/api/install-tokens/$Token/redeem" 'redeem.json' 'POST'
 } else {
-  Invoke-RestMethod -Uri "$Server/api/releases/latest?product=$Product" | ConvertTo-Json -Depth 10 | Set-Content redeem.json -Encoding utf8
+  Save-HunterResponse "$Server/api/releases/latest?product=$Product" 'redeem.json'
 }
 
-$payload = Get-Content redeem.json -Raw | ConvertFrom-Json
+$payload = Get-Content redeem.json -Raw -Encoding UTF8 | ConvertFrom-Json
 if ($payload.error) { throw "服务器返回错误：$($payload.error.message)" }
 $release = if ($payload.release) { $payload.release } else { $payload }
 $downloadUrl = $payload.downloadUrl
@@ -50,13 +78,21 @@ if (-not $downloadUrl -or -not $release.sha256 -or -not $release.version) { thro
 
 $stage = 'package-download'
 Write-Host '正在下载安装包 pkg.tar.gz（SHA-256 只校验此文件，不是 install.ps1）。'
-Invoke-WebRequest -Uri $downloadUrl -OutFile pkg.tar.gz
+Save-HunterResponse $downloadUrl 'pkg.tar.gz'
 $actual = (Get-FileHash pkg.tar.gz -Algorithm SHA256).Hash.ToLowerInvariant()
 if ($actual -ne $release.sha256.ToLowerInvariant()) { throw '安装包校验失败（SHA-256 不一致），已中止。' }
 
 $stage = 'extract'
-tar.exe -xzf pkg.tar.gz
-if ($LASTEXITCODE -ne 0) { throw '安装包解压失败，已停止安装。' }
+$savedErrorPreference = $ErrorActionPreference
+try {
+  $ErrorActionPreference = 'Continue'
+  tar.exe -xzf pkg.tar.gz *> (Join-Path $logDir 'extract.txt')
+  $extractExit = $LASTEXITCODE
+} finally { $ErrorActionPreference = $savedErrorPreference }
+if ($extractExit -ne 0) {
+  Get-Content (Join-Path $logDir 'extract.txt')
+  throw '安装包解压失败，已停止安装。'
+}
 if (Test-Path -LiteralPath (Join-Path $workDir 'install.mjs') -PathType Leaf) {
   $packageDir = Get-Item -LiteralPath $workDir
 } else {

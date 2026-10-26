@@ -20,5 +20,7 @@ COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
 COPY scripts/publish-gllue-release.mjs ./scripts/publish-gllue-release.mjs
+COPY scripts/publish-liepin-release.mjs scripts/rollback-liepin-release.mjs ./scripts/
+COPY scripts/lib/liepin-release-guard.mjs ./scripts/lib/liepin-release-guard.mjs
 EXPOSE 3000
 CMD ["node", "server.js"]

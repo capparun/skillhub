@@ -59,15 +59,16 @@ test('命令行命令指向 install.sh', () => {
   );
 });
 
-test('Windows 命令行命令指向 install.ps1 并传递参数', () => {
-  assert.equal(
-    windowsCliCommand(freeInput),
-    "$script = irm https://skills.example.com/install.ps1; & ([scriptblock]::Create($script)) -Product 'hunter-align'",
-  );
-  assert.equal(
-    windowsPaidCliCommand(paidInput),
-    "$script = irm https://skills.example.com/install.ps1; & ([scriptblock]::Create($script)) -Product 'soho-sourcing' -Token 'hunter_it_testtoken123'",
-  );
+test('Windows commands use Node HTTPS and preserve free and paid arguments', () => {
+  for (const command of [windowsCliCommand(freeInput), windowsPaidCliCommand(paidInput)]) {
+    assert.ok(command.includes('node -e'));
+    assert.ok(command.includes('https://skills.example.com/install.ps1'));
+    assert.ok(command.includes('FromBase64String'));
+    assert.ok(!command.includes('irm '));
+    assert.ok(!command.includes('NODE_TLS_REJECT_UNAUTHORIZED'));
+  }
+  assert.ok(windowsCliCommand(freeInput).endsWith("-Product 'hunter-align'"));
+  assert.ok(windowsPaidCliCommand(paidInput).endsWith("-Product 'soho-sourcing' -Token 'hunter_it_testtoken123'"));
 });
 
 test('Windows 免费安装 Prompt 只调用 PowerShell 官方入口', () => {

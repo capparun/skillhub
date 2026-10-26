@@ -1,0 +1,38 @@
+[
+  {
+    "name": "discover-linkedin-xray",
+    "skill": "cskh-sourcing-linkedin",
+    "description": "搜索引擎发现LinkedIn人员",
+    "output_dir": false
+  },
+  {
+    "name": "enrich-linkedin-profiles",
+    "skill": "cskh-sourcing-linkedin",
+    "description": "批量补充人员资料",
+    "output_dir": false
+  },
+  {
+    "name": "collect-outreach-context",
+    "skill": "cskh-outreach",
+    "description": "读取联系前上下文",
+    "output_dir": true
+  },
+  {
+    "name": "execute-approved-outreach",
+    "skill": "cskh-outreach",
+    "description": "执行已获批准的联系动作",
+    "output_dir": true
+  },
+  {
+    "name": "summarize-outreach-batch",
+    "skill": "cskh-outreach",
+    "description": "汇总既有联系结果",
+    "output_dir": true
+  },
+  {
+    "name": "create-email-draft",
+    "skill": "cskh-outreach",
+    "description": "生成本地邮件草稿",
+    "output_dir": true
+  }
+]

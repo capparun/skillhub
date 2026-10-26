@@ -1,0 +1,6 @@
+{
+  "name": "cskh-linkedin-salesnav",
+  "version": "2.1.0",
+  "description": "LinkedIn task workflow and Sales Navigator deterministic commands",
+  "opencli": ">=2.0.1"
+}

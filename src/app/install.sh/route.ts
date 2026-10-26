@@ -30,7 +30,7 @@ if ! command -v node >/dev/null 2>&1; then
 fi
 NODE_MAJOR="\$(node -p "process.versions.node.split('.')[0]")"
 MIN_NODE=20
-if [ "\$PRODUCT" = "gllue-only" ] || [ "\$PRODUCT" = "liepin-search" ]; then MIN_NODE=22; fi
+if [ "\$PRODUCT" = "gllue-only" ] || [ "\$PRODUCT" = "liepin-search" ] || [ "\$PRODUCT" = "soho-sourcing" ]; then MIN_NODE=22; fi
 if [ "\$NODE_MAJOR" -lt "\$MIN_NODE" ]; then
   echo "Node.js 版本过低(\$(node --version)),请升级到 \$MIN_NODE 或更高版本" >&2
   exit 1

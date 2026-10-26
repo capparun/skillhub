@@ -1,0 +1,18 @@
+{
+  "name": "@cappa/cskh-update",
+  "version": "1.1.1",
+  "description": "检查并更新已安装的猎策能力，复用官方更新器完成校验、备份、Doctor 和回滚",
+  "main": "SKILL.md",
+  "files": [
+    "SKILL.md",
+    "scripts/",
+    "test-prompts.json"
+  ],
+  "keywords": [
+    "claude-skill",
+    "hunter",
+    "update"
+  ],
+  "author": "cappa",
+  "license": "MIT"
+}

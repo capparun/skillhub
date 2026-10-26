@@ -1,0 +1,5 @@
+LinkedIn 2.1.0
+需要 Node.js 22+、Chrome 与官方 OpenCLI 扩展。
+运行 node install.mjs，然后 node doctor.mjs。
+普通账号可使用普通 LinkedIn；Sales Navigator 必须有对应权限。
+安装与业务权限分别验证。所有消息和邀请仍需明确授权。

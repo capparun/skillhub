@@ -53,7 +53,7 @@ try {
   Write-Host "安装日志目录：$logDir"
 
 
-$minimumNode = if ($Product -in @('liepin-search', 'gllue-only')) { 22 } else { 20 }
+$minimumNode = if ($Product -in @('liepin-search', 'gllue-only', 'soho-sourcing')) { 22 } else { 20 }
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "未找到 Node.js。请先安装 Node.js $minimumNode 或更高版本：https://nodejs.org" }
 $nodeMajor = & node -p "process.versions.node.split('.')[0]"
 if ($LASTEXITCODE -ne 0) { throw 'Node.js 执行失败，请修复环境后重试。' }

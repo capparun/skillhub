@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "type": "happy_path",
+    "prompt": "帮我对齐一个 AI Inference Engineer 职位：上海，必须有 CUDA/TensorRT，目标候选人来自 NVIDIA、字节或阿里。",
+    "expected": "使用宿主交互能力逐项补全信息，再交互式确认人才画像和渠道策略；确认后生成搜索参数与 HTML，先确认 JBF 归档/交付方式，再单独询问是否开始搜索。"
+  },
+  {
+    "id": 7,
+    "type": "jbf_delivery",
+    "prompt": "报告确认了，下一步怎么处理这份 JBF？",
+    "expected": "交互提供保存到本地、保存并上传企业微信、暂不归档；选择企微时询问接收目标并在实际上传前再次确认，不能据此自动开始搜索。"
+  },
+  {
+    "id": 5,
+    "type": "document_conflict",
+    "prompt": "JD 中薪资写成最低 700K、最高 100K，管理年限口径也不清楚。",
+    "expected": "先交互确认薪资口径，再确认管理年限；原生控件不可用时退化为一次一个问题的编号选项，并允许自定义答案。"
+  },
+  {
+    "id": 6,
+    "type": "jbf_complete_output",
+    "prompt": "读取这份 Job Briefing Form，按原始 JBF 标准字段输出完整对齐报告。",
+    "expected": "align.json 保留全部 jobBrief 标准字段；HTML 依次展示 10 个 JBF 章节，原文空白字段显示待确认，再附加画像、渠道和搜索参数。"
+  },
+  {
+    "id": 2,
+    "type": "pause_after_align",
+    "prompt": "对齐完成后先不要开始搜索。",
+    "expected": "保存 align.json 和 align.html 后正常结束，不检查 OpenCLI、插件或登录态，不创建搜索会话。"
+  },
+  {
+    "id": 3,
+    "type": "handoff",
+    "prompt": "这份画像和渠道我都确认，现在开始搜索。",
+    "expected": "若尚未确认 JBF 归档/交付方式，先完成该独立确认；随后生成 SourcingRequest 并交给 cskh-sourcing。Align 自身不初始化环境、不执行搜索。"
+  },
+  {
+    "id": 4,
+    "type": "channel_revision",
+    "prompt": "LinkedIn 只使用公开搜索和我的登录浏览器，不要第三方采集渠道。",
+    "expected": "渠道策略只包含 xray 和 browser，不出现 Apify；更新后再次让用户确认渠道策略。"
+  },
+  {
+    "id": 8,
+    "type": "supplementary_channels",
+    "prompt": "这个职位很稀缺，除了 LinkedIn 和猎聘外还可以从哪里找？",
+    "expected": "根据职位只推荐 1 至 2 条相关的补充渠道，例如目标机构图谱、行业协会、校友网络或转介绍网络；说明它们需要用户确认，且不会自动开始外部搜索或触达。"
+  },
+  {
+    "id": 9,
+    "type": "fragmented_intake",
+    "prompt": "这是会议纪要和几条微信消息，帮我开始做这个职位的寻访。",
+    "expected": "先将零散输入映射为完整 JBF 草稿，逐组交互补全并标记每个字段为已确认、暂缺或不适用及其来源；JBF 基线确认后，才定稿人才画像和渠道策略。"
+  }
+]

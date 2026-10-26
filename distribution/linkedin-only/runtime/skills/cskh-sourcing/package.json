@@ -1,0 +1,21 @@
+{
+  "name": "@cappa/cskh-sourcing",
+  "version": "2.2.2",
+  "description": "猎头寻访执行分发器。验证已确认的 SourcingRequest 和本次授权后分发平台 pipeline",
+  "main": "SKILL.md",
+  "files": [
+    "SKILL.md",
+    "test-prompts.json"
+  ],
+  "keywords": [
+    "claude-skill",
+    "hunter",
+    "recruitment",
+    "sourcing"
+  ],
+  "author": "cappa",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://skillshub8302.zeabur.app/"
+  }
+}

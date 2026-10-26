@@ -1,0 +1,17 @@
+{
+  "name": "linkedin-only-hunter-runtime",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "@jackwener/opencli": "2.0.1",
+    "hunter-linkedin": "2.0.9",
+    "@cskh/linkedin-salesnav": "2.1.0"
+  }
+}

@@ -57,7 +57,8 @@ export function LinkedInLanding() {
           <li>LinkedIn 站内与 X-Ray 双通道搜索</li>
           <li>按职位要求判断匹配程度，排序并标注待核实项</li>
           <li>生成候选人初评与寻访报告</li>
-          <li>包含职位需求对齐、寻访入口与 LinkedIn 寻访技能；具体以安装包清单为准</li>
+          <li>有 Sales Navigator 权限时，可筛选公司与人员、读取详情并导出表格</li>
+          <li>安装需要 Node.js 22+、Chrome 和官方 OpenCLI 扩展；普通 LinkedIn 功能不要求 Sales Navigator 订阅</li>
         </ul>
       </article>
     </section>

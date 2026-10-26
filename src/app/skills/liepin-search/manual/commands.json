@@ -1,0 +1,797 @@
+[
+  {
+    "name": "bind",
+    "description": "将观察到的已有猎聘标签绑定到Adapter会话，核对完整URL并保留用户页面",
+    "output": "绑定ID与用户页面归属",
+    "args": [
+      {
+        "name": "file",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "tab_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "expected_url",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "connect",
+    "description": "在官方猎聘Adapter会话中打开搜索页并返回实际标签ID；需明确授权，不用于白屏重试",
+    "output": "Adapter会话标签ID与页面地址，未证明登录或业务就绪",
+    "args": [
+      {
+        "name": "replaces_operation_id",
+        "type": "string",
+        "description": "可选：原独立工作页创建回执；只在Chrome确认该页已不存在时新建替代页，不提交搜索"
+      },
+      {
+        "name": "new_workspace",
+        "type": "boolean",
+        "default": false,
+        "description": "新建搜索标签并保留当前页面；需精确授权newWorkspace:true"
+      },
+      {
+        "name": "file",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "operation_id",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "current-detail",
+    "description": "读取已绑定猎聘详情的可见内容并保存到本地任务；可选择展开经历，不新建或关闭标签",
+    "output": "已保存的可见详情、完整性状态及操作状态",
+    "args": [
+      {
+        "name": "expand",
+        "type": "boolean",
+        "default": false,
+        "help": "展开已识别的工作、项目、教育经历按钮"
+      },
+      {
+        "name": "file",
+        "type": "string",
+        "required": true,
+        "help": "已有任务的本机绝对路径"
+      },
+      {
+        "name": "operation_id",
+        "type": "string",
+        "required": true,
+        "help": "已授权的稳定操作ID"
+      },
+      {
+        "name": "tab_id",
+        "type": "string",
+        "required": true,
+        "help": "官方会话实际绑定的标签ID"
+      },
+      {
+        "name": "resume_id",
+        "type": "string",
+        "required": true,
+        "help": "已观察到的唯一简历ID"
+      }
+    ]
+  },
+  {
+    "name": "detail-batch",
+    "description": "继续本地已创建并授权的详情队列，逐条保存并返回搜索页；跳过已完成项，未知状态暂停",
+    "output": "持久批次及各详情完成状态",
+    "args": [
+      {
+        "name": "file",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "tab_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "interval_ms",
+        "type": "int",
+        "min": 1000,
+        "max": 60000,
+        "default": 6000
+      }
+    ]
+  },
+  {
+    "name": "detail-review",
+    "description": "继续本运行时保留的详情：完成证据评估后按授权收藏，或关闭并返回列表；不重复打开",
+    "output": "收藏回读或审阅关闭结果",
+    "args": [
+      {
+        "name": "file",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "parent_tab_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "review_token",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "action",
+        "type": "string",
+        "required": true,
+        "choices": [
+          "add",
+          "close"
+        ]
+      },
+      {
+        "name": "operation_id",
+        "type": "string"
+      },
+      {
+        "name": "group",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "name": "favorite-list",
+    "description": "按已保存跟进依据，从核实过的列表打开对应详情并收藏到指定组，回读后关闭本次详情返回列表；不重新搜索",
+    "output": "收藏回执；已有收藏但组别未核实会明确保留",
+    "args": [
+      {
+        "name": "action",
+        "type": "string",
+        "choices": [
+          "add",
+          "remove"
+        ],
+        "default": "add"
+      },
+      {
+        "name": "file",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "operation_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "open_operation_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "tab_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "observation_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "group",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "verify_only",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "create_group",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "group_operation_id",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "name": "favorite",
+    "description": "核对指定简历收藏状态，或按任务授权添加到指定分组、取消收藏；操作后回读确认",
+    "output": "收藏状态、是否改变及回读结果",
+    "args": [
+      {
+        "name": "file",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "operation_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "tab_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "resume_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "action",
+        "type": "string",
+        "required": true,
+        "choices": [
+          "status",
+          "add",
+          "remove"
+        ]
+      },
+      {
+        "name": "group",
+        "type": "string"
+      }
+    ]
+  },
+  {
+    "name": "favorites",
+    "description": "读取已绑定的猎聘收藏列表，可在独立工作标签核验；支持组内全文搜索与简历ID核验；不更改收藏、不翻页",
+    "output": "当前可见收藏条目及保存结果",
+    "args": [
+      {
+        "name": "keyword",
+        "type": "string",
+        "description": "可选：收藏全文关键词，选组后输入；空字符串清除搜索。无命中不等于未收藏"
+      },
+      {
+        "name": "resume_ids",
+        "type": "string",
+        "description": "可选：待核验简历ID，以英文逗号分隔，须指定group；按观察到的链接精确比对"
+      },
+      {
+        "name": "after_operation_id",
+        "type": "string",
+        "description": "可选：同组已完成收藏/取消的操作ID；据此登记写后新核验，原读取回执仍保留"
+      },
+      {
+        "name": "workspace",
+        "type": "boolean",
+        "default": false,
+        "description": "新建人才管理工作页，读取后关闭；tab_id 为保留的原页面，须授权 workspace:true 请求"
+      },
+      {
+        "name": "file",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "operation_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "tab_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "limit",
+        "type": "int",
+        "min": 1,
+        "max": 30,
+        "default": 3
+      },
+      {
+        "name": "group",
+        "type": "string",
+        "description": "可选：准确收藏分组名，仅切换视图并回读，不增删收藏"
+      }
+    ]
+  },
+  {
+    "name": "next-page",
+    "description": "在已绑定的搜索结果上翻到下一页并保存新一页，不重新提交查询；页码与首行都未变化则停止",
+    "output": "新页页码、保存数量与绑定标签ID",
+    "args": [
+      {
+        "name": "file",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "operation_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "tab_id",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "open-detail",
+    "description": "核对已保存列表卡片后点击姓名，展开详情、保存并关闭本次详情返回列表；需要同会话标签兼容接口",
+    "output": "已保存详情、列表身份关联及返回状态",
+    "args": [
+      {
+        "name": "keep_open",
+        "type": "boolean",
+        "default": false,
+        "description": "保存后保留本次详情供评估；用detail-review收藏或关闭，不重复打开"
+      },
+      {
+        "name": "file",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "operation_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "tab_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "observation_id",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "prepare",
+    "description": "设置并回读猎聘筛选，不点击搜索；站点可能自动查询，需已有任务授权",
+    "output": "已回读的筛选条件与未提交搜索说明",
+    "args": [
+      {
+        "name": "file",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "operation_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "tab_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "filters",
+        "type": "object",
+        "required": true,
+        "properties": {
+          "keyword": {
+            "type": "string",
+            "help": "关键词"
+          },
+          "match": {
+            "type": "string",
+            "help": "关键词匹配"
+          },
+          "title": {
+            "type": "string",
+            "help": "职位名称"
+          },
+          "company": {
+            "type": "string",
+            "help": "公司名称"
+          },
+          "city": {
+            "type": "string",
+            "help": "目前城市"
+          },
+          "expected_city": {
+            "type": "string",
+            "help": "期望城市"
+          },
+          "experience": {
+            "type": "string",
+            "help": "工作年限"
+          },
+          "education": {
+            "type": "string",
+            "help": "教育经历"
+          },
+          "school_tier": {
+            "type": "string",
+            "help": "院校要求"
+          },
+          "full_time": {
+            "type": "string",
+            "help": "统招要求"
+          },
+          "industry": {
+            "type": "string",
+            "help": "当前行业"
+          },
+          "position": {
+            "type": "string",
+            "help": "当前职位"
+          },
+          "expected_industry": {
+            "type": "string",
+            "help": "期望行业"
+          },
+          "expected_position": {
+            "type": "string",
+            "help": "期望职位"
+          },
+          "activity": {
+            "type": "string",
+            "help": "活跃度"
+          },
+          "language": {
+            "type": "string",
+            "help": "语言"
+          },
+          "job_changes": {
+            "type": "string",
+            "help": "跳槽频率"
+          },
+          "school": {
+            "type": "string",
+            "help": "毕业院校"
+          },
+          "major": {
+            "type": "string",
+            "help": "专业名称"
+          },
+          "job_status": {
+            "type": "string",
+            "help": "求职状态"
+          },
+          "resume_language": {
+            "type": "string",
+            "help": "简历语言"
+          },
+          "salary_min": {
+            "type": "string",
+            "help": "目前年薪"
+          },
+          "salary_max": {
+            "type": "string",
+            "help": "目前年薪"
+          },
+          "expected_salary_min": {
+            "type": "string",
+            "help": "期望年薪"
+          },
+          "expected_salary_max": {
+            "type": "string",
+            "help": "期望年薪"
+          },
+          "age_min": {
+            "type": "string",
+            "help": "年龄"
+          },
+          "age_max": {
+            "type": "string",
+            "help": "年龄"
+          },
+          "gender": {
+            "type": "string",
+            "help": "性别"
+          },
+          "overseas": {
+            "type": "boolean",
+            "help": "海外工作经验"
+          },
+          "management": {
+            "type": "boolean",
+            "help": "管理经验"
+          }
+        }
+      },
+      {
+        "name": "options_only",
+        "type": "boolean",
+        "help": "仅打开选择类控件查看选项后收起，不选择值、不提交搜索；须精确授权filter-options请求"
+      },
+      {
+        "name": "verify_only",
+        "type": "boolean",
+        "help": "只读当前筛选与已选摘要；不清空、不点击、不恢复任务"
+      }
+    ]
+  },
+  {
+    "name": "previous-page",
+    "description": "点击当前结果的上一页并保存列表，用于返回核实遗漏人选；不重新搜索，不表示该页已处理完成",
+    "output": "上一页页码与保存数量",
+    "args": [
+      {
+        "name": "file",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "operation_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "tab_id",
+        "type": "string",
+        "required": true
+      }
+    ]
+  },
+  {
+    "name": "results",
+    "description": "读取并保存已绑定猎聘搜索页当前列表，不重新搜索或翻页",
+    "output": "已保存数量及绑定标签ID",
+    "args": [
+      {
+        "name": "file",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "operation_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "tab_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "limit",
+        "type": "int",
+        "min": 1,
+        "max": 30,
+        "default": 3
+      }
+    ]
+  },
+  {
+    "name": "saved-search",
+    "description": "列出、保存、应用或删除猎聘搜索方案；写操作需已有任务授权",
+    "output": "方案操作及回读结果",
+    "args": [
+      {
+        "name": "file",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "operation_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "tab_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "action",
+        "type": "string",
+        "required": true,
+        "choices": [
+          "list",
+          "save",
+          "apply",
+          "delete"
+        ]
+      },
+      {
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "name": "current",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "filters",
+        "type": "object",
+        "properties": {
+          "keyword": {
+            "type": "string",
+            "help": "关键词"
+          },
+          "match": {
+            "type": "string",
+            "help": "关键词匹配"
+          },
+          "title": {
+            "type": "string",
+            "help": "职位名称"
+          },
+          "company": {
+            "type": "string",
+            "help": "公司名称"
+          },
+          "city": {
+            "type": "string",
+            "help": "目前城市"
+          },
+          "expected_city": {
+            "type": "string",
+            "help": "期望城市"
+          },
+          "experience": {
+            "type": "string",
+            "help": "工作年限"
+          },
+          "education": {
+            "type": "string",
+            "help": "教育经历"
+          },
+          "school_tier": {
+            "type": "string",
+            "help": "院校要求"
+          },
+          "full_time": {
+            "type": "string",
+            "help": "统招要求"
+          },
+          "industry": {
+            "type": "string",
+            "help": "当前行业"
+          },
+          "position": {
+            "type": "string",
+            "help": "当前职位"
+          },
+          "expected_industry": {
+            "type": "string",
+            "help": "期望行业"
+          },
+          "expected_position": {
+            "type": "string",
+            "help": "期望职位"
+          },
+          "activity": {
+            "type": "string",
+            "help": "活跃度"
+          },
+          "language": {
+            "type": "string",
+            "help": "语言"
+          },
+          "job_changes": {
+            "type": "string",
+            "help": "跳槽频率"
+          },
+          "school": {
+            "type": "string",
+            "help": "毕业院校"
+          },
+          "major": {
+            "type": "string",
+            "help": "专业名称"
+          },
+          "job_status": {
+            "type": "string",
+            "help": "求职状态"
+          },
+          "resume_language": {
+            "type": "string",
+            "help": "简历语言"
+          },
+          "salary_min": {
+            "type": "string",
+            "help": "目前年薪"
+          },
+          "salary_max": {
+            "type": "string",
+            "help": "目前年薪"
+          },
+          "expected_salary_min": {
+            "type": "string",
+            "help": "期望年薪"
+          },
+          "expected_salary_max": {
+            "type": "string",
+            "help": "期望年薪"
+          },
+          "age_min": {
+            "type": "string",
+            "help": "年龄"
+          },
+          "age_max": {
+            "type": "string",
+            "help": "年龄"
+          },
+          "gender": {
+            "type": "string",
+            "help": "性别"
+          },
+          "overseas": {
+            "type": "boolean",
+            "help": "海外工作经验"
+          },
+          "management": {
+            "type": "boolean",
+            "help": "管理经验"
+          }
+        }
+      },
+      {
+        "name": "limit",
+        "type": "int",
+        "min": 1,
+        "max": 30,
+        "default": 3
+      }
+    ]
+  },
+  {
+    "name": "search",
+    "description": "执行已批准轮次，提交一次搜索并读取授权页数，逐页保存；restore显式恢复已完成搜索，未知结果停止",
+    "output": "轮次状态、读取数量、页数及中断提示",
+    "args": [
+      {
+        "name": "file",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "round_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "tab_id",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "restore",
+        "type": "boolean",
+        "default": false,
+        "help": "仅在已授权的新空结果页恢复已完成轮次；会提交真实查询"
+      },
+      {
+        "name": "operation_id",
+        "type": "string",
+        "help": "restore必填，新恢复操作ID"
+      },
+      {
+        "name": "reason",
+        "type": "string",
+        "help": "restore必填，实际页面丢失原因"
+      }
+    ]
+  },
+  {
+    "name": "tabs",
+    "description": "列出支持的已有猎聘标签元数据，不读取正文或新建页面；需兼容运行时",
+    "output": "标签ID、URL、页面类型",
+    "args": []
+  }
+]

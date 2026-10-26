@@ -10,8 +10,11 @@
     "packages/*"
   ],
   "dependencies": {
+    "@cskh/linkedin-salesnav": "2.1.0",
     "@jackwener/opencli": "2.0.1",
-    "hunter-linkedin": "2.0.9",
-    "@cskh/linkedin-salesnav": "2.1.0"
+    "hunter-linkedin": "2.0.9"
+  },
+  "overrides": {
+    "undici": "7.30.1"
   }
 }

@@ -10,7 +10,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "@cskh/linkedin-salesnav": "2.1.0",
+    "@cskh/linkedin-salesnav": "2.1.1",
     "@jackwener/opencli": "2.0.1",
     "hunter-linkedin": "2.0.9"
   },

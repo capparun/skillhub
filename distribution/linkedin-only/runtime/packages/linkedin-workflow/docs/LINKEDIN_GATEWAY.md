@@ -121,3 +121,9 @@ node scripts/install-skill.mjs --project /absolute/project --skill cskh-sourcing
 预算支持max_operations、max_pages、max_detail_reads、max_elapsed_seconds，均为正整数；不支持的键拒绝，避免静默忽略。页数为累计请求max_pages预留（省略按1），详情按动作预留，batch逐子步骤计入；失败/未知不返还，回执重放不消耗。普通LinkedIn无可靠页数限制，带页预算的该搜索拒绝派发。时间自任务创建累计，过期阻止派发，子进程使用剩余超时；超时不能证明上游取消成功，保留未知并停止。
 
 源码和包应以本轮固定提交复验，历史开发快照不代表最新包；当前仍不宣称正式上线。
+
+### 人员列表覆盖下限
+
+人员发现任务可传 `coverage: {mode: "target_only", min_unique_people: 200}`；`min_unique_people` 为正整数，仅适用于 people_discovery，也可与 all_observed_queries 共用。CLI 不自行默认 200，Skill 在未指定列表量的新人员搜索任务中提供该值。固定名单核实不应用此默认值。
+
+task-status 和 task-report 返回 list_coverage：minimum、unique_people、remaining、met。按人员搜索/续页结果的现有实体键跨操作去重，批量操作仅统计 lead-search；纯详情读取不计入。缺少稳定 ID/主页的行不能计数。覆盖不足时报告 partial，即使合格目标已达到；报告显示实际数、下限和缺口。预算及平台阻塞仍优先停止，默认下限不扩大授权。

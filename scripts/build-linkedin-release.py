@@ -5,7 +5,7 @@ root=Path(__file__).resolve().parents[1]
 src=root/'distribution/linkedin-only'
 d=json.loads((src/'distribution.json').read_text())
 version=d['version']
-if d['product']!='soho-sourcing' or version!='2.1.0':raise ValueError('Unexpected release identity')
+if d['product']!='soho-sourcing' or version!='2.1.1':raise ValueError('Unexpected release identity')
 files=[]
 for p in sorted(src.rglob('*')):
  if 'node_modules' in p.parts:continue

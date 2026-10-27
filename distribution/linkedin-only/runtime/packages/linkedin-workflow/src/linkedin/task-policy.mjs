@@ -1,6 +1,7 @@
 const fail=code=>{throw Object.assign(new Error(code),{code});};
 export function validatePolicy(task){
- if(task.coverage!==undefined && (!task.coverage || !['target_only','all_observed_queries'].includes(task.coverage.mode) || Object.keys(task.coverage).some(k=>k!=='mode')))fail('invalid_coverage');
+ if(task.coverage!==undefined && (!task.coverage || !['target_only','all_observed_queries'].includes(task.coverage.mode) || Object.keys(task.coverage).some(k=>!['mode','min_unique_people'].includes(k))))fail('invalid_coverage');
+ if(task.coverage?.min_unique_people!==undefined && (task.intent!=='people_discovery'||!Number.isInteger(task.coverage.min_unique_people)||task.coverage.min_unique_people<1))fail('invalid_coverage');
  if(task.budgets!==undefined){
   if(!task.budgets || typeof task.budgets!=='object' || Array.isArray(task.budgets))fail('invalid_budget');
   for(const [k,v] of Object.entries(task.budgets))if(!['max_operations','max_pages','max_detail_reads','max_elapsed_seconds'].includes(k)||!Number.isInteger(v)||v<1)fail('invalid_budget');

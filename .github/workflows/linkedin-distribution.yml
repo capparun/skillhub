@@ -1,0 +1,40 @@
+name: LinkedIn Distribution
+on:
+  pull_request:
+    paths:
+      - 'distribution/linkedin-only/**'
+      - 'public/download/soho-sourcing-v2.1.1*'
+      - '.github/workflows/linkedin-distribution.yml'
+  workflow_dispatch:
+jobs:
+  windows-upgrade:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install old release and upgrade final archive
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $testRoot = Join-Path $env:RUNNER_TEMP 'linkedin upgrade test'
+          $skillRoot = Join-Path $testRoot 'skills'
+          $stateRoot = Join-Path $testRoot 'state'
+          foreach ($version in @('2.1.0','2.1.1')) {
+            $extract = Join-Path $testRoot $version
+            New-Item -ItemType Directory -Force $extract | Out-Null
+            tar -xzf "public/download/soho-sourcing-v$version.tar.gz" -C $extract
+            if ($LASTEXITCODE -ne 0) { throw 'Archive extraction failed' }
+            node "$extract/install.mjs" --agent codex --skills-dir "$skillRoot" --state-dir "$stateRoot" --product soho-sourcing --version $version
+            if ($LASTEXITCODE -ne 0) { throw 'Installation failed' }
+            node "$stateRoot/packages/soho-sourcing/doctor.mjs" --skills-dir "$skillRoot" --state-dir "$stateRoot"
+            if ($LASTEXITCODE -ne 0) { throw 'Doctor failed' }
+          }
+          node "$skillRoot/cskh-linkedin/scripts/opencli.mjs" hunter-linkedin capabilities -f json
+          if ($LASTEXITCODE -ne 0) { throw 'Installed launcher failed' }
+          node --test "$stateRoot/packages/soho-sourcing/runtime/packages/linkedin-workflow/test/list-coverage.test.mjs"
+          if ($LASTEXITCODE -ne 0) { throw 'Installed coverage tests failed' }
+          $receipt = Get-Content "$stateRoot/installations/soho-sourcing.json" -Raw | ConvertFrom-Json
+          if ($receipt.version -ne '2.1.1') { throw 'Wrong installed version' }
+          if (!(Select-String -Path "$skillRoot/cskh-linkedin/SKILL.md" -Pattern 'min_unique_people: 200' -Quiet)) { throw 'Missing default policy' }

@@ -67,7 +67,7 @@ export async function taskExecute(input,options={}){
  });
 }
 export async function taskStatus(input){
- const {dir,record}=await taskAt(input);const {readdir}=await import('node:fs/promises');const names=await readdir(dir);const operations=[];const entities=new Map();const receipts=[];
+ const {dir,record}=await taskAt(input);const {readdir}=await import('node:fs/promises');const names=await readdir(dir);const operations=[];const entities=new Map();const listedPeople=new Set();const receipts=[];
  for(const file of names.filter(n=>n.endsWith('.planned.json')).sort()){
   const operation_id=file.slice(0,-13),planned=await load(join(dir,file));let receipt;
   try{receipt=await load(join(dir,operation_id+'.result.json'));}catch(e){if(e.code!=='ENOENT')throw e;}
@@ -78,6 +78,8 @@ export async function taskStatus(input){
    // Exact public URL can join providers; opaque IDs remain provider-scoped.
    const url=row.url??row.profileUrl;const publicUrl=typeof url==='string'&&/^https:\/\/(www\.)?linkedin\.com\/(in|company)\/[^/?#]+\/?$/.test(url)?url.replace('://linkedin.com','://www.linkedin.com').replace(/\/$/,''):null;
    const key=publicUrl??(row.id?planned.request.provider+':'+row.id:null);if(!key)continue;
+   const isPeopleList=planned.request.operation==='person.search'||(planned.request.operation==='search.next'&&record.task.intent==='people_discovery')||(planned.request.operation==='operations.batch'&&group.operation==='lead-search');
+   if(isPeopleList)listedPeople.add(key);
    const current=entities.get(key)??{key,name:row.name??'',url:url??'',observations:[]};if(row.name)current.name=row.name;current.observations.push({operation_id,provider:planned.request.provider,observed_at:row.observed_at??group.checked_at??planned.time,row});entities.set(key,current);
   }}
  }
@@ -87,7 +89,9 @@ export async function taskStatus(input){
  const evidence_revision=hash(await Promise.all(names.filter(n=>/\.(planned|result|resolution)\.json$/.test(n)).sort().map(async n=>[n,await load(join(dir,n))])));
  const revision=hash(await Promise.all(names.filter(n=>/\.(planned|result|assessment|resolution)\.json$/.test(n)).sort().map(async n=>[n,await load(join(dir,n))])));
  let delivery=null;try{delivery=await load(join(dir,'delivery.json'));}catch(e){if(e.code!=='ENOENT')throw e;}
- return {evidence_revision,search_coverage:summarizeCoverage(receipts.sort((a,b)=>a.time.localeCompare(b.time)).map(r=>r.receipt)),task:record.task,task_fingerprint:record.fingerprint,operations,entities:[...entities.values()],unique_count:entities.size,revision,status:delivery?.revision===revision?delivery.status:'in_progress',latest_delivery:delivery};
+ const minimum=record.task.coverage?.min_unique_people??null;
+ const list_coverage={minimum,unique_people:listedPeople.size,remaining:minimum===null?0:Math.max(0,minimum-listedPeople.size),met:minimum===null||listedPeople.size>=minimum};
+ return {list_coverage,evidence_revision,search_coverage:summarizeCoverage(receipts.sort((a,b)=>a.time.localeCompare(b.time)).map(r=>r.receipt)),task:record.task,task_fingerprint:record.fingerprint,operations,entities:[...entities.values()],unique_count:entities.size,revision,status:delivery?.revision===revision?delivery.status:'in_progress',latest_delivery:delivery};
 }
 export async function taskAssess(input){
  const {dir,record}=await taskAt(input);return lock(dir,async()=>{
@@ -120,11 +124,11 @@ export async function taskReport(input){
  const qualified=assessment.assessments.filter(a=>a.status==='qualified').length;const achieved=(state.task.target.meaning==='qualified'?qualified:state.unique_count)>=state.task.target.count;
  const unresolved=state.operations.some(o=>!o.resolved_by&&(o.interruption||['unknown','blocked'].includes(o.status)||(state.task.intent==='entity_read'&&o.status==='partial')));
  const coverageRequired=state.task.coverage?.mode==='all_observed_queries';
- const status=achieved&&!unresolved&&(!coverageRequired||state.search_coverage.complete)?'completed':'partial';const title=state.task.intent==='people_discovery'?'LinkedIn 人员结果':'LinkedIn 公司结果';
- const payload={results,presentation:{layout:'table',columns,title,summary:`目标 ${state.task.target.count}；候选 ${state.unique_count}；模型评估符合 ${qualified}；未评估 ${counts.not_evaluated}；证据不足 ${counts.insufficient_evidence}；不符合 ${counts.not_qualified}。人员评估${counts.not_evaluated?'未全部完成':'已全部完成'}；操作中断 ${state.operations.filter(o=>o.interruption).length} 次。任务状态：${status}。覆盖要求：${state.task.coverage?.mode??'target_only'}；已观察查询窗口${state.search_coverage.complete?'已读完':'未证实读完'}。`,evidence_scope:state.task.evidence_scope??'证据类型未声明；不能据此认定为真实平台验收。',coverage:state.operations.map(o=>`${o.operation_id}：${o.status}；命中 ${o.coverage?.total_text??'未知'}；已读 ${o.coverage?.returned_count??'未知'}；停止原因 ${o.coverage?.stop_reason??'未提供'}`).join('；')}};
+ const status=achieved&&state.list_coverage.met&&!unresolved&&(!coverageRequired||state.search_coverage.complete)?'completed':'partial';const title=state.task.intent==='people_discovery'?'LinkedIn 人员结果':'LinkedIn 公司结果';
+ const payload={results,presentation:{layout:'table',columns,title,summary:`${state.list_coverage.minimum===null?'':`人员列表覆盖 ${state.list_coverage.unique_people}/${state.list_coverage.minimum}；尚缺 ${state.list_coverage.remaining}。`}目标 ${state.task.target.count}；候选 ${state.unique_count}；模型评估符合 ${qualified}；未评估 ${counts.not_evaluated}；证据不足 ${counts.insufficient_evidence}；不符合 ${counts.not_qualified}。人员评估${counts.not_evaluated?'未全部完成':'已全部完成'}；操作中断 ${state.operations.filter(o=>o.interruption).length} 次。任务状态：${status}。覆盖要求：${state.task.coverage?.mode??'target_only'}；已观察查询窗口${state.search_coverage.complete?'已读完':'未证实读完'}。`,evidence_scope:state.task.evidence_scope??'证据类型未声明；不能据此认定为真实平台验收。',coverage:state.operations.map(o=>`${o.operation_id}：${o.status}；命中 ${o.coverage?.total_text??'未知'}；已读 ${o.coverage?.returned_count??'未知'}；停止原因 ${o.coverage?.stop_reason??'未提供'}`).join('；')}};
  const stem=id(input.report_id);await writeFile(join(dir,stem+'.html'),serializeExport(payload,'html'),{flag:'wx',mode:0o600});
  await writeFile(join(dir,stem+'.csv'),'\uFEFF'+[[...columns.map(c=>c.label),'来源'],...results.map(r=>[...columns.map(c=>r.display[c.key]||'未提供'),r.url])].map(r=>r.map(cell).join(',')).join('\r\n'),{flag:'wx',mode:0o600});
- const delivery={status,counts,qualified_count:qualified,candidate_count:state.unique_count,html:join(dir,stem+'.html'),csv:join(dir,stem+'.csv'),coverage_complete:state.search_coverage.complete,coverage_scope:'observed_queries_only',revision:state.revision};
+ const delivery={status,list_coverage:state.list_coverage,counts,qualified_count:qualified,candidate_count:state.unique_count,html:join(dir,stem+'.html'),csv:join(dir,stem+'.csv'),coverage_complete:state.search_coverage.complete,coverage_scope:'observed_queries_only',revision:state.revision};
  const {rename}=await import('node:fs/promises');await writeFile(join(dir,'.delivery.tmp'),JSON.stringify(delivery),{mode:0o600});await rename(join(dir,'.delivery.tmp'),join(dir,'delivery.json'));
  return delivery;
  });

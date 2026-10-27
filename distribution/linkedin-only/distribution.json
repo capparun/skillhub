@@ -48,11 +48,11 @@
       },
       {
         "name": "@cskh/linkedin-salesnav",
-        "version": "2.1.0",
+        "version": "2.1.1",
         "path": "packages/linkedin-workflow"
       }
     ]
   },
   "product": "soho-sourcing",
-  "version": "2.1.0"
+  "version": "2.1.1"
 }

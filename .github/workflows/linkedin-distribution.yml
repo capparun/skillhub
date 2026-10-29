@@ -3,7 +3,7 @@ on:
   pull_request:
     paths:
       - 'distribution/linkedin-only/**'
-      - 'public/download/soho-sourcing-v2.1.1*'
+      - 'public/download/soho-sourcing-v2.1.2*'
       - '.github/workflows/linkedin-distribution.yml'
   workflow_dispatch:
 jobs:
@@ -21,7 +21,7 @@ jobs:
           $testRoot = Join-Path $env:RUNNER_TEMP 'linkedin upgrade test'
           $skillRoot = Join-Path $testRoot 'skills'
           $stateRoot = Join-Path $testRoot 'state'
-          foreach ($version in @('2.1.0','2.1.1')) {
+          foreach ($version in @('2.1.1','2.1.2')) {
             $extract = Join-Path $testRoot $version
             New-Item -ItemType Directory -Force $extract | Out-Null
             tar -xzf "public/download/soho-sourcing-v$version.tar.gz" -C $extract
@@ -35,6 +35,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Installed launcher failed' }
           node --test "$stateRoot/packages/soho-sourcing/runtime/packages/linkedin-workflow/test/list-coverage.test.mjs"
           if ($LASTEXITCODE -ne 0) { throw 'Installed coverage tests failed' }
+          node "$stateRoot/packages/soho-sourcing/runtime/packages/hunter-linkedin/scripts/run-tests.mjs"
+          if ($LASTEXITCODE -ne 0) { throw 'Installed ordinary search tests failed' }
+          node --test "$stateRoot/packages/soho-sourcing/runtime/packages/linkedin-workflow/test/ordinary-paging-policy.test.mjs"
+          if ($LASTEXITCODE -ne 0) { throw 'Installed ordinary paging policy tests failed' }
           $receipt = Get-Content "$stateRoot/installations/soho-sourcing.json" -Raw | ConvertFrom-Json
-          if ($receipt.version -ne '2.1.1') { throw 'Wrong installed version' }
+          if ($receipt.version -ne '2.1.2') { throw 'Wrong installed version' }
           if (!(Select-String -Path "$skillRoot/cskh-linkedin/SKILL.md" -Pattern 'min_unique_people: 200' -Quiet)) { throw 'Missing default policy' }

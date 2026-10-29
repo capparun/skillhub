@@ -134,7 +134,7 @@ task-status 恢复账本和实体观察；按覆盖决定下一步。用 task-as
 - 页面卡片状态稳定后即返回，15 秒只是慢加载的硬上限；慢页仍可能以 `profiles_unresolved` 结束，此时应报告未解析而非跳过。
 - 续读游标绑定筛选条件与该策略；改筛选或策略后沿用旧游标会被拒绝，CLI 实际返回 `search_cursor_query_mismatch`（游标 requestKey 已同时包含筛选与策略）。`cursor_policy_mismatch` 只在程序内直接传 previous 时出现，`cursor_query_mismatch` 对应查询指纹不一致；策略值非法返回 `invalid_anonymous_policy`。
 
-## 故障处理（候选版）
+## 故障处理
 
 遇 task_busy，调用 `task-lock-inspect`，输入 directory、task_id。running 等待原任务；unknown 保留现场，不删锁；owner_exited 仅说明主进程已退出，不证明浏览器操作停止。不要自行把 execution_stopped_confirmed 填为 true。确认相关执行已停止后才可使用 task-lock-recover，必须传最新 revision；恢复不会重跑原操作。profile_busy 暂停并核对账号锁，不能清全局锁目录。
 

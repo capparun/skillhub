@@ -8,7 +8,7 @@ test('LinkedIn install instructions enforce the bundled Node requirement',()=>{
  assert.match(text,/Node.js 22/);
 });
 test('LinkedIn release archive matches metadata and fixed dependencies',()=>{
- const meta=JSON.parse(fs.readFileSync('public/download/soho-sourcing-v2.1.2.json','utf8'));
+ const meta=JSON.parse(fs.readFileSync('public/download/soho-sourcing-v2.1.3.json','utf8'));
  const data=fs.readFileSync('public/download/'+meta.file);
  assert.equal(createHash('sha256').update(data).digest('hex'),meta.sha256);
  assert.equal(data.length,meta.sizeBytes);

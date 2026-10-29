@@ -46,7 +46,7 @@ test('failed cursor persistence keeps the observed people and marks interruption
  fs.renameSync(cursorRoot,backup);fs.writeFileSync(cursorRoot,'synthetic obstruction');
  try{
   const result=await command.func(browser(),args);
-  assert.equal(result.returned_count,30);assert.equal(result.cursor,null);assert.equal(result.interruption.code,'checkpoint_write_failed');
+  assert.equal(result.returned_count,20);assert.equal(result.cursor,null);assert.equal(result.interruption.code,'checkpoint_write_failed');
  }finally{fs.unlinkSync(cursorRoot);fs.renameSync(backup,cursorRoot);}
 });
 

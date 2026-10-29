@@ -23,3 +23,17 @@ export function readSearchCursor(file,{binding,requestKey,now=Date.now()}){
   if(!d.progress||!Array.isArray(d.progress.results)||d.progress.results.length>2500)fail('invalid_search_cursor');
   return d.progress;
 }
+
+// Append-only task journal. A completed record is visible only after atomic rename.
+export function publishSearchCheckpoint(directory, cursor, progress) {
+  if (!directory) return;
+  if (!path.isAbsolute(directory)) fail('invalid_checkpoint_directory');
+  fs.mkdirSync(directory, {recursive:true, mode:0o700});
+  const name = randomUUID();
+  const temporary = path.join(directory, name + '.pending');
+  const destination = path.join(directory, name + '.json');
+  fs.writeFileSync(temporary, JSON.stringify({schema_version:1, cursor,
+    next_page:progress.page, collected_count:progress.results.length, saved_at:Date.now()}), {flag:'wx',mode:0o600});
+  fs.renameSync(temporary, destination);
+  return destination;
+}

@@ -6,7 +6,7 @@ import { LinkedInLanding } from './landing';
 
 export const metadata: Metadata = {
   title: 'LinkedIn · 安装与使用｜猎策',
-  description: '三步安装和连接 LinkedIn，按账号权限找人、找公司、研究已有名单并交付表格报告。',
+  description: '安装 LinkedIn Skill、检查连接问题、开始第一个任务，并升级已有版本。',
 };
 
 export default async function Page() {

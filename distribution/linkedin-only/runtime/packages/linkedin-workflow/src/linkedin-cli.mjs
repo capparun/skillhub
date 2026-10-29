@@ -1,9 +1,10 @@
 #!/usr/bin/env node
+import {inspectProfileLock,recoverProfileLock} from './profile-lock.mjs';
 import './distribution-binding.mjs';
 import {taskResume,consolidatedReport} from './linkedin/task-closeout.mjs';
 import {inspectAccount} from './linkedin/account-inspect.mjs';
 import {routeOptions} from './linkedin/route-options.mjs';
-import {taskRecovery,outreachInput,prepareOutreach,companyPeopleTask,resolveOperation,importSourcing,createTask,taskExecute,taskStatus,taskAssess,taskReport} from './linkedin/task-store.mjs';
+import {taskLockInspect,taskLockRecover,taskContinue,taskRecovery,outreachInput,prepareOutreach,companyPeopleTask,resolveOperation,importSourcing,createTask,taskExecute,taskStatus,taskAssess,taskReport} from './linkedin/task-store.mjs';
 import {readFile} from 'node:fs/promises';
 import {compile,execute,operations,validateTask} from './linkedin/gateway.mjs';
 try {
@@ -13,7 +14,12 @@ try {
  if(command==='capabilities'&&!path)data={schema_version:1,operations,mode:'development',business_decisions:'model_owned',ordinary_runtime:'HUNTER_OPENCLI_ENTRY',runtime_status:'not_checked'};
  else {
   const input=JSON.parse(await readFile(path,'utf8'));const options={linkedinEntry:process.env.HUNTER_OPENCLI_ENTRY};
-  if(command==='task-resume')data=await taskResume(input,options);
+  if(command==='profile-lock-inspect')data=await inspectProfileLock(input.profile);
+  else if(command==='profile-lock-recover')data=await recoverProfileLock(input);
+  else if(command==='task-lock-inspect')data=await taskLockInspect(input);
+  else if(command==='task-lock-recover')data=await taskLockRecover(input);
+  else if(command==='task-continue')data=await taskContinue(input,options);
+  else if(command==='task-resume')data=await taskResume(input,options);
   else if(command==='task-consolidate')data=await consolidatedReport(input);
   else if(command==='task-recovery')data=await taskRecovery(input);
   else if(command==='account-inspect')data=await inspectAccount(input,options);

@@ -55,7 +55,7 @@ target/
 .vite/
 coverage/
 dist/
-node_modules/
+node_modules
 next-env.d.ts
 *.tsbuildinfo
 package-lock.json
@@ -97,3 +97,6 @@ charts/skillhub/charts/*.tgz
 # Local config file
 .mcp.json
 .gstack/
+
+# Local acceptance evidence (account and page data stays on this machine)
+workflow-runs/

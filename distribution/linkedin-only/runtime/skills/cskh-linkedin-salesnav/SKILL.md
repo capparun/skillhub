@@ -80,7 +80,7 @@ HTML 默认只展示业务摘要、关键数字、公司资料、推荐理由、
 
 ## OpenCLI 统一入口
 
-新增能力优先通过 `node scripts/opencli.mjs hunter-linkedin <command> --input input.json -f json` 调用；SalesNav命令加 `salesnav-` 前缀。先确认插件已安装并检查 `--help`；安装未完成时不得声称命令已可用。账号绑定仍来自输入文件，不能以全局Profile选项覆盖。安装与字段规则见 `../../docs/OPENCLI_PLUGIN.md`。旧Node入口保留为内部兼容入口。
+客户调用统一通过 `node scripts/opencli.mjs hunter-linkedin <command> --input input.json -f json` 调用；SalesNav命令加 `salesnav-` 前缀。先确认插件已安装并检查 `--help`；安装未完成时不得声称命令已可用。账号绑定仍来自输入文件，不能以全局Profile选项覆盖。安装与字段规则见 `../../docs/OPENCLI_PLUGIN.md`。内部 Node 入口仅供开发诊断，客户任务不要直接调用。
 
 ### 连接失败先分层定位
 
@@ -153,3 +153,7 @@ HTML 默认只展示业务摘要、关键数字、公司资料、推荐理由、
 ## 安装后调用
 
 从本 Skill 目录运行 `node scripts/opencli.mjs hunter-linkedin --help`，可查看全部命令。该入口使用产品自带的固定运行时；不要改用其他全局安装版本。Sales Navigator 需要当前账号实际具备权限，普通 LinkedIn 不需要订阅 Sales Navigator。
+
+## 人员列表默认覆盖
+
+人员发现任务沿用 [统一入口的默认列表覆盖规则](../cskh-linkedin/SKILL.md#人员发现默认列表覆盖至少-200-人)：未另行指定时，跨查询至少读取 200 位去重人员的列表资料；最终合格数量、详情读取量与执行预算分别处理。公司查询及固定名单核实不适用；结果不足须说明原因，单批结束不代表完成。

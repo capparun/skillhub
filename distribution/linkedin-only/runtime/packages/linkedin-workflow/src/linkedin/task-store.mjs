@@ -1,7 +1,8 @@
+import {lockOwner,inspectLock,recoverLock} from '../lock-health.mjs';
 import {entityPresentation,reportColumns} from './presentation.mjs';
 import {checkBudget,summarizeCoverage} from './task-policy.mjs';
 import {mkdir,readFile,writeFile,open,unlink} from 'node:fs/promises';
-import {resolve,join} from 'node:path';
+import {resolve,join,isAbsolute} from 'node:path';
 import {createHash} from 'node:crypto';
 import {validateTask,compile,execute} from './gateway.mjs';
 import {serializeExport} from '../export.mjs';
@@ -9,7 +10,7 @@ const fail=code=>{throw Object.assign(new Error(code),{code});};
 const hash=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const id=x=>{if(typeof x!=='string'||!/^[a-zA-Z0-9_-]{1,100}$/.test(x))fail('invalid_id');return x;};
 const load=async p=>JSON.parse(await readFile(p,'utf8'));
-async function lock(dir,work){const p=join(dir,'.task.lock');let h;try{h=await open(p,'wx',0o600);}catch(e){if(e.code==='EEXIST')fail('task_busy');throw e;}try{return await work();}finally{await h.close();await unlink(p);}}
+async function lock(dir,work){const p=join(dir,'.task.lock');let h;try{h=await open(p,'wx',0o600);}catch(e){if(e.code==='EEXIST')fail('task_busy');throw e;}try{await h.writeFile(JSON.stringify(lockOwner()));return await work();}finally{await h.close();await unlink(p);}}
 async function save(p,x){await writeFile(p,JSON.stringify(x,null,2)+'\n',{flag:'wx',mode:0o600});}
 export async function createTask(input){
  const {task}=validateTask(input.task);id(task.task_id);
@@ -18,6 +19,7 @@ export async function createTask(input){
  return {directory:dir,task_id:task.task_id,status:'created'};
 }
 async function taskAt(input){const dir=resolve(input.directory),record=await load(join(dir,'task.json'));if(record.task.task_id!==input.task_id)fail('task_mismatch');return {dir,record};}
+const heldLock=Symbol('heldTaskLock');
 export async function taskExecute(input,options={}){
  const {dir,record}=await taskAt(input);const operationId=id(input.operation_id);
  compile(input.request,options);
@@ -28,7 +30,8 @@ export async function taskExecute(input,options={}){
   const permitted=expected==='company'?['account-search','account-read']:['lead-search','lead-read'];
   if(!Array.isArray(input.request.input.operations)||input.request.input.operations.some(o=>!permitted.includes(o.command)))fail('task_operation_mismatch');
  }
- return lock(dir,async()=>{
+ const runLocked=options[heldLock]===dir?async(_dir,work)=>work():lock;
+ return runLocked(dir,async()=>{
   const prefix=join(dir,operationId),fingerprint=hash(input.request);
   const bindingPath=join(dir,'account.json');
   try{const binding=await load(bindingPath);if(hash(binding)!==hash(input.request.account))fail('task_account_mismatch');}
@@ -61,8 +64,8 @@ export async function taskExecute(input,options={}){
     }
    }
   }
-  await save(prefix+'.planned.json',{task_fingerprint:record.fingerprint,fingerprint,request:input.request,effective_request:effectiveRequest,status:'dispatched',time:new Date().toISOString()});
-  let result;try{result=await (options.execute??execute)(effectiveRequest,{...options,timeoutMs:budget.remaining_ms});}catch(e){result={status:'blocked',error:{code:e.code??'execution_outcome_unknown'},qualification:'not_evaluated'};}
+  await save(prefix+'.planned.json',{task_fingerprint:record.fingerprint,fingerprint,request:input.request,effective_request:effectiveRequest,checkpoint_directory:prefix+'.checkpoints',sequence:current.operations.length+1,status:'dispatched',continuation:options[heldLock]===dir&&options.continuation===true,time:new Date().toISOString()});
+  let result;try{result=await (options.execute??execute)(effectiveRequest,{...options,timeoutMs:budget.remaining_ms,checkpointDirectory:prefix+'.checkpoints'});}catch(e){result={status:'blocked',error:{code:e.code??'execution_outcome_unknown'},qualification:'not_evaluated'};}
   await save(prefix+'.result.json',result);return result;
  });
 }
@@ -197,7 +200,66 @@ export async function outreachInput(input){
 // Local recovery inventory only: never dispatch or bypass an interrupted account.
 export async function taskRecovery(input){
  const state=await taskStatus(input);
+ const {dir}=await taskAt(input),checkpoints=[],checkpointErrors=[];
+ const {readdir,lstat}=await import('node:fs/promises');
+ for(const op of state.operations){
+  const journal=join(dir,op.operation_id+'.checkpoints');
+  let files;try{files=await readdir(journal);}catch(e){if(e.code==='ENOENT')continue;throw e;}
+  for(const file of files.filter(f=>/^[a-f0-9-]+\.json$/.test(f))){
+   try {
+    const filePath=join(journal,file),stat=await lstat(filePath);
+    if(!stat.isFile()||stat.isSymbolicLink()||stat.size>8192)fail('invalid_checkpoint_record');
+    const item=await load(filePath);
+    if(item.schema_version!==1||typeof item.cursor!=='string'||!isAbsolute(item.cursor)
+      ||!Number.isInteger(item.next_page)||item.next_page<1||item.next_page>251
+      ||!Number.isInteger(item.collected_count)||item.collected_count<0||item.collected_count>2500
+      ||!Number.isFinite(item.saved_at)||item.saved_at<0)fail('invalid_checkpoint_record');
+    checkpoints.push({operation_id:op.operation_id,schema_version:1,cursor:item.cursor,next_page:item.next_page,
+      collected_count:item.collected_count,saved_at:item.saved_at,verification:'saved_not_revalidated',resumable:false});
+   } catch {
+    checkpointErrors.push({operation_id:op.operation_id,file,code:'invalid_checkpoint_record'});
+   }
+  }
+ }
+ checkpoints.sort((a,b)=>b.saved_at-a.saved_at||b.next_page-a.next_page);
  const completed=state.entities.filter(e=>e.observations.some(o=>o.row.fields?.current_roles));
  const done=new Set(completed.map(e=>e.key));
- return {task_id:state.task.task_id,status:state.operations.some(o=>o.interruption||['blocked','unknown'].includes(o.status))?'diagnosis_required':'ready_for_planning',dispatched:false,completed:completed.map(e=>({key:e.key,name:e.name,url:e.url})),pending:state.entities.filter(e=>!done.has(e.key)).map(e=>({key:e.key,name:e.name,url:e.url})),interruptions:state.operations.filter(o=>o.interruption||['blocked','unknown'].includes(o.status)).map(o=>({operation_id:o.operation_id,error:o.error,interruption:o.interruption})),instruction:'Preserve completed details. Diagnose interruptions before planning a new bounded operation; no automatic retry.'};
+ return {task_id:state.task.task_id,status:checkpointErrors.length||state.operations.some(o=>o.interruption||['blocked','unknown'].includes(o.status))?'diagnosis_required':'ready_for_planning',dispatched:false,search_checkpoints:checkpoints,checkpoint_errors:checkpointErrors,completed:completed.map(e=>({key:e.key,name:e.name,url:e.url})),pending:state.entities.filter(e=>!done.has(e.key)).map(e=>({key:e.key,name:e.name,url:e.url})),interruptions:state.operations.filter(o=>o.interruption||['blocked','unknown'].includes(o.status)).map(o=>({operation_id:o.operation_id,error:o.error,interruption:o.interruption})),instruction:'Preserve completed details. Diagnose interruptions before planning a new bounded operation; no automatic retry.'};
 }
+
+// Continue one ordinary search chain under the same lock as dispatch and receipts.
+export async function taskContinue(input,options={}){
+ if(Object.keys(input).some(k=>!['directory','task_id','operation_id'].includes(k)))fail('unsupported_parameter');
+ const {dir,record}=await taskAt(input);id(input.operation_id);
+ return lock(dir,async()=>{
+  const prefix=join(dir,input.operation_id);
+  try{const prior=await load(prefix+'.planned.json');
+   if(prior.continuation!==true)fail('operation_id_conflict');
+   try{return {...await load(prefix+'.result.json'),replayed:true};}catch(e){if(e.code!=='ENOENT')throw e;fail('operation_outcome_unknown');}
+  }catch(e){if(e.code!=='ENOENT')throw e;}
+  const state=await taskStatus(input),searches=[];
+  for(const op of state.operations){
+   if(op.request.provider!=='linkedin'||!['person.search','search.next'].includes(op.request.operation))continue;
+   const plan=await load(join(dir,op.operation_id+'.planned.json'));
+   searches.push({...op,time:plan.time,sequence:plan.sequence});
+  }
+  if(!searches.length)fail('search_required');
+  const queries=new Set(searches.map(o=>{const {cursor,limit,max_pages,...query}=o.request.input;return hash(Object.fromEntries(Object.entries(query).sort()));}));
+  if(queries.size!==1)fail('multiple_queries_require_selection');
+  searches.sort((a,b)=>Number.isInteger(a.sequence)&&Number.isInteger(b.sequence)?b.sequence-a.sequence:b.time.localeCompare(a.time));
+  if(searches[1]?.time===searches[0].time && !(Number.isInteger(searches[0].sequence)&&Number.isInteger(searches[1].sequence)&&searches[0].sequence!==searches[1].sequence))fail('ambiguous_search_progress');
+  const latest=searches[0];
+  if(!['completed','partial'].includes(latest.status)||latest.interruption)fail('diagnosis_required');
+  if(record.task.target.meaning==='candidates'&&state.list_coverage.unique_people>=record.task.target.count)return {status:'completed',dispatched:false,stop_reason:'target_reached'};
+  if(record.task.target.meaning!=='candidates')fail('explicit_collection_target_required');
+  if(!latest.resume)fail('search_not_resumable');
+  const request=structuredClone(latest.resume);
+  request.input.limit=record.task.target.count;
+  // Reuse the prior page allowance, never increase the approved batch size.
+  request.input.max_pages=latest.request.input.max_pages??1;
+  return taskExecute({...input,request},{...options,[heldLock]:dir,continuation:true});
+ });
+}
+
+export async function taskLockInspect(input){const {dir}=await taskAt(input);return inspectLock(join(dir,'.task.lock'));}
+export async function taskLockRecover(input){const {dir}=await taskAt(input);return recoverLock(join(dir,'.task.lock'),input);}

@@ -1,0 +1,610 @@
+{
+  "schema_version": 1,
+  "scope": "ordinary_linkedin_gateway",
+  "operations": [
+    {
+      "provider": "linkedin",
+      "operation": "account.inspect",
+      "cli": "linkedin whoami",
+      "layer": "platform_operation",
+      "request": {
+        "required": [
+          "provider",
+          "operation",
+          "account",
+          "input"
+        ],
+        "account_required": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url"
+        ],
+        "input": {
+          "required": [],
+          "properties": {},
+          "additionalProperties": false
+        }
+      },
+      "output": {
+        "required": [
+          "schema_version",
+          "provider",
+          "operation",
+          "status",
+          "qualification",
+          "data",
+          "error",
+          "coverage",
+          "resume"
+        ],
+        "status": [
+          "completed",
+          "partial",
+          "blocked"
+        ],
+        "qualification": "not_evaluated",
+        "data_semantics": "当前账号身份，不代表订阅或搜索权限"
+      },
+      "preconditions": [
+        "产品固定入口可用",
+        "已连接指定Profile且本人身份匹配",
+        "访问范围和预算已获准"
+      ],
+      "effects": [
+        "浏览器只读操作",
+        "搜索可能保存本地结果与游标"
+      ],
+      "errors": [
+        "identity_unconfirmed",
+        "unsupported_parameter",
+        "runtime_failure",
+        "execution_outcome_unknown",
+        "invalid_response"
+      ],
+      "retry": "结果未知时先诊断；搜索续读需同账号同条件的有效游标，不自动重跑",
+      "verification": {
+        "contract": "source_checked",
+        "live": "not_checked_for_this_candidate"
+      },
+      "notes": [
+        "此为网关契约；直接CLI参数以当前命令help为准",
+        "搜索limit为累计目标；max_pages仅是单次页数上限；页预算不代表已授权"
+      ]
+    },
+    {
+      "provider": "linkedin",
+      "operation": "person.search",
+      "cli": "hunter-linkedin scout",
+      "layer": "platform_operation",
+      "request": {
+        "required": [
+          "provider",
+          "operation",
+          "account",
+          "input"
+        ],
+        "account_required": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url"
+        ],
+        "input": {
+          "required": [
+            "keyword"
+          ],
+          "properties": {
+            "keyword": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "connection": {
+              "type": "string"
+            },
+            "currentCompany": {
+              "type": "string"
+            },
+            "pastCompany": {
+              "type": "string"
+            },
+            "school": {
+              "type": "string"
+            },
+            "industry": {
+              "type": "string"
+            },
+            "language": {
+              "type": "string"
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2500
+            },
+            "max_pages": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 250
+            },
+            "cursor": {
+              "type": "string"
+            },
+            "anonymousPolicy": {
+              "type": "string",
+              "enum": [
+                "stop",
+                "continue"
+              ],
+              "default": "stop"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "output": {
+        "required": [
+          "schema_version",
+          "provider",
+          "operation",
+          "status",
+          "qualification",
+          "data",
+          "error",
+          "coverage",
+          "resume"
+        ],
+        "status": [
+          "completed",
+          "partial",
+          "blocked"
+        ],
+        "qualification": "not_evaluated",
+        "data_semantics": "results 为已读取对象；returned_count不是平台总人数，completeness说明读取范围"
+      },
+      "preconditions": [
+        "产品固定入口可用",
+        "已连接指定Profile且本人身份匹配",
+        "访问范围和预算已获准"
+      ],
+      "effects": [
+        "浏览器只读操作",
+        "搜索可能保存本地结果与游标"
+      ],
+      "errors": [
+        "identity_unconfirmed",
+        "unsupported_parameter",
+        "runtime_failure",
+        "execution_outcome_unknown",
+        "invalid_response"
+      ],
+      "retry": "结果未知时先诊断；搜索续读需同账号同条件的有效游标，不自动重跑",
+      "verification": {
+        "contract": "source_checked",
+        "live": "not_checked_for_this_candidate"
+      },
+      "notes": [
+        "此为网关契约；直接CLI参数以当前命令help为准",
+        "搜索limit为累计目标；max_pages仅是单次页数上限；页预算不代表已授权"
+      ]
+    },
+    {
+      "provider": "linkedin",
+      "operation": "search.next",
+      "cli": "hunter-linkedin scout",
+      "layer": "platform_operation",
+      "request": {
+        "required": [
+          "provider",
+          "operation",
+          "account",
+          "input"
+        ],
+        "account_required": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url"
+        ],
+        "input": {
+          "required": [
+            "keyword",
+            "cursor"
+          ],
+          "properties": {
+            "keyword": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "connection": {
+              "type": "string"
+            },
+            "currentCompany": {
+              "type": "string"
+            },
+            "pastCompany": {
+              "type": "string"
+            },
+            "school": {
+              "type": "string"
+            },
+            "industry": {
+              "type": "string"
+            },
+            "language": {
+              "type": "string"
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2500
+            },
+            "max_pages": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 250
+            },
+            "cursor": {
+              "type": "string"
+            },
+            "anonymousPolicy": {
+              "type": "string",
+              "enum": [
+                "stop",
+                "continue"
+              ],
+              "default": "stop"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "output": {
+        "required": [
+          "schema_version",
+          "provider",
+          "operation",
+          "status",
+          "qualification",
+          "data",
+          "error",
+          "coverage",
+          "resume"
+        ],
+        "status": [
+          "completed",
+          "partial",
+          "blocked"
+        ],
+        "qualification": "not_evaluated",
+        "data_semantics": "results 为已读取对象；returned_count不是平台总人数，completeness说明读取范围"
+      },
+      "preconditions": [
+        "产品固定入口可用",
+        "已连接指定Profile且本人身份匹配",
+        "访问范围和预算已获准"
+      ],
+      "effects": [
+        "浏览器只读操作",
+        "搜索可能保存本地结果与游标"
+      ],
+      "errors": [
+        "identity_unconfirmed",
+        "unsupported_parameter",
+        "runtime_failure",
+        "execution_outcome_unknown",
+        "invalid_response"
+      ],
+      "retry": "结果未知时先诊断；搜索续读需同账号同条件的有效游标，不自动重跑",
+      "verification": {
+        "contract": "source_checked",
+        "live": "not_checked_for_this_candidate"
+      },
+      "notes": [
+        "此为网关契约；直接CLI参数以当前命令help为准",
+        "搜索limit为累计目标；max_pages仅是单次页数上限；页预算不代表已授权"
+      ]
+    },
+    {
+      "provider": "linkedin",
+      "operation": "person.read",
+      "cli": "linkedin profile-read",
+      "layer": "platform_operation",
+      "request": {
+        "required": [
+          "provider",
+          "operation",
+          "account",
+          "input"
+        ],
+        "account_required": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url"
+        ],
+        "input": {
+          "required": [
+            "profile_url"
+          ],
+          "properties": {
+            "profile_url": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "output": {
+        "required": [
+          "schema_version",
+          "provider",
+          "operation",
+          "status",
+          "qualification",
+          "data",
+          "error",
+          "coverage",
+          "resume"
+        ],
+        "status": [
+          "completed",
+          "partial",
+          "blocked"
+        ],
+        "qualification": "not_evaluated",
+        "data_semantics": "results 为已读取对象；returned_count不是平台总人数，completeness说明读取范围"
+      },
+      "preconditions": [
+        "产品固定入口可用",
+        "已连接指定Profile且本人身份匹配",
+        "访问范围和预算已获准"
+      ],
+      "effects": [
+        "浏览器只读操作",
+        "搜索可能保存本地结果与游标"
+      ],
+      "errors": [
+        "identity_unconfirmed",
+        "unsupported_parameter",
+        "runtime_failure",
+        "execution_outcome_unknown",
+        "invalid_response"
+      ],
+      "retry": "结果未知时先诊断；搜索续读需同账号同条件的有效游标，不自动重跑",
+      "verification": {
+        "contract": "source_checked",
+        "live": "not_checked_for_this_candidate"
+      },
+      "notes": [
+        "此为网关契约；直接CLI参数以当前命令help为准",
+        "搜索limit为累计目标；max_pages仅是单次页数上限；页预算不代表已授权"
+      ]
+    },
+    {
+      "provider": "linkedin",
+      "operation": "person.experience",
+      "cli": "linkedin profile-experience",
+      "layer": "platform_operation",
+      "request": {
+        "required": [
+          "provider",
+          "operation",
+          "account",
+          "input"
+        ],
+        "account_required": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url"
+        ],
+        "input": {
+          "required": [
+            "profile_url"
+          ],
+          "properties": {
+            "profile_url": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "output": {
+        "required": [
+          "schema_version",
+          "provider",
+          "operation",
+          "status",
+          "qualification",
+          "data",
+          "error",
+          "coverage",
+          "resume"
+        ],
+        "status": [
+          "completed",
+          "partial",
+          "blocked"
+        ],
+        "qualification": "not_evaluated",
+        "data_semantics": "results 为已读取对象；经历和项目按同一人聚合，section_count为段数"
+      },
+      "preconditions": [
+        "产品固定入口可用",
+        "已连接指定Profile且本人身份匹配",
+        "访问范围和预算已获准"
+      ],
+      "effects": [
+        "浏览器只读操作",
+        "搜索可能保存本地结果与游标"
+      ],
+      "errors": [
+        "identity_unconfirmed",
+        "unsupported_parameter",
+        "runtime_failure",
+        "execution_outcome_unknown",
+        "invalid_response"
+      ],
+      "retry": "结果未知时先诊断；搜索续读需同账号同条件的有效游标，不自动重跑",
+      "verification": {
+        "contract": "source_checked",
+        "live": "not_checked_for_this_candidate"
+      },
+      "notes": [
+        "此为网关契约；直接CLI参数以当前命令help为准",
+        "搜索limit为累计目标；max_pages仅是单次页数上限；页预算不代表已授权"
+      ]
+    },
+    {
+      "provider": "linkedin",
+      "operation": "person.projects",
+      "cli": "linkedin profile-projects",
+      "layer": "platform_operation",
+      "request": {
+        "required": [
+          "provider",
+          "operation",
+          "account",
+          "input"
+        ],
+        "account_required": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url"
+        ],
+        "input": {
+          "required": [
+            "profile_url"
+          ],
+          "properties": {
+            "profile_url": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "output": {
+        "required": [
+          "schema_version",
+          "provider",
+          "operation",
+          "status",
+          "qualification",
+          "data",
+          "error",
+          "coverage",
+          "resume"
+        ],
+        "status": [
+          "completed",
+          "partial",
+          "blocked"
+        ],
+        "qualification": "not_evaluated",
+        "data_semantics": "results 为已读取对象；经历和项目按同一人聚合，section_count为段数"
+      },
+      "preconditions": [
+        "产品固定入口可用",
+        "已连接指定Profile且本人身份匹配",
+        "访问范围和预算已获准"
+      ],
+      "effects": [
+        "浏览器只读操作",
+        "搜索可能保存本地结果与游标"
+      ],
+      "errors": [
+        "identity_unconfirmed",
+        "unsupported_parameter",
+        "runtime_failure",
+        "execution_outcome_unknown",
+        "invalid_response"
+      ],
+      "retry": "结果未知时先诊断；搜索续读需同账号同条件的有效游标，不自动重跑",
+      "verification": {
+        "contract": "source_checked",
+        "live": "not_checked_for_this_candidate"
+      },
+      "notes": [
+        "此为网关契约；直接CLI参数以当前命令help为准",
+        "搜索limit为累计目标；max_pages仅是单次页数上限；页预算不代表已授权"
+      ]
+    },
+    {
+      "provider": "linkedin",
+      "operation": "company.read",
+      "cli": "linkedin company",
+      "layer": "platform_operation",
+      "request": {
+        "required": [
+          "provider",
+          "operation",
+          "account",
+          "input"
+        ],
+        "account_required": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url"
+        ],
+        "input": {
+          "required": [
+            "company"
+          ],
+          "properties": {
+            "company": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "output": {
+        "required": [
+          "schema_version",
+          "provider",
+          "operation",
+          "status",
+          "qualification",
+          "data",
+          "error",
+          "coverage",
+          "resume"
+        ],
+        "status": [
+          "completed",
+          "partial",
+          "blocked"
+        ],
+        "qualification": "not_evaluated",
+        "data_semantics": "results 为已读取对象；returned_count不是平台总人数，completeness说明读取范围"
+      },
+      "preconditions": [
+        "产品固定入口可用",
+        "已连接指定Profile且本人身份匹配",
+        "访问范围和预算已获准"
+      ],
+      "effects": [
+        "浏览器只读操作",
+        "搜索可能保存本地结果与游标"
+      ],
+      "errors": [
+        "identity_unconfirmed",
+        "unsupported_parameter",
+        "runtime_failure",
+        "execution_outcome_unknown",
+        "invalid_response"
+      ],
+      "retry": "结果未知时先诊断；搜索续读需同账号同条件的有效游标，不自动重跑",
+      "verification": {
+        "contract": "source_checked",
+        "live": "not_checked_for_this_candidate"
+      },
+      "notes": [
+        "此为网关契约；直接CLI参数以当前命令help为准",
+        "搜索limit为累计目标；max_pages仅是单次页数上限；页预算不代表已授权"
+      ]
+    }
+  ]
+}

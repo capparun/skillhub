@@ -29,6 +29,33 @@ export function inferStateRootFromUpdater(scriptPath, product) {
   return path.dirname(packagesDir);
 }
 
+// Node canonicalises module paths (e.g. /tmp -> /private/tmp on macOS), so receipt
+// comparison must follow symlinks instead of comparing literal strings.
+function canonicalPath(value) {
+  try { return fs.realpathSync(value); }
+  catch { return path.resolve(value); }
+}
+
+// Diagnostics run from a persisted package must use that installation's receipt.
+// Explicit target options remain available for unpacked-package acceptance.
+export function resolveDoctorTargets(scriptPath, product, argv = [], env = process.env) {
+  const explicit = ['--agent', '--project-dir', '--skills-dir', '--state-dir'].some(flag => argv.includes(flag));
+  const inferred = inferStateRootFromUpdater(scriptPath, product);
+  if (explicit || !inferred) return resolveInstallTargets(argv, env);
+  const receiptPath = path.join(inferred, 'installations', `${product}.json`);
+  let record;
+  try { record = JSON.parse(fs.readFileSync(receiptPath, 'utf8')); }
+  catch (cause) { throw Object.assign(new Error('Installation receipt is missing or unreadable; specify the original --skills-dir and --state-dir for diagnosis.'), { code: 'installation_receipt_unavailable', cause }); }
+  if (record.product !== product || !Array.isArray(record.skillTargets) || !record.skillTargets.length
+      || record.skillTargets.some(p => typeof p !== 'string' || !path.isAbsolute(p))
+      || typeof record.stateTarget !== 'string' || canonicalPath(record.stateTarget) !== canonicalPath(inferred)) {
+    throw Object.assign(new Error('Installation receipt does not match this package.'), { code: 'installation_receipt_mismatch' });
+  }
+  return { requestedAgent: record.agent ?? 'auto', detectedAgent: record.agent ?? null,
+    projectDir: record.projectDir ?? null, skillRoots: record.skillTargets,
+    stateRoot: inferred, selectionApplied: true, source: 'installation_receipt' };
+}
+
 export function resolveInstallTargets(argv = process.argv.slice(2), env = process.env) {
   const requested = getArg(argv, '--agent') ?? env.HUNTER_AGENT ?? 'auto';
   const projectDir = path.resolve(getArg(argv, '--project-dir') ?? env.HUNTER_PROJECT_DIR ?? process.cwd());

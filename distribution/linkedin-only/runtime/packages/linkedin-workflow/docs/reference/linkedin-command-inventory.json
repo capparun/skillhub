@@ -1,5 +1,7 @@
 {
   "checked_at": "2026-10-24",
+  "amended_at": "2026-10-29",
+  "amendment": "仅补齐 L38 scout 参数与输出字段（capability-catalog 核对）；其余条目未重新审计",
   "scope": "Hunter workspace runtime registered commands; read-only catalog inspection",
   "entries": [
     {
@@ -416,8 +418,8 @@
       "previous_reference": "P09",
       "integration": "已映射统一网关",
       "access_declared": "write",
-      "inputs": "keyword（必填）；location；connection；currentCompany；pastCompany；school；industry；language；limit；output；skipTierCheck",
-      "outputs": "结构化结果/输出文件；以源码为准",
+      "inputs": "keyword（必填）；location；connection；currentCompany；pastCompany；school；industry；language；limit；maxPages；cursor；anonymousPolicy（stop|continue）；output；skipTierCheck",
+      "outputs": "结构化结果/输出文件；以源码为准；含 identity_summary、page_observations、stop_reason",
       "verification": "本轮注册表+help核对；不代表真实执行通过"
     },
     {

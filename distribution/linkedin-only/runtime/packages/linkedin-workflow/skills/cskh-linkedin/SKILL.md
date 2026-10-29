@@ -1,15 +1,17 @@
 ---
 name: cskh-linkedin
-description: 统一编排普通 LinkedIn 与 Sales Navigator 的公司和人员搜索、详情与账号核验。先形成明确任务定义，再由模型选择平台、评估证据；确定性 CLI 执行操作并返回覆盖和恢复信息。
+description: 统一编排普通 LinkedIn 与 Sales Navigator 的公司和人员搜索、详情与账号核验。由模型按需求组合原子能力、选择平台、评估证据；确定性 CLI 执行操作并返回覆盖和恢复信息。
 ---
 
 # LinkedIn 统一入口
 
-从此 Skill 目录运行 `node ../../src/linkedin-cli.mjs capabilities`。命令输入使用本地 JSON 文件，详细契约见 ../../docs/LINKEDIN_GATEWAY.md。
+先按 [能力发现与自由编排](references/capability-use.md) 选择独立操作或任务编排。以下任务流程适用于需要记录和恢复的多步任务，不是单个操作的强制前置。
+
+从此 Skill 目录运行 `node scripts/opencli.mjs hunter-linkedin capabilities -f json`。命令输入使用本地 JSON 文件，详细契约见 ../../docs/LINKEDIN_GATEWAY.md。
 
 1. 恢复用户已经确认的需求，输出 task_id、intent、criteria（required/preferred）、target（count、candidates/qualified），保存任务文件并运行 task-validate。行业、国家、人数、估算依据都是任务数据，不能固化规则。已有确认的 SourcingRequest 保留原文作为任务附件，模型逐项映射并记录；不强制重复 Align。
 2. 模型基于平台能力提出 provider、operation、account、input。用 plan 验证，不发生浏览器操作。没有支持的字段不静默删除；不将未知权限当未订阅。公司高级筛选优先评估 SalesNav，人员任务按实际需要选择。
-3. execute 执行。必须明确 Profile、站内完整姓名及个人主页 URL。普通 LinkedIn 通过 HUNTER_OPENCLI_ENTRY 指向既有产品 launcher，不改变全局 OpenCLI。每次普通调用先核验身份，暂不缓存；SalesNav 复用原执行上下文和批处理机制。
+3. execute 执行。必须明确 Profile、站内完整姓名及个人主页 URL。普通 LinkedIn 的运行时绑定由产品入口自动完成，Agent 不设置内部入口环境变量。每次普通调用先核验身份，暂不缓存；SalesNav 复用原执行上下文和批处理机制。
 4. 工具 completed 仅表示操作返回，不表示任务达标。业务判断由模型分别保存 evidence、assessment、gap；unknown 不能计为符合。估算须有依据，平台关联人数不是实际工资册人数。
 5. 逐查询记录条件、总数原文、读取覆盖、去重数、游标和停止原因。依据结果数量和证据决定续页、拆分或补证；达到单批上限不是任务完成。恢复使用原 provider/account/cursor，不跨平台转译游标。
 6. 账号/验证/限流/未知派发故障停止依赖操作；局部选项错误挂起该项。不得自动跨渠道绕过限制。普通入口共享 SalesNav profile 锁，但绕过统一入口的旧普通 CLI 不受此锁约束，禁止并发使用。
@@ -21,9 +23,9 @@ description: 统一编排普通 LinkedIn 与 Sales Navigator 的公司和人员�
 
 按用户需求选择能力、核对输入输出或更新本 Skill 时，先查 [能力使用与 Skill 维护手册](../../docs/ATOMIC_CAPABILITIES.md)。按稳定的 P/T 编号引用相关能力；参数定义以代码为准，验证范围以实际回执为准，不复制整张筛选表到本 Skill。
 
-## 必须使用的任务记录流程
+## 可选的任务记录与恢复流程
 
-有多步或数量目标时，先以 task-create 保存任务（directory 指向授权项目的私有结果目录）。使用 task-execute 执行平台请求，每次稳定 operation_id 关联本轮计划。重复ID只能取回原回执；改变参数需新操作ID。未知派发结果先核对，不换ID绕过重跑保护。
+有多步或数量目标且需要持久记录与恢复时，优先以 task-create 保存任务（directory 指向授权项目的私有结果目录）。使用 task-execute 执行平台请求，每次稳定 operation_id 关联本轮计划。重复ID只能取回原回执；改变参数需新操作ID。未知派发结果先核对，不换ID绕过重跑保护。
 
 task-status 恢复账本和实体观察；按覆盖决定下一步。用 task-assess 保存模型评估，qualified 必须逐硬条件提供关联该实体观察的 operation_id、来源和解释。新条件新任务，不沿用旧评估。最后 task-report 导出 HTML 和普通表格 CSV，核对实际/目标数量与报告内容。
 
@@ -45,7 +47,7 @@ task-status 恢复账本和实体观察；按覆盖决定下一步。用 task-as
 
 ### 完成与预算契约
 
-需要读完已观察查询时显式设置coverage.mode=all_observed_queries；只要求达标数量可用默认target_only，仍披露未读范围。不要把查询窗口完整称市场全量。budgets可用max_operations/max_pages/max_detail_reads/max_elapsed_seconds；页数与详情按请求保守预留，时间自创建计，重放不消耗，失败不返还。普通LI搜索不接受任务页预算；上游success:false即阻塞，linkedin_sales_pitch不能误称账号未订阅或通过其他渠道规避。
+需要读完已观察查询时显式设置coverage.mode=all_observed_queries；只要求达标数量可用默认target_only，仍披露未读范围。不要把查询窗口完整称市场全量。budgets可用max_operations/max_pages/max_detail_reads/max_elapsed_seconds；页数与详情按请求保守预留，时间自创建计，重放不消耗，失败不返还。普通 LinkedIn 列表搜索支持任务页预算，执行请求须明确 max_pages；失败调用仍计入已预留预算；上游success:false即阻塞，linkedin_sales_pitch不能误称账号未订阅或通过其他渠道规避。
 
 ### 既有触达能力的范围说明
 
@@ -89,7 +91,7 @@ task-status 恢复账本和实体观察；按覆盖决定下一步。用 task-as
 
 ## OpenCLI 统一入口
 
-新增能力优先通过 `node scripts/opencli.mjs hunter-linkedin <command> --input input.json -f json` 调用；SalesNav命令加 `salesnav-` 前缀。先确认插件已安装并检查 `--help`；安装未完成时不得声称命令已可用。账号绑定仍来自输入文件，不能以全局Profile选项覆盖。安装与字段规则见 `../../docs/OPENCLI_PLUGIN.md`。旧Node入口保留为内部兼容入口。
+客户调用统一通过 `node scripts/opencli.mjs hunter-linkedin <command> --input input.json -f json` 调用；SalesNav命令加 `salesnav-` 前缀。先确认插件已安装并检查 `--help`；安装未完成时不得声称命令已可用。账号绑定仍来自输入文件，不能以全局Profile选项覆盖。安装与字段规则见 `../../docs/OPENCLI_PLUGIN.md`。内部 Node 入口仅供开发诊断，客户任务不要直接调用。
 
 ## 本机桥接假断连排查
 
@@ -109,3 +111,33 @@ task-status 恢复账本和实体观察；按覆盖决定下一步。用 task-as
 - 即使已提前找到目标数量的合格人选，也要完成约定列表覆盖再交付；覆盖 200 人后若合格人数未达目标，继续按结果与已确认预算调整策略。核对回执 `list_coverage` 的实际人数、缺口和 met；尚未满足覆盖要求时报告保持 partial。
 - 结果耗尽、平台限制、用户停止或已确认预算不足时，可以不足 200 人，但必须报告实际数、差额、原因及未读范围，不能宣称覆盖已达标；不擅自放宽硬条件或重置预算。默认数量不是未确认的时间/调用预算授权。
 - 仅需读取列表已展示的信息做初筛，不默认打开 200 份个人详情。报告分别列出列表去重人数、详情读取人数、已评估人数、合格人数及列表覆盖目标。
+
+### 首次运行入口
+
+安装后始终使用本 Skill 的 `scripts/opencli.mjs`。不要设置 `HUNTER_OPENCLI_ENTRY` 或 `OPENCLI_BIN`，不要改用全局 OpenCLI 或直接调用内部 Node 入口。遇到入口不一致先移除本次调用覆盖；同一错误不得靠更换 operation_id 重试。帮助命令通过仅证明命令存在，不代表账号检查或搜索成功。
+
+### 普通列表续读
+
+单查询、候选人数目标的任务，使用 `node scripts/opencli.mjs hunter-linkedin task-continue --input continue.json`。输入仅包含 directory、task_id、operation_id；同一次请求重试沿用 operation_id。程序选择最新进度并沿用原预算，不手动搬运游标。多查询返回 multiple_queries_require_selection；中断返回 diagnosis_required；预算耗尽停止。此能力不等于页级崩溃恢复，不能用新操作 ID 绕过中断。task-resume 仍用于补读详情。
+
+### 匿名结果与分页策略
+
+普通列表搜索按“结果卡”分类，不看整页文本（共同联系人里也可能出现 LinkedIn Member）。回执 `identity_summary` 的卡片计数只统计本次运行：`cards_inspected`（读取卡片）、`named_cards`（具名卡）、`visibility_limited_cards`（明确不可见）、`unresolved_cards`（未解析）；`collected_total` 是含游标历史、按 profileId 跨页去重后的已返回具名人数。`page_observations` 逐页记录同一口径。
+
+- 具名候选人始终保留，不因同页出现匿名卡而丢弃整页结果。
+- 未解析卡片（尚未加载完成或身份无法读取）不允许跳过：`profiles_unresolved` 停止并诊断，先核对加载与页面证据。
+- 已确认不可见身份（如 `LinkedIn Member`）默认 `anonymousPolicy=stop`：保留具名结果，`completeness=partial`，回执无游标，停止原因 `profile_identity_unavailable`。
+- 只有用户已了解“将跳过无法识别者”并明确同意，才使用 `anonymousPolicy=continue`；该策略仅在有下一页时继续，末页仍有匿名卡时以 `visibility_limited_pagination_end` 结束，不能称为 complete。
+- 匿名卡没有稳定身份，不得跨页去重，也不计入列表覆盖人数；覆盖只按具名 profileId/规范主页链接统计。
+- `cursor` 只在确有下一页或本页仍有未读卡片时返回；`pagination_unavailable`、`no_new_people`、末尾匿名页结束时不返回游标，不要据旧游标重读同一页。
+- `continue` 会跨匿名页继续翻页，直到达到用户设定的 max_pages/limit、检测到页面重复，或没有下一页；整页匿名本身不是停止理由。
+- 页面卡片状态稳定后即返回，15 秒只是慢加载的硬上限；慢页仍可能以 `profiles_unresolved` 结束，此时应报告未解析而非跳过。
+- 续读游标绑定筛选条件与该策略；改筛选或策略后沿用旧游标会被拒绝，CLI 实际返回 `search_cursor_query_mismatch`（游标 requestKey 已同时包含筛选与策略）。`cursor_policy_mismatch` 只在程序内直接传 previous 时出现，`cursor_query_mismatch` 对应查询指纹不一致；策略值非法返回 `invalid_anonymous_policy`。
+
+## 故障处理
+
+遇 task_busy，调用 `task-lock-inspect`，输入 directory、task_id。running 等待原任务；unknown 保留现场，不删锁；owner_exited 仅说明主进程已退出，不证明浏览器操作停止。不要自行把 execution_stopped_confirmed 填为 true。确认相关执行已停止后才可使用 task-lock-recover，必须传最新 revision；恢复不会重跑原操作。profile_busy 暂停并核对账号锁，不能清全局锁目录。
+
+入口错误先检查安装回执与本次环境变量，不修改产品源码、不搜索旧运行时替代。缺少教育或证书能力时明确报告不支持，不使用来源未核实的用户级适配器。匿名结果不能直接归因于加载慢或账号限制；先保留页面与解析证据。
+
+初始化分开报告：安装入口／离线命令／浏览器连接／本人身份／首次业务结果。help 和 capabilities 不能证明浏览器可用。已有有效检查不重复执行；真实搜索和详情读取沿用用户批准的范围。

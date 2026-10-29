@@ -1,6 +1,6 @@
 import {validateOrdinaryFilters,ordinaryFilterContract} from './lib/ordinary-filter-contract.js';
 import { collectOrdinarySearch, inspectOrdinarySearchDOM, scrollOrdinarySearchDOM } from './lib/ordinary-search-collector.js';
-import {requestFingerprint,sessionBinding,readSearchCursor,writeSearchCursor} from './lib/ordinary-search-cursor.js';
+import {requestFingerprint,sessionBinding,readSearchCursor,writeSearchCursor,publishSearchCheckpoint} from './lib/ordinary-search-cursor.js';
 import { cli, Strategy } from '@jackwener/opencli/registry';
 import fs from 'fs';
 import path from 'path';
@@ -898,6 +898,7 @@ cli({
     { name: 'limit', type: 'int', default: 20, help: '累计唯一列表人数目标（1–2500）；默认任务覆盖量由Skill提供。平台限制另行返回。' },
     { name: 'maxPages', type: 'int', required: false, help: '本次最多读取的真实页数（1–250），达到后返回续读游标；省略时按limit和平台终点停止' },
     { name: 'cursor', type: 'string', required: false, help: '上次返回的本地续读文件；须同账号、同查询，limit为新的累计目标' },
+    { name: 'anonymousPolicy', type: 'string', default: 'stop', help: '确认不可见身份卡片（如 LinkedIn Member）的处理策略：stop=保留具名结果后停止并诊断；continue=保留具名结果并继续后续页' },
     { name: 'output', type: 'string', default: '', description: '输出 JSON 文件路径。默认保存到 ~/.hunter/channels/linkedin/linkedin-scout-result.json' },
     { name: 'skipTierCheck', type: 'boolean', default: true, description: '跳过 LinkedIn 账号档位与实际会话的校验（默认跳过，可用 --skipTierCheck false 开启）' },
   ],
@@ -1049,7 +1050,8 @@ cli({
 
     const cookies=await page.getCookies({url:'https://www.linkedin.com'});
     const binding=sessionBinding(cookies);
-    const requestParams={searchUrl,keyword,location:location??'',connection:connection??'',currentCompany:currentCompany??'',pastCompany:pastCompany??'',school:school??'',industry:industry??'',language:language??''};
+    const anonymousPolicy=kwargs.anonymousPolicy??'stop';
+    const requestParams={searchUrl,keyword,location:location??'',connection:connection??'',currentCompany:currentCompany??'',pastCompany:pastCompany??'',school:school??'',industry:industry??'',language:language??'',anonymousPolicy};
     const requestKey=requestFingerprint(requestParams);
     const previous=kwargs.cursor?readSearchCursor(kwargs.cursor,{binding,requestKey}):undefined;
     let baseUrl=previous?.base_url??searchUrl;
@@ -1069,8 +1071,10 @@ cli({
       }
     }
     const filterContract=ordinaryFilterContract(kwargs,{consumer:consumerTier,searchUrl:baseUrl,uiResolved});
+    let pageCheckpoint=null;
     const collection=await collectOrdinarySearch({
-      searchUrl:baseUrl,limit,maxPages:kwargs.maxPages,previous,
+      searchUrl:baseUrl,limit,maxPages:kwargs.maxPages,previous,anonymousPolicy,
+      onCheckpoint:progress=>{pageCheckpoint=writeSearchCursor({directory:path.join(CONFIG_DIR,'search-cursors'),binding,requestKey,progress:{...progress,base_url:baseUrl,ui_resolved:uiResolved}});publishSearchCheckpoint(process.env.HUNTER_SEARCH_CHECKPOINT_DIR,pageCheckpoint,progress);},
       read:()=>page.evaluate(inspectOrdinarySearchDOM),
       navigate:url=>page.goto(url,{waitUntil:'domcontentloaded',timeout:60000}),
       scroll:()=>page.evaluate(scrollOrdinarySearchDOM),
@@ -1108,7 +1112,7 @@ cli({
     const previousIds=new Set((previous?.results??[]).map(row=>row.profileId));
     const result = {
       meta: buildScoutMeta({
-        searchParams: { keyword, location, connection, currentCompany, pastCompany, school, industry, language, limit },
+        searchParams: { keyword, location, connection, currentCompany, pastCompany, school, industry, language, limit, anonymousPolicy },
         requestedLimit,
         pagesViewed: collection.pages_viewed,
         tier: linkedinTier,
@@ -1116,6 +1120,7 @@ cli({
       filter_contract:filterContract,
       filter_observations:collection.filter_observations,
       page_observations:collection.page_observations,
+      identity_summary:collection.identity_summary,
       operation:'ordinary-people-search',
       query_fingerprint:collection.query_fingerprint,
       returned_count: allResults.length,
@@ -1124,6 +1129,7 @@ cli({
       truncated: collection.truncated,
       stop_reason: collection.stop_reason,
       cursor,
+      recovery_checkpoint:pageCheckpoint,
       interruption: collection.interruption,
       pagination:{pages_viewed:collection.pages_viewed,scroll_rounds:collection.scroll_rounds,total_text:null},
       timing:collection.timing,

@@ -1,11 +1,12 @@
 """Build the frozen LinkedIn distribution as deterministic Windows-compatible USTAR."""
 from pathlib import Path
-import gzip, hashlib, io, json, tarfile
+import gzip, hashlib, io, json, re, subprocess, tarfile
 root=Path(__file__).resolve().parents[1]
 src=root/'distribution/linkedin-only'
 d=json.loads((src/'distribution.json').read_text())
 version=d['version']
-if d['product']!='soho-sourcing' or version!='2.1.3':raise ValueError('Unexpected release identity')
+if d['product']!='soho-sourcing' or not re.fullmatch(r'\d+\.\d+\.\d+',version):raise ValueError('Unexpected release identity')
+subprocess.run(['node',str(root/'scripts/sync-linkedin-skills.mjs')],check=True)
 files=[]
 for p in sorted(src.rglob('*')):
  if 'node_modules' in p.parts:continue

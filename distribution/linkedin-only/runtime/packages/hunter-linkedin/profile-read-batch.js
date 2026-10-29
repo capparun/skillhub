@@ -53,6 +53,34 @@ function normalizeProfileUrl(value) {
   return url.href;
 }
 
+const sleepMs = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+// Readiness replaces fixed waits: return as soon as the name and at least two
+// profile sections are rendered; waitSeconds is only the slow-page hard cap.
+const readinessScript = `(() => {
+  const clean = (s) => String(s || '').replace(/\\s+/g, ' ').trim();
+  const name = clean((document.querySelector('main h1, main h2') || {}).textContent || '');
+  const sections = ['About', 'Experience', 'Education'].map((title) => {
+    const heading = Array.from(document.querySelectorAll('section h2, section h3, h2, h3'))
+      .find((el) => new RegExp('^' + title + '$', 'i').test(clean(el.textContent || '')));
+    return heading ? 1 : 0;
+  }).join('');
+  return { nameReady: Boolean(name), sections, loading: Boolean(document.querySelector('[aria-busy="true"]')) };
+})()`;
+
+async function waitForProfile(page, maxSeconds = 8) {
+  const started = Date.now();
+  for (;;) {
+    const state = await page.evaluate(readinessScript);
+    const readyCount = String(state?.sections ?? '').split('').filter(flag => flag === '1').length;
+    if (state?.nameReady && !state?.loading && readyCount >= 2) return state;
+    // A profile without About/Experience sections still becomes readable after a short wait.
+    if (state?.nameReady && Date.now() - started >= 2000) return state;
+    if (Date.now() - started >= Math.max(1, maxSeconds) * 1000) return state;
+    await sleepMs(250);
+  }
+}
+
 const clean = value => String(value ?? '').replace(/\s+/g, ' ').trim();
 
 function normalizeRow(row, expectedUrl) {
@@ -92,7 +120,7 @@ function readCheckpoint(file) {
   return done;
 }
 
-export async function runProfileBatch({ page, urls, outputDir, resumeFile, waitSeconds = 5, limit } = {}) {
+export async function runProfileBatch({ page, urls, outputDir, resumeFile, waitSeconds = 8, limit } = {}) {
   if (!page) fail('browser_session_required');
   if (!Array.isArray(urls) || !urls.length) fail('profile_urls_required');
   const selected = [...new Set(urls.map(normalizeProfileUrl))].slice(0, Number.isInteger(limit) ? limit : undefined);
@@ -106,7 +134,6 @@ export async function runProfileBatch({ page, urls, outputDir, resumeFile, waitS
     const started = Date.now();
     try {
       await page.goto(url);
-      await page.wait(waitSeconds);
       const state = await page.evaluate('({url: location.href, title: document.title})');
       const fatal = fatalCode(state);
       if (fatal) {
@@ -114,8 +141,9 @@ export async function runProfileBatch({ page, urls, outputDir, resumeFile, waitS
         fs.appendFileSync(checkpoint, JSON.stringify({ profile_url: url, status: 'stopped', error: fatal, duration_ms: Date.now() - started }) + '\n');
         break;
       }
-      await page.autoScroll({ times: 4, delayMs: 700 });
-      await page.wait(1);
+      await waitForProfile(page, waitSeconds);
+      await page.autoScroll({ times: 2, delayMs: 700 });
+      await page.wait(0.5);
       const row = normalizeRow(await page.evaluate(buildProfileExtractionScript()), url);
       rows.push(row);
       fs.appendFileSync(checkpoint, JSON.stringify({ profile_url: url, status: 'ok', duration_ms: Date.now() - started }) + '\n');
@@ -151,7 +179,7 @@ cli({
     { name: 'input', type: 'string', required: true, help: 'JSON 文件，字段 profile_urls[]（可选 output、resume、wait_seconds、limit）' },
     { name: 'output', type: 'string', required: false, help: '结果与检查点目录；默认 ~/.hunter/channels/linkedin/profile-batch' },
     { name: 'resume', type: 'string', required: false, help: '已有检查点文件；默认输出目录下的 checkpoint.jsonl' },
-    { name: 'wait', type: 'number', required: false, help: '每次导航后的等待秒数，默认 5' },
+    { name: 'wait', type: 'number', required: false, help: '页面就绪硬上限秒数，默认 8；就绪后立即读取' },
     { name: 'limit', type: 'number', required: false, help: '本次最多读取人数' },
   ],
   func: async (page, args) => {
@@ -165,7 +193,7 @@ cli({
       urls: input.profile_urls,
       outputDir,
       resumeFile: args.resume ? path.resolve(args.resume) : input.resume ? path.resolve(input.resume) : undefined,
-      waitSeconds: args.wait ?? input.wait_seconds ?? 5,
+      waitSeconds: args.wait ?? input.wait_seconds ?? 8,
       limit: args.limit ?? input.limit,
     });
     return result.rows;

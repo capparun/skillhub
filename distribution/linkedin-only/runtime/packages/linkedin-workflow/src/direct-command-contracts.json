@@ -1,0 +1,781 @@
+{
+  "schema_version": 1,
+  "contracts": [
+    {
+      "command": "linkedin profile-read",
+      "source": "@jackwener/opencli@2.0.1/clis/linkedin/profile-read.js",
+      "input": {
+        "profile-url": {
+          "type": "string",
+          "required": false,
+          "default": "https://www.linkedin.com/in/me/",
+          "recommendation": "读取候选人时必须明确传入该候选人的主页URL，避免读取本人"
+        }
+      },
+      "output": {
+        "adapter_return": "array<object>",
+        "fields": [
+          "profile_url",
+          "name",
+          "headline",
+          "location",
+          "about",
+          "about_character_count",
+          "about_skills",
+          "experience",
+          "education",
+          "services",
+          "featured"
+        ],
+        "product_json_path": "data",
+        "raw_opencli_format": "原始OpenCLI渲染与产品入口不同；这里描述适配器返回值，不是网关status/coverage契约",
+        "missing": "文本字段可能为空字符串；空缺不能推断不存在",
+        "completeness": "仅当前页面可见且成功解析的内容，不保证完整简历"
+      },
+      "preconditions": [
+        "官方桥接扩展连接到指定Chrome Profile",
+        "LinkedIn已登录且允许查看目标",
+        "用户授权读取范围与预算；此命令自身不执行网关expected_identity比对"
+      ],
+      "effects": [
+        "导航至目标页面并滚动读取",
+        "不发送消息、不修改资料",
+        "未传profile-url时会打开本人About编辑页读取，不提交修改"
+      ],
+      "errors": [
+        "浏览器连接或页面会话失效",
+        "登录失效或页面拦截",
+        "提取结果格式错误",
+        "未找到姓名"
+      ],
+      "verification": {
+        "source_review": "reviewed_pinned_2.0.1",
+        "live": "one_success_defined_sections_2026-10-29; previous_partial"
+      }
+    },
+    {
+      "command": "linkedin profile-experience",
+      "source": "@jackwener/opencli@2.0.1/clis/linkedin/profile-experience.js",
+      "input": {
+        "profile-url": {
+          "type": "string",
+          "required": false,
+          "default": "https://www.linkedin.com/in/me/",
+          "recommendation": "读取候选人时必须明确传入该候选人的主页URL，避免读取本人"
+        }
+      },
+      "output": {
+        "adapter_return": "array<object>",
+        "fields": [
+          "rank",
+          "total_count",
+          "title",
+          "employment_type",
+          "company",
+          "date_range",
+          "start_date",
+          "end_date",
+          "location",
+          "location_type",
+          "description",
+          "skills",
+          "media",
+          "urls",
+          "skill_url",
+          "media_url",
+          "profile_url",
+          "raw_text"
+        ],
+        "product_json_path": "data",
+        "raw_opencli_format": "原始OpenCLI渲染与产品入口不同；这里描述适配器返回值，不是网关status/coverage契约",
+        "missing": "文本字段可能为空字符串；空缺不能推断不存在",
+        "completeness": "仅当前页面可见且成功解析的内容，不保证完整简历"
+      },
+      "preconditions": [
+        "官方桥接扩展连接到指定Chrome Profile",
+        "LinkedIn已登录且允许查看目标",
+        "用户授权读取范围与预算；此命令自身不执行网关expected_identity比对"
+      ],
+      "effects": [
+        "导航至目标页面并滚动读取",
+        "不发送消息、不修改资料"
+      ],
+      "errors": [
+        "浏览器连接或页面会话失效",
+        "登录失效或页面拦截",
+        "提取结果格式错误",
+        "EmptyResultError：没有可见且可解析的条目，不代表确实无经历/项目"
+      ],
+      "verification": {
+        "source_review": "reviewed_pinned_2.0.1",
+        "live": "one_success_7_entries_2026-10-29; previous_stale_page_identity_unresolved"
+      }
+    },
+    {
+      "command": "linkedin profile-projects",
+      "source": "@jackwener/opencli@2.0.1/clis/linkedin/profile-projects.js",
+      "input": {
+        "profile-url": {
+          "type": "string",
+          "required": false,
+          "default": "https://www.linkedin.com/in/me/",
+          "recommendation": "读取候选人时必须明确传入该候选人的主页URL，避免读取本人"
+        }
+      },
+      "output": {
+        "adapter_return": "array<object>",
+        "fields": [
+          "rank",
+          "title",
+          "date_range",
+          "associated_with",
+          "description",
+          "skills",
+          "media",
+          "urls",
+          "profile_url",
+          "raw_text"
+        ],
+        "product_json_path": "data",
+        "raw_opencli_format": "原始OpenCLI渲染与产品入口不同；这里描述适配器返回值，不是网关status/coverage契约",
+        "missing": "文本字段可能为空字符串；空缺不能推断不存在",
+        "completeness": "仅当前页面可见且成功解析的内容，不保证完整简历"
+      },
+      "preconditions": [
+        "官方桥接扩展连接到指定Chrome Profile",
+        "LinkedIn已登录且允许查看目标",
+        "用户授权读取范围与预算；此命令自身不执行网关expected_identity比对"
+      ],
+      "effects": [
+        "导航至目标页面并滚动读取",
+        "不发送消息、不修改资料"
+      ],
+      "errors": [
+        "浏览器连接或页面会话失效",
+        "登录失效或页面拦截",
+        "提取结果格式错误",
+        "EmptyResultError：没有可见且可解析的条目，不代表确实无经历/项目"
+      ],
+      "verification": {
+        "source_review": "reviewed_pinned_2.0.1",
+        "live": "not_checked"
+      }
+    },
+    {
+      "command": "hunter-linkedin identity-check",
+      "source": "packages/hunter-linkedin/lib/identity-probe.js",
+      "input": {
+        "target-url": {
+          "type": "string",
+          "required": true,
+          "allowed": "https://www.linkedin.com 的 /in/<slug>/、/company/<slug>/ 或 /search/results/people/；不含查询/片段"
+        }
+      },
+      "output": {
+        "adapter_return": "object",
+        "fields": [
+          "logged_in",
+          "public_id",
+          "name"
+        ],
+        "product_json_path": "data",
+        "completeness": "仅当前登录身份，不证明Premium/SalesNav权益"
+      },
+      "preconditions": [
+        "桥接已连接指定Profile",
+        "LinkedIn有效登录"
+      ],
+      "effects": [
+        "当前LinkedIn页面读取/voyager/api/me",
+        "不在LinkedIn时导航至target-url；不会主动打开feed",
+        "不缓存身份；不输出cookie"
+      ],
+      "errors": [
+        "invalid_identity_target",
+        "not_logged_in",
+        "login_required",
+        "identity_probe_failed",
+        "identity_unconfirmed",
+        "上游浏览器错误"
+      ],
+      "verification": {
+        "source_review": "reviewed",
+        "live": "two_successful_checks_2026-10-29"
+      }
+    },
+    {
+      "command": "hunter-linkedin scout",
+      "source": "packages/hunter-linkedin/scout.js and lib/ordinary-search-cursor.js",
+      "input": {
+        "parameters": "以同一目录条目的parameters为准，含keyword、limit、maxPages、cursor、anonymousPolicy及各筛选",
+        "limit": "累计唯一人数目标，1至2500，CLI默认20；Skill可提供已获用户批准的200等目标",
+        "maxPages": "本次调用页数上限，1至250",
+        "cursor": "上次返回的绝对路径，30分钟有效；同会话身份、同查询；使用最新游标；仅在存在下一页或本页仍有未读卡片时返回，无下一页/无新人员/分页不可用时不返回",
+        "location_industry_language": "普通账号为关键词增强，非原生精确筛选"
+      },
+      "output": {
+        "adapter_return": "object",
+        "product_json_path": "data",
+        "fields": [
+          "meta",
+          "filter_contract",
+          "filter_observations",
+          "page_observations",
+          "identity_summary",
+          "operation",
+          "query_fingerprint",
+          "returned_count",
+          "new_count",
+          "completeness",
+          "truncated",
+          "stop_reason",
+          "cursor",
+          "recovery_checkpoint",
+          "interruption",
+          "pagination",
+          "timing",
+          "list_coverage",
+          "candidates"
+        ],
+        "candidate_fields": [
+          "rank",
+          "profileId",
+          "name",
+          "headline",
+          "title",
+          "location",
+          "connectionDegree",
+          "profileUrl",
+          "channel"
+        ],
+        "missing": "列表缺失字段不等于候选人没有该经历",
+        "completeness": "列表量，不等于完整简历或业务合格人数；读取stop_reason和completeness",
+        "alternate_return": "开启档位检查时可能返回success:false,error:tier_mismatch或tier_unconfirmed，不能视为成功空结果"
+      },
+      "preconditions": [
+        "连接并登录指定Profile",
+        "用户批准列表量和读取预算",
+        "直接命令不做网关expected_identity比对"
+      ],
+      "effects": [
+        "翻页滚动读取列表",
+        "本地保存结果，默认路径可能覆盖上一份；批量任务建议显式output",
+        "保存不可变本地游标及可选任务检查点",
+        "不打开候选人详情、不发送消息"
+      ],
+      "errors": [
+        "invalid_search_limit",
+        "invalid_page_limit",
+        "invalid_search_cursor",
+        "search_cursor_expired",
+        "search_cursor_account_mismatch",
+        "search_cursor_query_mismatch",
+        "not_logged_in",
+        "浏览器连接/页面错误"
+      ],
+      "verification": {
+        "source_review": "reviewed",
+        "live": "historical_200_rows_61.642_seconds_not_retested_current_candidate"
+      }
+    },
+    {
+      "preconditions": [
+        "官方桥接连接指定Chrome Profile",
+        "LinkedIn已登录且用户允许本次读取"
+      ],
+      "effects": [
+        "导航到公司About页",
+        "不保存公司、不发消息"
+      ],
+      "verification": {
+        "source_review": "reviewed_pinned_2.0.1",
+        "live": "not_checked_current_candidate"
+      },
+      "command": "linkedin company",
+      "source": "@jackwener/opencli@2.0.1/clis/linkedin/company.js",
+      "input": {
+        "company": {
+          "type": "string",
+          "required": true,
+          "positional": true,
+          "accepted": "公司slug、/company/<slug>路径或LinkedIn公司URL"
+        }
+      },
+      "output": {
+        "adapter_return": "array<object>",
+        "product_json_path": "data",
+        "fields": [
+          "name",
+          "industry",
+          "size",
+          "headquarters",
+          "founded",
+          "website",
+          "specialties",
+          "followers",
+          "about",
+          "url"
+        ],
+        "missing": "文本缺失返回空字符串；followers缺失时归一为0，不能当作已验证零关注",
+        "completeness": "公司About页可见数据，不是公司研究结论或地区团队人数"
+      },
+      "errors": [
+        "非法公司URL",
+        "登录失效",
+        "公司姓名未解析",
+        "followers格式错误",
+        "浏览器会话错误"
+      ]
+    },
+    {
+      "preconditions": [
+        "官方桥接连接指定Chrome Profile",
+        "LinkedIn已登录且用户允许本次读取"
+      ],
+      "effects": [
+        "主动导航到LinkedIn feed首页",
+        "读取/voyager/api/me；不返回cookie"
+      ],
+      "verification": {
+        "source_review": "reviewed_pinned_2.0.1",
+        "live": "not_checked_current_candidate"
+      },
+      "command": "linkedin whoami",
+      "source": "@jackwener/opencli@2.0.1/clis/linkedin/auth.js + clis/_shared/site-auth.js",
+      "input": {},
+      "output": {
+        "adapter_return": "object",
+        "product_json_path": "data",
+        "fields": [
+          "public_id",
+          "plain_id",
+          "name",
+          "logged_in",
+          "site"
+        ],
+        "completeness": "仅登录身份；不包含订阅与额度证据"
+      },
+      "errors": [
+        "AuthRequiredError",
+        "HTTP或身份提取错误",
+        "浏览器会话错误"
+      ]
+    },
+    {
+      "command": "hunter-linkedin task-status",
+      "source": "packages/linkedin-workflow/src/linkedin/task-store.mjs",
+      "layer": "execution_support",
+      "input": {
+        "cli": "--input <JSON文件>",
+        "required": [
+          "directory",
+          "task_id"
+        ],
+        "directory": "既有任务目录",
+        "task_id": "必须匹配task.json",
+        "notes": "本地只读检查不需浏览器连接"
+      },
+      "output": {
+        "adapter_return": "object",
+        "product_json_path": "data",
+        "fields": [
+          "list_coverage",
+          "evidence_revision",
+          "search_coverage",
+          "task",
+          "task_fingerprint",
+          "operations",
+          "entities",
+          "unique_count",
+          "revision",
+          "status",
+          "latest_delivery"
+        ],
+        "semantics": "只读任务账本；in_progress不代表存在活动进程"
+      },
+      "preconditions": [
+        "既有任务目录和匹配的task_id"
+      ],
+      "effects": [
+        "不访问浏览器、不派发操作"
+      ],
+      "errors": [
+        "task_mismatch"
+      ],
+      "verification": {
+        "source_review": "reviewed",
+        "live": "not_checked",
+        "offline": "task-continue/task-checkpoint/lock-health tests; specific supported scenarios only"
+      }
+    },
+    {
+      "command": "hunter-linkedin task-recovery",
+      "source": "packages/linkedin-workflow/src/linkedin/task-store.mjs",
+      "layer": "execution_support",
+      "input": {
+        "cli": "--input <JSON文件>",
+        "required": [
+          "directory",
+          "task_id"
+        ],
+        "directory": "既有任务目录",
+        "task_id": "必须匹配task.json",
+        "notes": "本地只读检查不需浏览器连接"
+      },
+      "output": {
+        "adapter_return": "object",
+        "product_json_path": "data",
+        "fields": [
+          "task_id",
+          "status",
+          "dispatched",
+          "search_checkpoints",
+          "checkpoint_errors",
+          "completed",
+          "pending",
+          "interruptions",
+          "instruction"
+        ],
+        "semantics": "ready_for_planning不是已恢复；检查点saved_not_revalidated且resumable:false"
+      },
+      "preconditions": [
+        "既有任务目录和匹配的task_id"
+      ],
+      "effects": [
+        "只读已完成资料与中断，禁止自动重试"
+      ],
+      "errors": [
+        "task_mismatch",
+        "invalid_checkpoint_record作为诊断条目返回"
+      ],
+      "verification": {
+        "source_review": "reviewed",
+        "live": "not_checked",
+        "offline": "task-continue/task-checkpoint/lock-health tests; specific supported scenarios only"
+      }
+    },
+    {
+      "command": "hunter-linkedin task-lock-inspect",
+      "source": "packages/linkedin-workflow/src/linkedin/task-store.mjs",
+      "layer": "execution_support",
+      "input": {
+        "cli": "--input <JSON文件>",
+        "required": [
+          "directory",
+          "task_id"
+        ],
+        "directory": "既有任务目录",
+        "task_id": "必须匹配task.json",
+        "notes": "本地只读检查不需浏览器连接"
+      },
+      "output": {
+        "adapter_return": "object",
+        "product_json_path": "data",
+        "fields": [
+          "status",
+          "revision",
+          "owner"
+        ],
+        "semantics": "status为absent/running/owner_exited/unknown，revision/owner可能缺失；PID退出不证明浏览器动作停止"
+      },
+      "preconditions": [
+        "既有任务目录和匹配的task_id"
+      ],
+      "effects": [
+        "只读本地锁"
+      ],
+      "errors": [
+        "task_mismatch"
+      ],
+      "verification": {
+        "source_review": "reviewed",
+        "live": "not_checked",
+        "offline": "task-continue/task-checkpoint/lock-health tests; specific supported scenarios only"
+      }
+    },
+    {
+      "command": "hunter-linkedin task-lock-recover",
+      "source": "packages/linkedin-workflow/src/linkedin/task-store.mjs",
+      "layer": "execution_support",
+      "input": {
+        "cli": "--input <JSON文件>",
+        "required": [
+          "directory",
+          "task_id",
+          "revision",
+          "execution_stopped_confirmed"
+        ],
+        "directory": "既有任务目录",
+        "task_id": "必须匹配task.json",
+        "notes": "execution_stopped_confirmed必须为true且已有执行停止证据"
+      },
+      "output": {
+        "adapter_return": "object",
+        "product_json_path": "data",
+        "fields": [
+          "status",
+          "archive",
+          "dispatched",
+          "operation_outcome",
+          "instruction"
+        ],
+        "semantics": "absent时只返回status/dispatched；recovered仅归档锁，不更改操作结果"
+      },
+      "preconditions": [
+        "既有任务目录和匹配的task_id"
+      ],
+      "effects": [
+        "本地归档锁，不重跑；必须有独立执行停止证据，不能仅依据PID或pending=0"
+      ],
+      "errors": [
+        "execution_stop_confirmation_required",
+        "recovery_busy",
+        "lock_changed",
+        "lock_not_recoverable",
+        "task_mismatch"
+      ],
+      "verification": {
+        "source_review": "reviewed",
+        "live": "not_checked",
+        "offline": "task-continue/task-checkpoint/lock-health tests; specific supported scenarios only"
+      }
+    },
+    {
+      "command": "hunter-linkedin task-continue",
+      "source": "packages/linkedin-workflow/src/linkedin/task-store.mjs",
+      "layer": "execution_support",
+      "input": {
+        "cli": "--input <JSON文件>",
+        "required": [
+          "directory",
+          "task_id",
+          "operation_id"
+        ],
+        "directory": "既有任务目录",
+        "task_id": "必须匹配task.json",
+        "notes": "operation_id为本次续读唯一标识"
+      },
+      "output": {
+        "adapter_return": "object",
+        "product_json_path": "data",
+        "fields": [
+          "status",
+          "dispatched",
+          "stop_reason"
+        ],
+        "semantics": "达到目标直接completed/dispatched:false；否则返回task-execute结果；相同operation_id重放旧结果带replayed:true"
+      },
+      "preconditions": [
+        "既有任务目录和匹配的task_id",
+        "用户授权读取范围与预算仍有效；账号和查询绑定核验"
+      ],
+      "effects": [
+        "写任务账本并可能执行一次普通LinkedIn续读；只支持单查询，沿用原页数及预算，使用最新游标"
+      ],
+      "errors": [
+        "unsupported_parameter",
+        "operation_id_conflict",
+        "operation_outcome_unknown",
+        "search_required",
+        "multiple_queries_require_selection",
+        "ambiguous_search_progress",
+        "diagnosis_required",
+        "explicit_collection_target_required",
+        "search_not_resumable"
+      ],
+      "verification": {
+        "source_review": "reviewed",
+        "live": "not_checked",
+        "offline": "task-continue/task-checkpoint/lock-health tests; specific supported scenarios only"
+      }
+    },
+    {
+      "command": "linkedin connections",
+      "source": "@jackwener/opencli@2.0.1/clis/linkedin/connections.js",
+      "input": {
+        "limit": {
+          "type": "integer",
+          "required": false,
+          "default": 20,
+          "minimum": 1,
+          "maximum": 500
+        }
+      },
+      "output": {
+        "adapter_return": "array<object>",
+        "fields": [
+          "rank",
+          "name",
+          "occupation",
+          "public_id",
+          "connected_at",
+          "url"
+        ],
+        "product_json_path": "data",
+        "completeness": "每批最多40条，直到达到limit或上游返回不足；没有对外续读游标。connected_at缺失归一为0，不代表真实连接日期。无连接时抛EmptyResultError。",
+        "missing": "缺失文本可能为空；不能据此认定不存在"
+      },
+      "preconditions": [
+        "指定Chrome Profile的官方扩展连接正常且LinkedIn已登录",
+        "已授权读取当前账号的私有人脉或收件箱；不能从普通搜索授权推导",
+        "直接命令不执行网关expected_identity比对"
+      ],
+      "effects": [
+        "打开当前账号的人脉页面",
+        "读取同源接口，不发送消息、不邀请、不修改关系",
+        "打开平台页面的服务端副作用未验证，不能承诺未读状态绝不变化"
+      ],
+      "errors": [
+        "ArgumentError：limit非范围内整数",
+        "AuthRequiredError：登录、Cookie缺失或接口401/403",
+        "CommandExecutionError：接口或数据结构异常",
+        "EmptyResultError：未找到结果（inbox未读过滤为空除外）"
+      ],
+      "verification": {
+        "source_review": "reviewed_pinned_2.0.1",
+        "live": "not_verified_for_current_candidate"
+      }
+    },
+    {
+      "command": "linkedin inbox",
+      "source": "@jackwener/opencli@2.0.1/clis/linkedin/inbox.js",
+      "input": {
+        "limit": {
+          "type": "integer",
+          "required": false,
+          "default": 40,
+          "minimum": 1,
+          "maximum": 100
+        },
+        "unread-only": {
+          "type": "boolean",
+          "required": false,
+          "default": false
+        }
+      },
+      "output": {
+        "adapter_return": "array<object>",
+        "fields": [
+          "rank",
+          "thread_url",
+          "thread_id",
+          "person_name",
+          "last_message_preview",
+          "unread",
+          "counterparty_type",
+          "category",
+          "timestamp"
+        ],
+        "product_json_path": "data",
+        "completeness": "仅一次会话查询，按最近活动排序；预览最多300字符，不是完整消息。unread-only在已返回会话上过滤，不能保证收齐所有未读；过滤后无未读返回空数组，其余空结果抛EmptyResultError。",
+        "missing": "缺失文本可能为空；不能据此认定不存在"
+      },
+      "preconditions": [
+        "指定Chrome Profile的官方扩展连接正常且LinkedIn已登录",
+        "已授权读取当前账号的私有人脉或收件箱；不能从普通搜索授权推导",
+        "直接命令不执行网关expected_identity比对"
+      ],
+      "effects": [
+        "打开当前账号消息页面，等待10秒；未找到请求时再等待6秒读取一次",
+        "读取同源接口，不发送消息、不邀请、不修改关系",
+        "打开平台页面的服务端副作用未验证，不能承诺未读状态绝不变化"
+      ],
+      "errors": [
+        "ArgumentError：limit非范围内整数",
+        "AuthRequiredError：登录、Cookie缺失或接口401/403",
+        "CommandExecutionError：接口或数据结构异常",
+        "EmptyResultError：未找到结果（inbox未读过滤为空除外）"
+      ],
+      "verification": {
+        "source_review": "reviewed_pinned_2.0.1",
+        "live": "not_verified_for_current_candidate"
+      }
+    },
+    {
+      "command": "hunter-linkedin profile-lock-inspect",
+      "source": "linkedin-workflow/src/profile-lock.mjs",
+      "input": {
+        "input": {
+          "type": "JSON file path",
+          "required": true,
+          "fields": [
+            "profile"
+          ]
+        }
+      },
+      "output": {
+        "adapter_return": "object",
+        "product_json_path": "data",
+        "fields": [
+          "status",
+          "reason",
+          "revision",
+          "owner"
+        ],
+        "completeness": "字段随状态变化；absent只有status，recover absent另有dispatched:false。owner_exited只证明本机进程退出。"
+      },
+      "preconditions": [
+        "profile为1至80位字母数字下划线连字符",
+        "仅处理本产品临时目录中的该Profile锁"
+      ],
+      "effects": [
+        "只读检查本地锁与进程，不修改锁、不操作浏览器"
+      ],
+      "errors": [
+        "invalid_profile",
+        "本地文件读写错误"
+      ],
+      "verification": {
+        "source_review": "reviewed_current_source",
+        "live": "offline_child_process_test_passed; browser_stop_not_automatically_verified"
+      }
+    },
+    {
+      "command": "hunter-linkedin profile-lock-recover",
+      "source": "linkedin-workflow/src/profile-lock.mjs",
+      "input": {
+        "input": {
+          "type": "JSON file path",
+          "required": true,
+          "fields": [
+            "profile",
+            "revision",
+            "execution_stopped_confirmed"
+          ]
+        }
+      },
+      "output": {
+        "adapter_return": "object",
+        "product_json_path": "data",
+        "fields": [
+          "status",
+          "archive",
+          "dispatched",
+          "operation_outcome",
+          "instruction"
+        ],
+        "completeness": "字段随状态变化；absent只有status，recover absent另有dispatched:false。owner_exited只证明本机进程退出。"
+      },
+      "preconditions": [
+        "profile为1至80位字母数字下划线连字符",
+        "仅处理本产品临时目录中的该Profile锁",
+        "使用inspect返回的当前revision；execution_stopped_confirmed必须为true且有停止依据；持有者必须已退出"
+      ],
+      "effects": [
+        "归档锁，不重跑、不操作浏览器"
+      ],
+      "errors": [
+        "invalid_profile",
+        "本地文件读写错误",
+        "execution_stop_confirmation_required",
+        "lock_changed",
+        "lock_not_recoverable",
+        "recovery_busy"
+      ],
+      "verification": {
+        "source_review": "reviewed_current_source",
+        "live": "offline_child_process_test_passed; browser_stop_not_automatically_verified"
+      }
+    }
+  ]
+}

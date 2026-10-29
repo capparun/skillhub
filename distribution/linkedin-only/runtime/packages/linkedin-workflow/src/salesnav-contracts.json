@@ -1,0 +1,420 @@
+{
+  "schema_version": 1,
+  "contracts": [
+    {
+      "command": "hunter-linkedin salesnav-account-check",
+      "layer": "platform_operation",
+      "input": {
+        "required": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url"
+        ],
+        "properties": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url"
+        ],
+        "cli_wrapper_options": [
+          "request_budget",
+          "execution_context"
+        ],
+        "notes": [
+          "account-check禁止execution_context；每次完整诊断",
+          "带filters的搜索支持max_pages；旧company_headcount/geography简化路径为兼容接口，不支持完整分页",
+          "limit为累计人数；search-page需大于已获取数；每次max_pages为1至10",
+          "filters字段类型通过salesnav-capabilities的离线字段目录获取，实际权限须账号核验"
+        ]
+      },
+      "output": "账号身份、SalesNav访问和各项权益观察；未知不等于无权限",
+      "preconditions": [
+        "连接的Profile与本人身份匹配",
+        "实际SalesNav权限可用；未知不推断",
+        "用户已批准读取范围和预算"
+      ],
+      "effects": [
+        "只读网页操作",
+        "可能创建临时浏览器会话并保存本地回执"
+      ],
+      "errors": [
+        "invalid_input",
+        "identity_mismatch",
+        "profile_not_connected",
+        "access_denied",
+        "page_changed"
+      ],
+      "retry": "中断先诊断，不自动换账号或绕过权限；续读只能使用同账号查询的有效游标",
+      "verification": {
+        "contract": "source_reviewed",
+        "live": "not_checked_for_this_candidate"
+      }
+    },
+    {
+      "command": "hunter-linkedin salesnav-capabilities",
+      "layer": "platform_operation",
+      "input": {
+        "required": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url",
+          "search_type"
+        ],
+        "properties": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url",
+          "search_type"
+        ],
+        "cli_wrapper_options": [
+          "request_budget",
+          "execution_context"
+        ],
+        "notes": [
+          "account-check禁止execution_context；每次完整诊断",
+          "带filters的搜索支持max_pages；旧company_headcount/geography简化路径为兼容接口，不支持完整分页",
+          "limit为累计人数；search-page需大于已获取数；每次max_pages为1至10",
+          "filters字段类型通过salesnav-capabilities的离线字段目录获取，实际权限须账号核验"
+        ]
+      },
+      "output": "当前页面可见筛选字段、受限项和观察时间",
+      "preconditions": [
+        "连接的Profile与本人身份匹配",
+        "实际SalesNav权限可用；未知不推断",
+        "用户已批准读取范围和预算"
+      ],
+      "effects": [
+        "只读网页操作",
+        "可能创建临时浏览器会话并保存本地回执"
+      ],
+      "errors": [
+        "invalid_input",
+        "identity_mismatch",
+        "profile_not_connected",
+        "access_denied",
+        "page_changed"
+      ],
+      "retry": "中断先诊断，不自动换账号或绕过权限；续读只能使用同账号查询的有效游标",
+      "verification": {
+        "contract": "source_reviewed",
+        "live": "not_checked_for_this_candidate"
+      }
+    },
+    {
+      "command": "hunter-linkedin salesnav-filter-options",
+      "layer": "platform_operation",
+      "input": {
+        "required": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url",
+          "search_type",
+          "field"
+        ],
+        "properties": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url",
+          "search_type",
+          "field",
+          "query"
+        ],
+        "cli_wrapper_options": [
+          "request_budget",
+          "execution_context"
+        ],
+        "notes": [
+          "account-check禁止execution_context；每次完整诊断",
+          "带filters的搜索支持max_pages；旧company_headcount/geography简化路径为兼容接口，不支持完整分页",
+          "limit为累计人数；search-page需大于已获取数；每次max_pages为1至10",
+          "filters字段类型通过salesnav-capabilities的离线字段目录获取，实际权限须账号核验"
+        ]
+      },
+      "output": "候选选项、包含/排除模式、可选状态；不代表已应用",
+      "preconditions": [
+        "连接的Profile与本人身份匹配",
+        "实际SalesNav权限可用；未知不推断",
+        "用户已批准读取范围和预算"
+      ],
+      "effects": [
+        "只读网页操作",
+        "可能创建临时浏览器会话并保存本地回执"
+      ],
+      "errors": [
+        "invalid_input",
+        "identity_mismatch",
+        "profile_not_connected",
+        "access_denied",
+        "page_changed"
+      ],
+      "retry": "中断先诊断，不自动换账号或绕过权限；续读只能使用同账号查询的有效游标",
+      "verification": {
+        "contract": "source_reviewed",
+        "live": "not_checked_for_this_candidate"
+      }
+    },
+    {
+      "command": "hunter-linkedin salesnav-account-search",
+      "layer": "platform_operation",
+      "input": {
+        "required": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url",
+          "filters",
+          "limit"
+        ],
+        "properties": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url",
+          "filters",
+          "keywords",
+          "limit",
+          "max_pages"
+        ],
+        "cli_wrapper_options": [
+          "request_budget",
+          "execution_context",
+          "evidence_directory"
+        ],
+        "notes": [
+          "account-check禁止execution_context；每次完整诊断",
+          "带filters的搜索支持max_pages；旧company_headcount/geography简化路径为兼容接口，不支持完整分页",
+          "limit为累计人数；search-page需大于已获取数；每次max_pages为1至10",
+          "filters字段类型通过salesnav-capabilities的离线字段目录获取，实际权限须账号核验"
+        ]
+      },
+      "output": "results、returned_count、requested_filters、applied_filters、pagination、cursor、completeness",
+      "preconditions": [
+        "连接的Profile与本人身份匹配",
+        "实际SalesNav权限可用；未知不推断",
+        "用户已批准读取范围和预算"
+      ],
+      "effects": [
+        "只读网页操作",
+        "可能创建临时浏览器会话并保存本地回执"
+      ],
+      "errors": [
+        "invalid_input",
+        "identity_mismatch",
+        "profile_not_connected",
+        "access_denied",
+        "page_changed"
+      ],
+      "retry": "中断先诊断，不自动换账号或绕过权限；续读只能使用同账号查询的有效游标",
+      "verification": {
+        "contract": "source_reviewed",
+        "live": "not_checked_for_this_candidate"
+      }
+    },
+    {
+      "command": "hunter-linkedin salesnav-lead-search",
+      "layer": "platform_operation",
+      "input": {
+        "required": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url",
+          "filters",
+          "limit"
+        ],
+        "properties": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url",
+          "filters",
+          "keywords",
+          "limit",
+          "max_pages"
+        ],
+        "cli_wrapper_options": [
+          "request_budget",
+          "execution_context",
+          "evidence_directory"
+        ],
+        "notes": [
+          "account-check禁止execution_context；每次完整诊断",
+          "带filters的搜索支持max_pages；旧company_headcount/geography简化路径为兼容接口，不支持完整分页",
+          "limit为累计人数；search-page需大于已获取数；每次max_pages为1至10",
+          "filters字段类型通过salesnav-capabilities的离线字段目录获取，实际权限须账号核验"
+        ]
+      },
+      "output": "results、returned_count、requested_filters、applied_filters、pagination、cursor、completeness",
+      "preconditions": [
+        "连接的Profile与本人身份匹配",
+        "实际SalesNav权限可用；未知不推断",
+        "用户已批准读取范围和预算"
+      ],
+      "effects": [
+        "只读网页操作",
+        "可能创建临时浏览器会话并保存本地回执"
+      ],
+      "errors": [
+        "invalid_input",
+        "identity_mismatch",
+        "profile_not_connected",
+        "access_denied",
+        "page_changed"
+      ],
+      "retry": "中断先诊断，不自动换账号或绕过权限；续读只能使用同账号查询的有效游标",
+      "verification": {
+        "contract": "source_reviewed",
+        "live": "not_checked_for_this_candidate"
+      }
+    },
+    {
+      "command": "hunter-linkedin salesnav-search-page",
+      "layer": "platform_operation",
+      "input": {
+        "required": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url",
+          "cursor"
+        ],
+        "properties": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url",
+          "cursor",
+          "limit",
+          "max_pages"
+        ],
+        "cli_wrapper_options": [
+          "request_budget",
+          "execution_context",
+          "evidence_directory"
+        ],
+        "notes": [
+          "account-check禁止execution_context；每次完整诊断",
+          "带filters的搜索支持max_pages；旧company_headcount/geography简化路径为兼容接口，不支持完整分页",
+          "limit为累计人数；search-page需大于已获取数；每次max_pages为1至10",
+          "filters字段类型通过salesnav-capabilities的离线字段目录获取，实际权限须账号核验"
+        ]
+      },
+      "output": "累计results、新增数、分页覆盖、下一游标及中断原因",
+      "preconditions": [
+        "连接的Profile与本人身份匹配",
+        "实际SalesNav权限可用；未知不推断",
+        "用户已批准读取范围和预算"
+      ],
+      "effects": [
+        "只读网页操作",
+        "可能创建临时浏览器会话并保存本地回执"
+      ],
+      "errors": [
+        "invalid_input",
+        "identity_mismatch",
+        "profile_not_connected",
+        "access_denied",
+        "page_changed"
+      ],
+      "retry": "中断先诊断，不自动换账号或绕过权限；续读只能使用同账号查询的有效游标",
+      "verification": {
+        "contract": "source_reviewed",
+        "live": "not_checked_for_this_candidate"
+      }
+    },
+    {
+      "command": "hunter-linkedin salesnav-account-read",
+      "layer": "platform_operation",
+      "input": {
+        "required": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url",
+          "company"
+        ],
+        "properties": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url",
+          "company"
+        ],
+        "cli_wrapper_options": [
+          "request_budget",
+          "execution_context"
+        ],
+        "notes": [
+          "account-check禁止execution_context；每次完整诊断",
+          "带filters的搜索支持max_pages；旧company_headcount/geography简化路径为兼容接口，不支持完整分页",
+          "limit为累计人数；search-page需大于已获取数；每次max_pages为1至10",
+          "filters字段类型通过salesnav-capabilities的离线字段目录获取，实际权限须账号核验"
+        ]
+      },
+      "output": "公司results、逐字段状态、missing_fields；仅定义的页面区域",
+      "preconditions": [
+        "连接的Profile与本人身份匹配",
+        "实际SalesNav权限可用；未知不推断",
+        "用户已批准读取范围和预算"
+      ],
+      "effects": [
+        "只读网页操作",
+        "可能创建临时浏览器会话并保存本地回执"
+      ],
+      "errors": [
+        "invalid_input",
+        "identity_mismatch",
+        "profile_not_connected",
+        "access_denied",
+        "page_changed"
+      ],
+      "retry": "中断先诊断，不自动换账号或绕过权限；续读只能使用同账号查询的有效游标",
+      "verification": {
+        "contract": "source_reviewed",
+        "live": "not_checked_for_this_candidate"
+      }
+    },
+    {
+      "command": "hunter-linkedin salesnav-lead-read",
+      "layer": "platform_operation",
+      "input": {
+        "required": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url",
+          "lead"
+        ],
+        "properties": [
+          "profile",
+          "expected_identity",
+          "expected_profile_url",
+          "lead",
+          "include_about"
+        ],
+        "cli_wrapper_options": [
+          "request_budget",
+          "execution_context"
+        ],
+        "notes": [
+          "account-check禁止execution_context；每次完整诊断",
+          "带filters的搜索支持max_pages；旧company_headcount/geography简化路径为兼容接口，不支持完整分页",
+          "limit为累计人数；search-page需大于已获取数；每次max_pages为1至10",
+          "filters字段类型通过salesnav-capabilities的离线字段目录获取，实际权限须账号核验"
+        ]
+      },
+      "output": "人员results、当前任职、逐字段状态；include_about控制About展开",
+      "preconditions": [
+        "连接的Profile与本人身份匹配",
+        "实际SalesNav权限可用；未知不推断",
+        "用户已批准读取范围和预算"
+      ],
+      "effects": [
+        "只读网页操作",
+        "可能创建临时浏览器会话并保存本地回执"
+      ],
+      "errors": [
+        "invalid_input",
+        "identity_mismatch",
+        "profile_not_connected",
+        "access_denied",
+        "page_changed"
+      ],
+      "retry": "中断先诊断，不自动换账号或绕过权限；续读只能使用同账号查询的有效游标",
+      "verification": {
+        "contract": "source_reviewed",
+        "live": "not_checked_for_this_candidate"
+      }
+    }
+  ]
+}

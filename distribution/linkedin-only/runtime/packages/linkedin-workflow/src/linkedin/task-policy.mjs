@@ -18,7 +18,7 @@ export function checkBudget(record,operations,request,now=Date.now()){
  if(b.max_elapsed_seconds!==undefined&&elapsed>=b.max_elapsed_seconds)fail('task_time_budget_exhausted');
  const used=operations.reduce((n,o)=>{const r=reservation(o.request);return {pages:n.pages+r.pages,details:n.details+r.details};},{pages:0,details:0});
  const next=reservation(request);
- if(b.max_pages!==undefined && request.provider!=='salesnav'&&next.pages)fail('page_budget_unsupported');
+ if(b.max_pages!==undefined && request.provider!=='salesnav'&&next.pages&&!(request.provider==='linkedin'&&['person.search','search.next'].includes(request.operation)&&Number.isInteger(request.input.max_pages)&&request.input.max_pages>0))fail('page_budget_unsupported');
  if(b.max_pages!==undefined&&used.pages+next.pages>b.max_pages)fail('task_page_budget_exhausted');
  if(b.max_detail_reads!==undefined&&used.details+next.details>b.max_detail_reads)fail('task_detail_budget_exhausted');
  return {remaining_ms:b.max_elapsed_seconds===undefined?undefined:Math.max(1,Math.floor(b.max_elapsed_seconds*1000-(now-Date.parse(record.created_at))))};
@@ -28,11 +28,11 @@ export function summarizeCoverage(receipts){
  for(const receipt of receipts){
   const groups=receipt.data?.receipts?.map(r=>r.data)??[receipt.data];
   for(const d of groups){
-   if(!d || !['account-search','lead-search','search-page'].includes(d.operation))continue;
+   if(!d || !['account-search','lead-search','search-page','ordinary-people-search'].includes(d.operation))continue;
    if(!d.query_fingerprint){untracked=true;continue;}
    queries.set(d.query_fingerprint,{query_fingerprint:d.query_fingerprint,complete:d.completeness==='complete'&&!d.cursor&&!d.truncated,total_text:d.pagination?.total_text??null,returned_count:d.returned_count??0});
   }
-  if(receipt.provider==='linkedin'&&receipt.operation==='person.search')untracked=true;
+  if(receipt.provider==='linkedin'&&['person.search','search.next'].includes(receipt.operation)&&receipt.data?.operation!=='ordinary-people-search')untracked=true;
  }
  return {complete:!untracked&&queries.size>0&&[...queries.values()].every(q=>q.complete),queries:[...queries.values()],untracked};
 }

@@ -1,5 +1,6 @@
 import { getConfig, buildUrl, openGlluePage, isLoggedIn, waitForLogin } from './auth.js';
 import { hardGoto } from './navigation.js';
+import { verifyCandidateContacts } from './contact-readback.js';
 import { selectors } from './selectors.js';
 import { ArgumentError, AuthRequiredError, CommandExecutionError } from '@jackwener/opencli/errors';
 import { randomDelay, saveJson, timestampedFilename, parseJobApplicationText, parsePipelineStatus } from './utils.js';
@@ -120,13 +121,35 @@ export class GllueClient {
       await this.page.goto(url, { waitUntil: 'networkidle2' });
       await this.page.wait({ selector: '[data-test="list-action:candidate$pagination"]', timeout: 10 });
       await randomDelay(this.config.delays.pageLoad);
-      const rows = await this.collectRows(s.resultRow, limit - candidates.length, parser);
-      const state = await this.page.evaluate(() => ({
+      // Pagination exists before the SPA finishes its query. A transient zero
+      // must not be saved as "no match", especially before duplicate checking.
+      const readState = () => this.page.evaluate(() => ({
         url: location.href,
         page: Number(document.querySelector('.rlt-pagination-item-active')?.textContent?.trim()),
         nextDisabled: document.querySelector('.rlt-pagination-next')?.getAttribute('aria-disabled') === 'true',
-        total: Number(document.querySelector('.rlt-pagination-total-text')?.textContent?.match(/\d+/)?.[0])
+        total: Number(document.querySelector('.rlt-pagination-total-text')?.textContent?.replace(/,/g, '').match(/\d+/)?.[0]),
+        empty: /暂无数据|没有数据|没有搜索结果|No data/i.test(document.querySelector('.rlt-empty-description, .ant-empty-description')?.textContent ?? ''),
+        loading: [...document.querySelectorAll('.rlt-spin-spinning, .ant-spin-spinning')].some(el => el.getClientRects?.().length > 0)
       }));
+      let state, previous, ready = false;
+      for (let attempt = 0; attempt < 40; attempt++) {
+        state = await readState();
+        const actual = new URL(state.url), expected = new URL(url);
+        const valid = actual.origin === expected.origin && actual.pathname === expected.pathname &&
+          actual.searchParams.get('gql') === gql && Number(actual.searchParams.get('page')) === pageNumber &&
+          Number.isSafeInteger(state.total) && state.total >= 0 && !state.loading &&
+          (state.total === 0 ? state.empty === true : state.page === pageNumber);
+        const fingerprint = JSON.stringify([state.url, state.page, state.total, state.nextDisabled]);
+        if (valid && previous === fingerprint) { ready = true; break; }
+        previous = valid ? fingerprint : undefined;
+        if (attempt < 39) await randomDelay(this.config.delays.readiness ?? this.config.delays.pageLoad);
+      }
+      if (!ready) throw new CommandExecutionError('候选人列表尚未稳定，不能判定为无匹配；未保存结果');
+      const rows = await this.collectRows(s.resultRow, limit - candidates.length, parser);
+      const after = await readState();
+      if (after.url !== state.url || after.total !== state.total || !Object.is(after.page, state.page) || after.loading) {
+        throw new CommandExecutionError('候选人列表读取期间发生变化；未保存不完整结果');
+      }
       const actual = new URL(state.url);
       const expected = new URL(url);
       if (actual.origin !== expected.origin || actual.pathname !== expected.pathname ||
@@ -140,7 +163,7 @@ export class GllueClient {
       }
       // 当前页面实测每页 25 条。非末页少于本次请求量，说明列表可能仍在加载；
       // 不能继续翻页补齐 limit，否则会静默漏掉当前页尚未出现的候选人。
-      if (!state.nextDisabled && rows.length < Math.min(25, limit - candidates.length)) {
+      if (state.total > 0 && !state.nextDisabled && rows.length < Math.min(25, limit - candidates.length)) {
         throw new CommandExecutionError('分页结果数量不完整：非末页候选人尚未加载完成，未保存');
       }
       for (const row of rows) seenIds.add(row.id);
@@ -474,6 +497,11 @@ export class GllueClient {
     return { ...result, filePath };
   }
 
+  async verifyCandidateContacts(id, expected) {
+    const url = buildUrl(this.config, `${this.config.paths.candidateDetail}?id=${id}`);
+    return verifyCandidateContacts(this.page, url, expected);
+  }
+
   /**
    * 查看候选人详情
    */
@@ -565,11 +593,29 @@ export class GllueClient {
         contactStatus: { phone: contact('mobile').status, email: contact('email').status,
           wechat: contact('gllueextwechat').status, skype: contact('gllueextskype').status },
         lastContact: getField('lastContactDate'),
-        contactRecords: Array.from(document.querySelectorAll('[data-test="detail-field:note$content"]')).map(el => {
-          const block = el.closest('.detail-form');
-          const field = name => block?.querySelector(`[data-test="detail-field:note$${name}"]`)?.innerText?.trim() || '';
-          return { content: el.innerText?.trim() || '', date: field('date'), author: field('noteuser_set') };
-        }),
+        contactRecords: (() => {
+          // Current quick notes are feed cards, not legacy detail-form fields.
+          // Restrict to notes so project events and the quick-add labels are excluded.
+          const cards = Array.from(document.querySelectorAll('.feeds-note-card'))
+            .filter(el => !el.getClientRects || el.getClientRects().length > 0);
+          const modern = cards.map(block => {
+            const text = selector => block.querySelector(selector)?.innerText?.trim() || '';
+            return {
+              content: text('[data-test="detail-field:note$content"]') ||
+                text('.detail-card_title-container_left .rlt-tag-content-wrapper'),
+              date: text('.added-by-info .slds-col_bump-left'),
+              author: text('.added-by-info .wf-card-avatar .text-xs')
+            };
+          }).filter(row => row.content);
+          const legacy = Array.from(document.querySelectorAll('[data-test="detail-field:note$content"]'))
+            .filter(el => !el.closest('.feeds-note-card'))
+            .map(el => {
+              const block = el.closest('.detail-form');
+              const field = name => block?.querySelector(`[data-test="detail-field:note$${name}"]`)?.innerText?.trim() || '';
+              return { content: el.innerText?.trim() || '', date: field('date'), author: field('noteuser_set') };
+            });
+          return [...modern, ...legacy];
+        })(),
         contactRecordsScope: 'rendered_only',
         experience: readSections('candidateexperience', 'company_name', ['company_name', 'title', 'time', 'description']),
         education: readSections('candidateeducation', 'school', ['school', 'major', 'degree', 'time']),

@@ -149,11 +149,11 @@ const plan = {
   skillTargets: skillsRoots,
   runtimeSource: runtimeRoot,
   runtimeTarget: product ? path.join(targets.stateRoot, 'packages', product, 'runtime') : runtimeRoot,
-  pluginRegistrationTarget: plugins.length ? path.join(os.homedir(), '.opencli', 'plugins') : null,
-  pluginRegistrationScope: plugins.length ? 'user-global' : null,
+  pluginRegistrationTarget: null,
+  pluginRegistrationScope: 'product-local',
   stateTarget: targets.stateRoot,
   actions: [
-    ...(plugins.length > 0 ? ['install-runtime', 'install-plugins'] : []),
+    ...(plugins.length > 0 ? ['install-runtime', 'verify-bundled-plugins'] : []),
     'install-skills',
     ...(getArg('--product') ? ['write-installation-receipt'] : []),
   ],
@@ -204,44 +204,9 @@ if (plugins.length > 0) {
   const runtimePackages = new Map(
     (receipt.runtime?.packages ?? []).map(runtimePackage => [runtimePackage.name, runtimePackage]),
   );
-  // 已安装的同名插件先卸载再装(opencli install 不支持覆盖,file:// 路径随包变化)
-  const listResult = spawnInvocation(opencli, ['plugin', 'list']);
-  const installedPlugins = `${listResult.stdout || ''}${listResult.stderr || ''}`;
-  const opencliPluginsDir = path.join(os.homedir(), '.opencli', 'plugins');
   for (const plugin of plugins) {
-    const runtimePackage = runtimePackages.get(plugin);
-    if (!runtimePackage) throw new Error(`交付包缺少插件运行时: ${plugin}`);
-    const pluginPath = path.join(pluginRuntimeRoot, runtimePackage.path);
-    if (installedPlugins.includes(plugin)) {
-      // lock 有记录不等于可用:软链目标被系统清理后 existsSync 为假,
-      // 此时 uninstall 会抛"未安装"中断升级。悬空软链自行清理,
-      // install 的原子替换会覆盖 lock 记录。
-      const pluginLink = path.join(opencliPluginsDir, plugin);
-      let linkPresent = false;
-      let linkReachable = false;
-      let linkIsSymbolic = false;
-      try {
-        linkIsSymbolic = fs.lstatSync(pluginLink).isSymbolicLink();
-        linkPresent = true;
-        linkReachable = fs.existsSync(pluginLink);
-      } catch {
-        linkPresent = false;
-      }
-      if (linkPresent && linkIsSymbolic) {
-        // 只解除注册链接，绝不把链接目标递归交给宿主的删除 shim。
-        // 目标可能属于 TRAE / WorkBuddy / 其他 IDE 的共享运行时。
-        fs.unlinkSync(pluginLink);
-        console.warn(`警告: 插件 ${plugin} 使用注册软链接，已只解除链接本身。`);
-      } else if (linkPresent && linkReachable) {
-        runInvocation(opencli, ['plugin', 'uninstall', plugin]);
-      } else if (linkPresent) {
-        fs.unlinkSync(pluginLink);
-        console.warn(`警告: 插件 ${plugin} 的注册软链已悬空(目标目录已被清理),已清理残留软链。`);
-      } else {
-        console.warn(`警告: 插件 ${plugin} 有注册记录但安装目录不存在,直接重新安装。`);
-      }
-    }
-    runInvocation(opencli, ['plugin', 'install', pathToFileURL(pluginPath).href]);
+    if (!runtimePackages.has(plugin)) throw new Error(`交付包缺少插件运行时: ${plugin}`);
+    runInvocation(opencli, [plugin, '--help']);
   }
 }
 
@@ -255,6 +220,9 @@ for (const skillsRoot of skillsRoots) {
     }
     // 完整复制成功后再切换，复制中断时仍保留可用旧 Skill。
     const previousSkill = replaceDirectory(source, destination);
+    if (fs.existsSync(path.join(destination,'scripts','opencli.mjs'))) {
+      fs.writeFileSync(path.join(destination,'scripts','opencli-entry.json'), JSON.stringify({entry:path.join(pluginRuntimeRoot,'opencli.mjs')})+'\n');
+    }
     if (previousSkill) {
       try { fs.rmSync(previousSkill, {recursive:true, force:true}); }
       catch (error) { console.warn(`警告: 旧 Skill 保留在 ${previousSkill}，自动清理失败(${error.message})。`); }

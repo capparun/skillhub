@@ -50,8 +50,13 @@ export async function verifyCreatedCandidate(client, candidate, id) {
       ? [candidate.name, `${candidate.englishName} ${candidate.name}`]
       : [candidate.name];
     if (!expectedNames.some(name => same(actual.name, name))) mismatchedFields.push('name');
-    if (!same(actual.email, candidate.email)) mismatchedFields.push('email');
-    if (!same(actual.phone, candidate.mobile)) mismatchedFields.push('mobile');
+    const hidden = {};
+    if (actual.contactStatus?.email === 'not_expanded') hidden.email = candidate.email;
+    if (actual.contactStatus?.phone === 'not_expanded') hidden.mobile = candidate.mobile;
+    const contactEvidence = Object.keys(hidden).length && client.verifyCandidateContacts
+      ? await client.verifyCandidateContacts(id, hidden) : {};
+    if (!same(actual.email, candidate.email) && contactEvidence.email !== true) mismatchedFields.push('email');
+    if (!same(actual.phone, candidate.mobile) && contactEvidence.mobile !== true) mismatchedFields.push('mobile');
     if (!actual.experience?.some(row => same(row.company_name, candidate.company) && same(row.title, candidate.title))) {
       mismatchedFields.push('experience');
     }

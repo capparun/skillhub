@@ -15,10 +15,12 @@ try {
   Get-ChildItem $env:TEMP -Directory -Filter 'hunter-install-*' | Where-Object { $_.Name -notlike 'hunter-install-log-*' } | Remove-Item -Recurse -Force
   & node (Join-Path $installed 'doctor.mjs') --json
   if ($LASTEXITCODE -ne 0) { throw 'Persistent doctor failed' }
-  $cli = Join-Path $installed 'runtime/node_modules/@jackwener/opencli/dist/main.js'
-  $manifest = Get-Content (Join-Path $installed 'runtime/node_modules/@jackwener/opencli/package.json') -Raw | ConvertFrom-Json
-  $bin = if ($manifest.bin -is [string]) { $manifest.bin } else { $manifest.bin.opencli }
-  $cli = Join-Path (Join-Path $installed 'runtime/node_modules/@jackwener/opencli') $bin
+  $cli = Join-Path $installed 'runtime/opencli.mjs'
+  if (-not (Test-Path $cli)) {
+    $manifest = Get-Content (Join-Path $installed 'runtime/node_modules/@jackwener/opencli/package.json') -Raw | ConvertFrom-Json
+    $bin = if ($manifest.bin -is [string]) { $manifest.bin } else { $manifest.bin.opencli }
+    $cli = Join-Path (Join-Path $installed 'runtime/node_modules/@jackwener/opencli') $bin
+  }
   & node $cli gllue check-exists --help
   if ($LASTEXITCODE -ne 0) { throw 'Persistent Gllue command failed' }
   & node (Join-Path $installed 'install.mjs') --preflight --json --product gllue-only

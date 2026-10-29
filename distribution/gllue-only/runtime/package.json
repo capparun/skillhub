@@ -6,7 +6,11 @@
     "packages/*"
   ],
   "dependencies": {
-    "@jackwener/opencli": "1.8.8",
+    "@jackwener/opencli": "2.0.2",
     "gllue": "1.3.0"
+  },
+  "type": "module",
+  "scripts": {
+    "opencli": "node opencli.mjs"
   }
 }

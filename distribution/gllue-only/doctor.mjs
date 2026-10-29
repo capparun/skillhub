@@ -29,36 +29,11 @@ checkProcess(versionResult,
   versionText || '未找到',
 );
 
-const pluginResult = spawn(opencli, ['plugin', 'list']);
-const pluginText = `${pluginResult.stdout || ''}${pluginResult.stderr || ''}`;
-const danglingPlugins = new Map(
-  findDanglingPluginRegistrations().map(problem => [problem.name, problem.reason]),
-);
-for (const { name } of receipt.requirements?.plugins ?? []) {
-  const listed = pluginResult.status === 0 && pluginText.includes(name);
-  checkProcess(pluginResult, `插件 ${name}`, listed, listed ? '已注册' : '未安装');
-  if (!listed) continue;
-  // 可达性自检:注册记录还在但软链目标被清理时,命令会以难懂的方式失败。
-  const pluginDir = path.join(os.homedir(), '.opencli', 'plugins', name);
-  let reachable = false;
-  let realDir = '';
-  try {
-    realDir = fs.realpathSync(pluginDir);
-    reachable = fs.statSync(realDir).isDirectory();
-  } catch {
-    reachable = false;
-  }
-  const danglingReason = danglingPlugins.get(name);
-  check(
-    `插件 ${name} 目标可达`,
-    reachable && !danglingReason,
-    danglingReason ?? (reachable ? realDir : '注册软链悬空'),
-  );
-  if (reachable) {
-    const loadResult = spawn(opencli, ['gllue', '--help']);
-    const output = `${loadResult.stdout || ''}${loadResult.stderr || ''}`;
-    checkProcess(loadResult, 'Gllue 命令加载', loadResult.status === 0 && ['login','test-connection','session-watch','capability-probe','search-candidates','get-candidate','evaluate','compare-candidate','add-note','update-candidate','check-exists','search-jobs','get-job','add-candidate','associate-job'].every(name => output.includes(name)), loadResult.status === 0 ? '15 个 Gllue 命令可加载；租户、浏览器连接和业务查询仍需单独验证' : output.trim());
-  }
+for (const {name} of receipt.requirements?.plugins ?? []) {
+  const result=spawn(opencli,[name,'--help']);
+  const output=`${result.stdout||''}${result.stderr||''}`;
+  const loaded=result.status===0 && ['login','test-connection','session-watch','capability-probe','search-candidates','get-candidate','evaluate','compare-candidate','add-note','update-candidate','check-exists','search-jobs','get-job','add-candidate','associate-job'].every(command=>output.includes(command));
+  checkProcess(result,`插件 ${name}`,loaded,loaded?'独立运行时命令加载通过；真实网站待验收':`${result.stdout||''}${result.stderr||''}`);
 }
 
 for (const { id } of receipt.skills ?? []) {

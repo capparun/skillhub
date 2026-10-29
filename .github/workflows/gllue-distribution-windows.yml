@@ -2,12 +2,14 @@ name: Gllue distribution Windows acceptance
 on:
   workflow_dispatch:
   push:
-    branches: ['codex/gllue-windows-acceptance']
+    branches: ['codex/gllue-windows-acceptance', 'codex/gllue-opencli202-upgrade']
 permissions:
   contents: read
 jobs:
   install:
     runs-on: windows-latest
+    env:
+      GLLUE_RELEASE_MANIFEST: candidate-artifacts/gllue-only-v1.3.1-rc.1.json
     strategy:
       fail-fast: false
       matrix:
@@ -21,6 +23,8 @@ jobs:
       - name: Minimal directory relocation probe
         run: node scripts/gllue-directory-probe.mjs
       - run: npm ci
+      - name: Build current candidate
+        run: node scripts/build-gllue-release.mjs --preview-out candidate-artifacts
       - name: Official bootstrap in Windows PowerShell 5.1
         if: matrix.shell == 'powershell'
         shell: powershell

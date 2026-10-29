@@ -7,6 +7,6 @@
     "test": "node test/run-tests.js"
   },
   "peerDependencies": {
-    "@jackwener/opencli": ">=1.8.0"
+    "@jackwener/opencli": "2.0.2"
   }
 }

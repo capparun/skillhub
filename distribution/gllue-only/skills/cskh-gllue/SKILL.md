@@ -69,3 +69,7 @@ Skill 负责业务编排与审核交付；原子命令位于 `opencli gllue`，�
 
 参数见 [命令参考](references/commands.md)，顺序见 [工作流](references/workflows.md)。历史页面实现笔记不是当前验收证据。
 真实人才数据仅存当前任务本地私有目录，不提交仓库，不用于公开网站或示例。
+
+## OpenCLI 2.0 运行入口
+
+安装后优先使用 `node "<本 Skill 目录>/scripts/opencli.mjs" <原命令参数>`，例如 `gllue --help`。该入口读取安装器生成的持久运行时指针，不依赖全局插件发现。JSON 成功输出为 `{ "ok": true, "data": ... }`；失败为 `ok: false`，不得当作空结果。

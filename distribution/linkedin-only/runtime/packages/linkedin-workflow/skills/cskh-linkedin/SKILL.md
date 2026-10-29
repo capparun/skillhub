@@ -125,13 +125,13 @@ task-status 恢复账本和实体观察；按覆盖决定下一步。用 task-as
 普通列表搜索按“结果卡”分类，不看整页文本（共同联系人里也可能出现 LinkedIn Member）。回执 `identity_summary` 的卡片计数只统计本次运行：`cards_inspected`（读取卡片）、`named_cards`（具名卡）、`visibility_limited_cards`（明确不可见）、`unresolved_cards`（未解析）；`collected_total` 是含游标历史、按 profileId 跨页去重后的已返回具名人数。`page_observations` 逐页记录同一口径。
 
 - 具名候选人始终保留，不因同页出现匿名卡而丢弃整页结果。
-- 未解析卡片（尚未加载完成或身份无法读取）不允许跳过：`profiles_unresolved` 停止并诊断，先核对加载与页面证据。
+- 未解析卡片（尚未加载完成或身份无法读取）不丢弃、不静默跳过，也不阻塞翻页：计入 `unresolved_cards`，本次结果标为 partial；只有整页都无可读卡片且没有下一页时才以 `profiles_unresolved` 停止并诊断。
 - 已确认不可见身份（如 `LinkedIn Member`）默认 `anonymousPolicy=stop`：保留具名结果，`completeness=partial`，回执无游标，停止原因 `profile_identity_unavailable`。
 - 只有用户已了解“将跳过无法识别者”并明确同意，才使用 `anonymousPolicy=continue`；该策略仅在有下一页时继续，末页仍有匿名卡时以 `visibility_limited_pagination_end` 结束，不能称为 complete。
 - 匿名卡没有稳定身份，不得跨页去重，也不计入列表覆盖人数；覆盖只按具名 profileId/规范主页链接统计。
 - `cursor` 只在确有下一页或本页仍有未读卡片时返回；`pagination_unavailable`、`no_new_people`、末尾匿名页结束时不返回游标，不要据旧游标重读同一页。
 - `continue` 会跨匿名页继续翻页，直到达到用户设定的 max_pages/limit、检测到页面重复，或没有下一页；整页匿名本身不是停止理由。
-- 页面卡片状态稳定后即返回，15 秒只是慢加载的硬上限；慢页仍可能以 `profiles_unresolved` 结束，此时应报告未解析而非跳过。
+- 页面卡片状态稳定后即返回，15 秒只是慢加载的硬上限；慢页的未解析卡会计入 `unresolved_cards` 并让结果保持 partial，但不会阻塞后续页；仍应报告未解析数量。
 - 续读游标绑定筛选条件与该策略；改筛选或策略后沿用旧游标会被拒绝，CLI 实际返回 `search_cursor_query_mismatch`（游标 requestKey 已同时包含筛选与策略）。`cursor_policy_mismatch` 只在程序内直接传 previous 时出现，`cursor_query_mismatch` 对应查询指纹不一致；策略值非法返回 `invalid_anonymous_policy`。
 
 ## 故障处理

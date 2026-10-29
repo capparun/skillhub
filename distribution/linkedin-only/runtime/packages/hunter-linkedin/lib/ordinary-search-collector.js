@@ -29,9 +29,21 @@ export function inspectOrdinarySearchDOM(){
   // cards expose no profile link, so class-based selectors alone cannot see them.
   const lists=[...root.querySelectorAll('[role="list"]')].map(list=>{
     const all=[...list.querySelectorAll('[role="listitem"]')];
-    return {all,likes:all.filter(cardLike).length};
-  }).filter(entry=>entry.likes>0).sort((a,b)=>b.likes-a.likes);
-  if(lists.length){items=[...new Set(lists[0].all)];matchedSelector='[role="list"] [role="listitem"]';}
+    return {all,parent:list.parentElement,likes:all.filter(cardLike).length};
+  }).filter(entry=>entry.likes>0);
+  if(lists.length){
+    // LinkedIn can split one result page into sibling role=list containers (for example
+    // named cards in one list and visibility-limited cards in another). Group lists by
+    // their parent container and read the whole group instead of the single largest list.
+    const groups=new Map();
+    for(const entry of lists){
+      const key=entry.parent??root;
+      const group=groups.get(key)??{items:[],likes:0};
+      group.items.push(...entry.all);group.likes+=entry.likes;groups.set(key,group);
+    }
+    const best=[...groups.values()].sort((a,b)=>b.likes-a.likes)[0];
+    items=[...new Set(best.items)];matchedSelector='[role="list"] [role="listitem"]';
+  }
   else for(const selector of ['li.reusable-search__result-container','.entity-result__item','[data-test-id="search-result-card"]','[data-chameleon-result-urn]','li.artdeco-list__item']){
     const matches=[...root.querySelectorAll(selector)].filter(cardLike);
     if(matches.length){items=matches;matchedSelector=selector;break;}
@@ -152,8 +164,9 @@ export async function collectOrdinarySearch({read,navigate,scroll,searchUrl,limi
       if(pendingIds&&JSON.stringify(frame.results.map(r=>r.profileId))!==JSON.stringify(pendingIds))fail('resume_page_changed');
       pendingIds=null;
       let cardState=identityOf(frame);
-      // Unresolved cards are never skipped; anonymous-only pages follow the explicit policy.
-      if(!frame.results.length&&cardState.unresolved>0){complete=false;stop='profiles_unresolved';interruption={code:stop};break;}
+      // Unresolved cards are recorded, not skipped: one slow card must not discard a
+      // readable page. Only a page with nothing readable and no next page stops here.
+      if(!frame.results.length&&cardState.unresolved>0&&!(frame.pagination?.nextExists&&frame.pagination.nextEnabled)){complete=false;stop='profiles_unresolved';interruption={code:stop};break;}
       if(!frame.results.length&&cardState.visibility_limited>0&&anonymousPolicy==='stop'){complete=false;stop='profile_identity_unavailable';interruption={code:stop};break;}
       if(frame.noResults){complete=true;stop=results.length?'results_exhausted':'verified_empty';break;}
       let idle=0,priorTop=-1;
@@ -164,8 +177,8 @@ export async function collectOrdinarySearch({read,navigate,scroll,searchUrl,limi
           if(!seen.has(row.profileId)){if(results.length>=limit)break;seen.add(row.profileId);results.push(row);}
         }
         cardState=identityOf(frame);
-        // ready() already waited for these identities; scrolling can hide unresolved cards.
-        if(cardState.unresolved>0){complete=false;stop='profiles_unresolved';interruption={code:stop};break;}
+        // Unresolved cards are counted and reported, but they do not stop the page:
+        // scrolling may still reveal readable cards, and paging continues after them.
         if(cardState.visibility_limited>0&&anonymousPolicy==='stop'){complete=false;stop='profile_identity_unavailable';interruption={code:stop};break;}
         // Under 'continue', stop scrolling so virtualised anonymous cards are not replaced before page advance.
         if(cardState.visibility_limited>0)break;
@@ -231,6 +244,9 @@ export async function collectOrdinarySearch({read,navigate,scroll,searchUrl,limi
   }
   const pageObservationsList=[...pageObservations.values()].map(({ids,...rest})=>({...rest,observed_unique_people:ids.size}));
   const sum=key=>pageObservationsList.reduce((total,page)=>total+(page[key]??0),0);
+  // Unresolved cards never remove readable people, but they always keep the run partial.
+  const unresolvedTotal=sum('unresolved_cards');
+  if(unresolvedTotal>0)complete=false;
   // Card counts describe this run only; collected_total also includes people carried by a resume cursor.
   const identitySummary={cards_inspected:sum('cards_inspected'),named_cards:sum('named_people'),visibility_limited_cards:sum('anonymous_people'),unresolved_cards:sum('unresolved_cards'),collected_total:results.length,scope:'per_run_cards_with_cumulative_total',cross_page_dedupe:'named_only',anonymous_scope:'Anonymous cards have no stable profile identifier; counts are page observations and are not deduplicated across pages.',anonymous_policy:anonymousPolicy};
   // A cursor is only useful when there is a readable next page or unread cards on this page.

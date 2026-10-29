@@ -187,21 +187,47 @@ test('anonymous state is classified per result card, not from whole-page text',a
  assert.deepEqual([...result.results].map(r=>r.profileId),['one','two']);
 });
 
-test('unresolved cards stop the page without discarding named people',async()=>{
- const f=fixture([[row(1),row(2)]]);const read=f.config.read;
- const result=await collectOrdinarySearch({...f.config,waitMs:500,read:async()=>{const frame=await read();
-  return {...frame,identity:{identified:2,visibility_limited:3,unresolved:1,cards:6},anonymous_count:3};}});
- assert.deepEqual(result.results.map(r=>r.profileId),['1','2']);
+test('sibling result lists are merged so named cards are not dropped',async()=>{
+ const vm=await import('node:vm');const {inspectOrdinarySearchDOM}=await import('../lib/ordinary-search-collector.js');
+ const named=id=>({textContent:`${id} • 2nd Teacher`,querySelector:sel=>sel==='a[href*="/in/"]'?{href:`https://www.linkedin.com/in/${id}/`}:null});
+ const member=()=>({textContent:'LinkedIn Member\nTeacher',querySelector:()=>null});
+ const parent={};
+ const lists=[
+  {parentElement:parent,querySelectorAll:sel=>sel==='[role="listitem"]'?[named('a'),named('b'),named('c')]:[]},
+  {parentElement:parent,querySelectorAll:sel=>sel==='[role="listitem"]'?Array.from({length:7},member):[]}];
+ const root={querySelector:()=>null,querySelectorAll:sel=>sel==='[role="list"]'?lists:[]};
+ const document={querySelector:()=>root,querySelectorAll:()=>[],scrollingElement:{scrollTop:0,clientHeight:100,scrollHeight:100}};
+ const result=vm.runInNewContext('('+inspectOrdinarySearchDOM.toString()+')()',{document,location:new URL(url),URL,innerHeight:100,getComputedStyle:()=>({overflowY:'visible'})});
+ assert.equal(result.identity.identified,3);
+ assert.equal(result.identity.visibility_limited,7);
+ assert.equal(result.identity.cards,10);
+ assert.deepEqual([...result.results].map(r=>r.profileId),['a','b','c']);
+});
+
+test('unresolved cards keep readable people and continue to the next page',async()=>{
+ const f=fixture([[row(1),row(2)],[row(3)]]);const read=f.config.read;
+ f.config.read=async()=>{const frame=await read();
+  return frame.pagination.selectedPage===1
+    ?{...frame,identity:{identified:frame.results.length,visibility_limited:0,unresolved:1,cards:frame.results.length+1}}
+    :{...frame,identity:{identified:frame.results.length,visibility_limited:0,unresolved:0,cards:frame.results.length}};};
+ const result=await collectOrdinarySearch({...f.config,waitMs:500});
+ assert.deepEqual(result.results.map(r=>r.profileId),['1','2','3']);
+ assert.equal(result.completeness,'partial');
+ assert.equal(result.interruption,null);
+ assert.equal(result.identity_summary.unresolved_cards,1);
+ assert.equal(result.identity_summary.visibility_limited_cards,0);
+ assert.equal(result.identity_summary.named_cards,3);
+ assert.equal(f.calls.navigate.length,1);
+});
+
+test('a page with nothing readable and no next page reports unresolved',async()=>{
+ const f=fixture([[row(1)]]);const read=f.config.read;
+ f.config.read=async()=>({...(await read()),results:[],identity:{identified:0,visibility_limited:0,unresolved:1,cards:1},pagination:{nextExists:false,nextEnabled:false,selectedPage:1},noResults:false});
+ const result=await collectOrdinarySearch({...f.config,waitMs:500});
  assert.equal(result.stop_reason,'profiles_unresolved');
  assert.equal(result.interruption.code,'profiles_unresolved');
  assert.equal(result.completeness,'partial');
- assert.equal(result.resume,null);
- assert.equal(result.identity_summary.unresolved_cards,1);
- assert.equal(result.identity_summary.visibility_limited_cards,3);
- assert.equal(result.identity_summary.named_cards,2);
- assert.equal(result.identity_summary.collected_total,2);
- assert.equal(result.identity_summary.scope,'per_run_cards_with_cumulative_total');
- assert.equal(f.calls.navigate.length,0);
+ assert.equal(result.returned_count,0);
 });
 
 test('continue policy preserves named people and advances past anonymous cards',async()=>{

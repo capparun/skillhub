@@ -12,6 +12,7 @@ function fakePage({fatalAt, unreadable=new Set()}={}){
  return {calls,goto:async u=>{calls.goto.push(u);},wait:async s=>{calls.wait.push(s);},autoScroll:async o=>{calls.scroll.push(o);},
   evaluate:async script=>{calls.evaluate.push(script);
    const current=calls.goto.at(-1);
+   if(String(script).includes('nameReady'))return {nameReady:true,sections:'111',loading:false};
    if(String(script).includes('document.title'))return fatalAt&&current.endsWith(`/in/${fatalAt}/`)?{url:`${current}login`,title:'LinkedIn Login'}:{url:current,title:'LinkedIn'};
    const id=current.match(/\/in\/([^/]+)\//)?.[1];
    return unreadable.has(id)?{...row(id),name:''}:row(id);
@@ -29,6 +30,8 @@ test('reads several profiles sequentially in one page session and writes a check
  const lines=readFileSync(join(dir,'checkpoint.jsonl'),'utf8').trim().split('\n').map(JSON.parse);
  assert.deepEqual(lines.map(l=>l.status),['ok','ok','ok']);
  assert.equal(existsSync(join(dir,'summary.json')),true);
+ assert.deepEqual(page.calls.wait,[0.5,0.5,0.5]);
+ assert.equal(page.calls.scroll[0].times,2);
 });
 test('resume skips profiles already in the checkpoint',async t=>{
  const dir=mkdtempSync(join(tmpdir(),'profile-batch-resume-'));

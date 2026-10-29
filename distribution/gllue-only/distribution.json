@@ -82,16 +82,15 @@
     ]
   },
   "product": "gllue-only",
-  "version": "1.3.1-rc.1",
+  "version": "1.3.1",
   "windowsVerification": {
-    "url": "https://github.com/capparun/hunter-gllue/actions/runs/37217414953",
-    "revision": "f9df3a57040f81f395599e0d2d0ef38ae96e9378",
+    "url": "https://github.com/capparun/skillhub/actions/runs/40824128274",
+    "revision": "796641f",
     "nodeVersions": [
-      20,
       22
     ],
-    "scope": "plugin-tests, skill-tests, packaging, command-registration; customer-browser acceptance required"
+    "scope": "PowerShell 5.1/7 official bootstrap, isolated launcher, doctor, Chinese spaced paths, extraction removed; business browser not tested"
   },
-  "channel": "local-candidate",
-  "acceptance": "opencli-2.0.2-verification-pending"
+  "channel": "stable",
+  "acceptance": "opencli-2.0.2-offline-and-windows-install-verified-browser-not-retested"
 }

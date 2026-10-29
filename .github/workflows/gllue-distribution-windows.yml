@@ -9,7 +9,7 @@ jobs:
   install:
     runs-on: windows-latest
     env:
-      GLLUE_RELEASE_MANIFEST: candidate-artifacts/gllue-only-v1.3.1-rc.1.json
+      GLLUE_RELEASE_MANIFEST: candidate-artifacts/gllue-only-v1.3.1.json
     strategy:
       fail-fast: false
       matrix:

@@ -53,3 +53,9 @@ scripts/deploy-zeabur.sh   # 本地打包上传,自动触发构建
 - 发布新版:管理后台上传 + 点发布(自动下架旧版);撤回按钮用于回滚。
 - 数据库迁移:仓库新增 `db/migrations/00XX_*.sql` 后,重跑 `node scripts/migrate.mjs`。
 - 日志不记录明文令牌/密码;审计日志在 `/admin/audit`。
+
+## LinkedIn 发布包存放
+
+- `public/download/` 只保留 LinkedIn 当前版本(`soho-sourcing-v<当前版本>.tar.gz` + `.json`);其他产品线暂未迁移。
+- 历史版本归档在 GitHub Releases(tag `soho-sourcing-vX.Y.Z`),升级测试与回滚从那里下载,不再进 git。
+- 构建:`python3 scripts/build-linkedin-release.py`;版本取自 `distribution/linkedin-only/distribution.json`,归档为平铺布局,重复构建哈希一致。

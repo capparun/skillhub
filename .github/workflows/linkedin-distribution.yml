@@ -24,9 +24,14 @@ jobs:
           $stateRoot = Join-Path $testRoot 'state'
           $versions = @('2.1.2','2.1.3',$current) | Select-Object -Unique
           foreach ($version in $versions) {
+            $archive = "public/download/soho-sourcing-v$version.tar.gz"
+            if (!(Test-Path $archive)) {
+              $archive = Join-Path $testRoot "soho-sourcing-v$version.tar.gz"
+              Invoke-WebRequest -Uri "https://github.com/capparun/skillhub/releases/download/soho-sourcing-v$version/soho-sourcing-v$version.tar.gz" -OutFile $archive
+            }
             $extract = Join-Path $testRoot $version
             New-Item -ItemType Directory -Force $extract | Out-Null
-            tar -xzf "public/download/soho-sourcing-v$version.tar.gz" -C $extract
+            tar -xzf $archive -C $extract
             if ($LASTEXITCODE -ne 0) { throw 'Archive extraction failed' }
             node "$extract/install.mjs" --agent codex --skills-dir "$skillRoot" --state-dir "$stateRoot" --product soho-sourcing --version $version
             if ($LASTEXITCODE -ne 0) { throw 'Installation failed' }

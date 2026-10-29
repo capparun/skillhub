@@ -10,7 +10,7 @@ export const operations = {
   salesnav: {'account.inspect':'account-check','capabilities.list':'capabilities','filters.resolve':'filter-options','company.search':'account-search','person.search':'lead-search','search.next':'search-page','company.read':'account-read','person.read':'lead-read','operations.batch':'batch'},
   linkedin: {'account.inspect':['linkedin','whoami'],'person.search':['hunter-linkedin','scout'],'search.next':['hunter-linkedin','scout'],'person.read':['linkedin','profile-read'],'company.read':['linkedin','company'],'person.experience':['linkedin','profile-experience'],'person.projects':['linkedin','profile-projects']},
 };
-const searchParameters=['keyword','location','connection','currentCompany','pastCompany','school','industry','language','limit','max_pages','cursor'];
+const searchParameters=['keyword','location','connection','currentCompany','pastCompany','school','industry','language','limit','max_pages','cursor','anonymousPolicy'];
 const allowed = { 'account.inspect':[], 'person.search':searchParameters,'search.next':searchParameters, 'person.read':['profile_url'], 'company.read':['company'], 'person.experience':['profile_url'], 'person.projects':['profile_url'] };
 function fail(code) { throw Object.assign(new Error(code),{code}); }
 function object(x) { return x && typeof x === 'object' && !Array.isArray(x); }
@@ -38,6 +38,7 @@ export function compile(request, {linkedinEntry} = {}) {
     if (k==='limit' && (!Number.isInteger(v)||v<1||v>2500)) fail('invalid_limit');
     if (k==='max_pages' && (!Number.isInteger(v)||v<1||v>250)) fail('invalid_page_limit');
     if (k==='cursor' && (typeof v!=='string'||!isAbsolute(v))) fail('invalid_search_cursor');
+    if (k==='anonymousPolicy' && !['stop','continue'].includes(v)) fail('invalid_anonymous_policy');
     if (k==='profile_url' && !/^https:\/\/(www\.)?linkedin\.com\/in\/[^/?#]+\/?$/.test(v)) fail('invalid_profile_url');
     if(k==='company'){if(!/^(?:[\w-]+|https:\/\/www\.linkedin\.com\/company\/[\w%-]+\/?)$/.test(v))fail('invalid_company');args.push(String(v));}
     else args.push('--'+(k==='profile_url'?'profile-url':k==='max_pages'?'maxPages':k),String(v));
@@ -49,12 +50,24 @@ export function compile(request, {linkedinEntry} = {}) {
   args.push('-f','json','--site-session','persistent');
   return {executable:process.execPath,args,provider:'linkedin'};
 }
-export async function runProcess(plan, {timeoutMs=300000}={}) {
-  try { const r=await exec(plan.executable,plan.args,{timeout:Math.min(300000,timeoutMs),maxBuffer:16*1024*1024});return JSON.parse(r.stdout); }
+export async function runProcess(plan, {timeoutMs=300000,checkpointDirectory}={}) {
+  const budgetMs=Math.min(300000,timeoutMs);
+  // OpenCLI aborts a browser command after 60s by default, which kills any multi-page batch.
+  // Align the child browser timeout with this operation's own budget instead.
+  try {
+    const r=await exec(plan.executable,plan.args,{timeout:budgetMs,maxBuffer:16*1024*1024,env:{...process.env,HUNTER_SEARCH_CHECKPOINT_DIR:checkpointDirectory??'',OPENCLI_BROWSER_COMMAND_TIMEOUT:String(Math.max(60,Math.floor(budgetMs/1000)))}});
+    return JSON.parse(r.stdout);
+  }
   catch(e) { if(e.stdout){try{const body=JSON.parse(e.stdout);if(body?.ok===false)return body;}catch{ /* Do not expose stderr. */ }} fail(e.killed?'execution_outcome_unknown':'runtime_failure'); }
 }
 export function normalize(request, raw) {
   if (!object(raw)||typeof raw.ok!=='boolean') fail('invalid_response');
+  if(raw.ok===false && typeof raw.error?.message==='string' && /stale page identity/.test(raw.error.message)) {
+    return {schema_version:1,provider:request.provider,operation:request.operation,status:'blocked',qualification:'not_evaluated',data:null,
+      error:{code:'page_session_invalidated',message:'The browser page identity is no longer valid. Preserve prior results and diagnose the page session before a new authorized operation.',upstream:raw.error},
+      coverage:{total_text:null,returned_count:null,completeness:'unknown',stop_reason:'page_session_invalidated'},resume:null,
+      recovery:{automatic_retry:false,execution_state:'unknown',next_action:'inspect_page_session'}};
+  }
   let d=raw.data;
   if(raw.ok && request.provider==='linkedin' && d?.success===false){
     const upstream=typeof d.error==='string'&&/^[a-z_]+$/.test(d.error)?d.error:'upstream_failure';
@@ -84,6 +97,10 @@ export function normalize(request, raw) {
       try{const parsed=new URL(original);if(/^(www\.)?linkedin\.com$/.test(parsed.hostname)&&/^\/in\/[^/]+\/?$/.test(parsed.pathname)){parsed.search='';parsed.hash='';url=parsed.toString();}}catch{/* Preserve original evidence; do not invent URLs. */}
       return {...row,id:row.id??row.profileId,url,name:row.name??row.fullName??'',raw:row};
     });
+    if(request.operation==='person.read'&&request.input?.profile_url){
+      const canonical=url=>url.replace('://linkedin.com','://www.linkedin.com').replace(/\/$/,'');
+      if(results.some(row=>typeof row.url!=='string'||canonical(row.url)!==canonical(request.input.profile_url)))fail('profile_identity_mismatch');
+    }
     const missing=request.operation==='person.read'&&rows.some(r=>!r.about&&!r.experience);
     d={...(object(d)?d:{}),results,returned_count:d?.returned_count??results.length,completeness:missing?'partial':d?.completeness??(['person.search','search.next'].includes(request.operation)?'partial':'defined_sections_only'),raw_response:raw.data};
   }
@@ -97,10 +114,16 @@ export function normalize(request, raw) {
 export async function execute(request, options={}) {
   const plan=compile(request,options),deadline=Date.now()+(options.timeoutMs??300000);
   const runner=options.run??runProcess;
-  const run=async(p,stage)=>{try{const remaining=deadline-Date.now();if(remaining<=0)fail('execution_outcome_unknown');return await runner(p,{timeoutMs:remaining});}catch(error){if(error && typeof error==='object')error.stage=stage;throw error;}};
+  const run=async(p,stage)=>{try{const remaining=deadline-Date.now();if(remaining<=0)fail('execution_outcome_unknown');return await runner(p,{timeoutMs:remaining,...(stage==='platform_operation'&&request.provider==='linkedin'&&['person.search','search.next'].includes(request.operation)?{checkpointDirectory:options.checkpointDirectory}:{})});}catch(error){if(error && typeof error==='object')error.stage=stage;throw error;}};
   const work=async()=>{
     if(request.provider==='linkedin') {
-      const identity=await run(compile({...request,operation:'account.inspect',input:{}},options),'account_check');
+      const identityPlan=compile({...request,operation:'account.inspect',input:{}},options);
+      if(request.operation!=='account.inspect'){
+        const target=request.input.profile_url?.replace('://linkedin.com','://www.linkedin.com').replace(/\/?$/,'/')
+          ??(request.operation==='company.read'?(/^(https:)/.test(request.input.company)?request.input.company.replace(/\/?$/,'/'):'https://www.linkedin.com/company/'+request.input.company+'/'):'https://www.linkedin.com/search/results/people/');
+        identityPlan.args=[options.linkedinEntry,'--profile',request.account.profile,'hunter-linkedin','identity-check','--target-url',target,'-f','json','--site-session','persistent'];
+      }
+      const identity=await run(identityPlan,'account_check');
       const rows=identity.data;const who=Array.isArray(rows)?rows.length===1?rows[0]:null:rows;
       const slug=request.account.expected_profile_url.split('/').filter(Boolean).at(-1);
       if(identity.ok!==true||who?.logged_in!==true||who?.name!==request.account.expected_identity||who?.public_id!==slug) fail('identity_unconfirmed');
@@ -110,5 +133,5 @@ export async function execute(request, options={}) {
   };
   // SalesNav owns the same lock inside its CLI; nesting would deadlock.
   // Ordinary LinkedIn acquires it here, protecting both provider paths.
-  return request.provider==='linkedin'?withProfileLock(request.account.profile,work):work();
+  return request.provider==='linkedin'?withProfileLock(request.account.profile,work,options.profileLockRoot):work();
 }

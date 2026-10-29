@@ -20,6 +20,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $current = (Get-Content 'distribution/linkedin-only/distribution.json' -Raw | ConvertFrom-Json).version
           $testRoot = Join-Path $env:RUNNER_TEMP 'linkedin upgrade test'
+          New-Item -ItemType Directory -Force $testRoot | Out-Null
           $skillRoot = Join-Path $testRoot 'skills'
           $stateRoot = Join-Path $testRoot 'state'
           $versions = @('2.1.2','2.1.3',$current) | Select-Object -Unique

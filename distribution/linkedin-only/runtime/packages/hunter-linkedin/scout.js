@@ -1,8 +1,11 @@
+import {validateOrdinaryFilters,ordinaryFilterContract} from './lib/ordinary-filter-contract.js';
+import { collectOrdinarySearch, inspectOrdinarySearchDOM, scrollOrdinarySearchDOM } from './lib/ordinary-search-collector.js';
+import {requestFingerprint,sessionBinding,readSearchCursor,writeSearchCursor} from './lib/ordinary-search-cursor.js';
 import { cli, Strategy } from '@jackwener/opencli/registry';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { getLinkedInTier, getTierConfig, normalizeTier, hasCommercialUseLimit } from './lib/index.js';
+import { getLinkedInTier, getTierConfig, normalizeTier } from './lib/index.js';
 import {
   getPeopleSearchUrl,
 } from './lib/index.js';
@@ -10,7 +13,7 @@ import { validateTier } from './lib/index.js';
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-const CONFIG_DIR = path.join(os.homedir(), '.hunter', 'channels', 'linkedin');
+const CONFIG_DIR = path.join(process.env.HUNTER_DATA_DIR || path.join(os.homedir(), '.hunter'), 'channels', 'linkedin');
 const SCOUT_RESULT_FILE = path.join(CONFIG_DIR, 'linkedin-scout-result.json');
 
 function ensureConfigDir() {
@@ -31,6 +34,7 @@ function getGeoCache() {
 }
 
 function saveGeoCache(cache) {
+  ensureConfigDir();
   fs.writeFileSync(GEO_CACHE_FILE, JSON.stringify(cache, null, 2));
 }
 
@@ -532,119 +536,6 @@ function parseLinkedInNameCard(nameText) {
   return { name, title: cleanTitleNoise(title), degree: normalizeDegree(degree), location };
 }
 
-async function logPageState(page, label) {
-  const state = await page.evaluate(() => {
-    const url = window.location.href;
-    return {
-      url,
-      title: document.title,
-      isSales: url.includes('linkedin.com/sales') || url.includes('sales.linkedin.com'),
-      isLogin: url.includes('login') || url.includes('authwall') || document.body?.innerText?.includes('Sign in') || document.body?.innerText?.includes('Join now'),
-      inLinks: Array.from(document.querySelectorAll('a[href*="/in/"]')).length,
-      resultItems: Array.from(document.querySelectorAll('li.reusable-search__result-container, .entity-result__item, [data-test-id="search-result-card"], li.artdeco-list__item, [data-chameleon-result-urn]')).length,
-      bodyText: (document.body?.innerText || '').substring(0, 200).replace(/\s+/g, ' '),
-    };
-  }).catch(err => ({ error: err.message }));
-  console.error(`  [${label}] url=${state.url?.substring(0, 80)} | title=${state.title} | sales=${state.isSales} | login=${state.isLogin} | inLinks=${state.inLinks} | resultItems=${state.resultItems}`);
-  if (state.error) console.error(`  [${label}] error: ${state.error}`);
-  return state;
-}
-
-async function extractPeopleFromPage(page) {
-  return await page.evaluate(() => {
-    // 诊断信息
-    const diagnostics = {
-      title: document.title,
-      url: window.location.href,
-      htmlLength: document.documentElement.innerHTML.length,
-      inLinks: Array.from(document.querySelectorAll('a[href*="/in/"]')).length,
-    };
-
-    // 策略 1：从搜索结果列表项中提取（新 UI 适配）
-    const itemSelectors = [
-      'li.reusable-search__result-container',
-      '.entity-result__item',
-      '.search-results-container > ul > li',
-      '.search-results-container li',
-      '[data-test-id="search-result-card"]',
-      'li.artdeco-list__item',
-      '[data-chameleon-result-urn]',
-      'li[class*="search-result"]',
-      'li div[data-test-search-result]',
-      '.reusable-search__result-container',
-    ];
-
-    let items = [];
-    let matchedSelector = '';
-    for (const sel of itemSelectors) {
-      items = Array.from(document.querySelectorAll(sel));
-      if (items.length > 0) {
-        matchedSelector = sel;
-        break;
-      }
-    }
-    diagnostics.matchedSelector = matchedSelector;
-    diagnostics.matchedItems = items.length;
-
-    const results = [];
-    const seen = new Set();
-
-    for (const item of items) {
-      const link = item.querySelector('a[href*="/in/"]');
-      if (!link) continue;
-
-      const href = (link.href || '').split('?')[0];
-      if (!href || seen.has(href)) continue;
-
-      const parts = href.split('/in/');
-      const profileId = (parts[1] || '').replace(/\/$/, '');
-      if (!profileId) continue;
-
-      // 优先取 item 内全部文本；如果太短则 fallback 到链接文本
-      let rawName = (item.textContent || '').trim().replace(/\s+/g, ' ');
-      if (rawName.length < 10) {
-        rawName = (link.textContent || '').trim().replace(/\s+/g, ' ');
-      }
-
-      seen.add(href);
-      results.push({ profileId, rawName, profileUrl: href });
-    }
-
-    if (results.length > 0) {
-      diagnostics.strategy = 'list-item';
-      return { results, diagnostics };
-    }
-
-    // 策略 2：兜底，直接收集所有 /in/ 链接文本，但过滤噪音
-    const allLinks = Array.from(document.querySelectorAll('a[href*="/in/"]'));
-    const hrefMap = new Map();
-    allLinks.forEach(function(a) {
-      var href = (a.href || '').split('?')[0];
-      if (!href) return;
-      var text = (a.textContent || '').trim().replace(/\s+/g, ' ');
-      // 只保留看起来是完整结果卡的链接：包含名字+职位/地点/关系度信号
-      if (text.length < 30) return;
-      if (!/•\s*(1st|2nd|3rd|3rd\+|1度|2度|3度)/i.test(text) &&
-          !/(Connect|Follow|加为好友|关注|Message|发消息)/i.test(text)) {
-        return;
-      }
-      if (!hrefMap.has(href) || text.length > hrefMap.get(href).length) {
-        hrefMap.set(href, text);
-      }
-    });
-
-    hrefMap.forEach(function(text, href) {
-      var parts = href.split('/in/');
-      var profileId = (parts[1] || '').replace(/\/$/, '');
-      if (!profileId || seen.has(href)) return;
-      results.push({ profileId: profileId, rawName: text, profileUrl: href });
-    });
-
-    diagnostics.strategy = results.length > 0 ? 'fallback-links' : 'none';
-    return { results, diagnostics };
-  });
-}
-
 /**
  * 在"全部筛选条件"面板中根据区域和标签文字勾选复选框
  * 使用 MouseEvent 模拟点击，兼容 React 自定义组件
@@ -972,7 +863,7 @@ function buildEnhancedKeyword(keyword, { location = '', industry = '', language 
 }
 
 // 组装 scout 结果 meta：searchParams.limit 记录钳制后的实际值，
-// requestedLimit 保留用户原始请求，pagesViewed 记录实际浏览页数（首页 + 滚动轮次）
+// requestedLimit 保留用户原始请求；pagesViewed 仅记录实际读取页数，滚动另计。
 function buildScoutMeta({ searchParams, requestedLimit, pagesViewed, tier }) {
   return {
     platform: 'linkedin',
@@ -988,6 +879,8 @@ function buildScoutMeta({ searchParams, requestedLimit, pagesViewed, tier }) {
 cli({
   site: 'hunter-linkedin',
   name: 'scout',
+  validateArgs: validateOrdinaryFilters,
+  navigateBefore: false, // This adapter owns its search navigation; avoid an extra home visit.
   access: 'write',
   description: 'LinkedIn 增强人才搜索：补充 opencli people-search 不支持的 faceted filters（地点/人脉/公司/学校/行业/语言）。只输出统一 schema 的 JSON，不评估、不打标签、不生成报告。',
   domain: 'www.linkedin.com',
@@ -1002,16 +895,20 @@ cli({
     { name: 'school', type: 'string', default: '', description: '学校筛选，逗号分隔多选。只接受 LinkedIn 学校数字 ID' },
     { name: 'industry', type: 'string', default: '', description: '所属行业筛选，逗号分隔多选。Consumer 账号下会作为关键词增强拼入搜索词' },
     { name: 'language', type: 'string', default: '', description: '档案语言筛选，逗号分隔多选。Consumer 账号下会作为关键词增强拼入搜索词' },
-    { name: 'limit', type: 'int', default: 20, description: '搜索数量上限。CUL（Commercial Use Limit）账号会自动降到 10' },
+    { name: 'limit', type: 'int', default: 20, help: '累计唯一列表人数目标（1–2500）；默认任务覆盖量由Skill提供。平台限制另行返回。' },
+    { name: 'maxPages', type: 'int', required: false, help: '本次最多读取的真实页数（1–250），达到后返回续读游标；省略时按limit和平台终点停止' },
+    { name: 'cursor', type: 'string', required: false, help: '上次返回的本地续读文件；须同账号、同查询，limit为新的累计目标' },
     { name: 'output', type: 'string', default: '', description: '输出 JSON 文件路径。默认保存到 ~/.hunter/channels/linkedin/linkedin-scout-result.json' },
     { name: 'skipTierCheck', type: 'boolean', default: true, description: '跳过 LinkedIn 账号档位与实际会话的校验（默认跳过，可用 --skipTierCheck false 开启）' },
   ],
   func: async (page, kwargs) => {
+    validateOrdinaryFilters(kwargs);
     const { keyword, location, connection, currentCompany, pastCompany, school, industry, language } = kwargs;
     let limit = kwargs.limit;
     const requestedLimit = kwargs.limit;
 
     const linkedinTier = getLinkedInTier();
+    const consumerTier = isConsumerTier(linkedinTier);
     const tierCfg = getTierConfig(linkedinTier);
 
     const outputPath = kwargs.output || SCOUT_RESULT_FILE;
@@ -1026,22 +923,9 @@ cli({
     if (school) console.error(`学校: ${school}`);
     if (industry) console.error(`行业: ${industry}`);
 
-    // ---- 档位感知的默认行为与额度提醒 ----
-    if (hasCommercialUseLimit(linkedinTier)) {
-      // 官方：CUL 每月 1 日 PST 重置，profile 搜索计入；免费/Career 档不显示剩余额度
-      console.error('⚠️  CUL 提醒（官方）：本档账号存在商业用途上限（Commercial Use Limit），profile 搜索会计入额度，每月 1 日 PST 重置。');
-      console.error('    社区估计（非官方）：免费/Career 档 CUL 约 250-350 次/月，请控制搜索频率。');
-      if (limit > 10) {
-        console.error(`    已自动将 limit 从 ${limit} 降为 10 以节省 CUL；如需更多结果请按关键词分多组运行，或使用 hunter-linkedin recruiter-scout（Recruiter tier）。`);
-        limit = 10;
-      }
-    } else if (tierCfg.supportsRecruiterSearch || tierCfg.supportsSalesNavigatorSearch) {
-      console.error(`💡 提示：当前命令使用消费者搜索路径。${tierCfg.label} 用户也可使用对应专属命令获取更深筛选。`);
-    }
-    if (tierCfg.maxResultsPerSearch && limit > tierCfg.maxResultsPerSearch) {
-      console.error(`ℹ️  ${tierCfg.label} 本地单查询预算 ${tierCfg.maxResultsPerSearch}，limit 已钳制。`);
-      limit = tierCfg.maxResultsPerSearch;
-    }
+    if(kwargs.maxPages!==undefined&&(!Number.isInteger(kwargs.maxPages)||kwargs.maxPages<1||kwargs.maxPages>250))throw Object.assign(new Error('invalid_page_limit'),{code:'invalid_page_limit'});
+    if(!Number.isInteger(limit)||limit<1||limit>2500)throw Object.assign(new Error('invalid_search_limit'),{code:'invalid_search_limit'});
+    if(tierCfg.maxResultsPerSearch&&limit>tierCfg.maxResultsPerSearch)console.error(`ℹ️ 旧档位参考值${tierCfg.maxResultsPerSearch}不是官方额度，本轮按明确limit=${limit}执行；平台实际限制会返回。`);
 
     if (!kwargs.skipTierCheck) {
       const v = await validateTier(page, linkedinTier);
@@ -1051,7 +935,7 @@ cli({
       }
       if (v.severity === 'warning') {
         console.error(`\n⚠️  ${v.mismatchReason}`);
-        if (!v.verified) limit = Math.min(limit, 10);
+        if (!v.verified) return {success:false,error:'tier_unconfirmed',details:v};
       }
     }
 
@@ -1059,14 +943,14 @@ cli({
     // 公司名称/学校名称解析已移除，避免跳转公司页/学校页；如需名称对应的 ID，先用 linkedin-company-id-lookup 查询
     const currentCompanyIds = parseNumericIds(currentCompany);
     if (currentCompany && currentCompanyIds.length === 0) {
-      console.error('  ⚠️  --currentCompany 只接受数字 ID，未提供有效 ID，已忽略');
+      throw Object.assign(new Error('invalid_currentCompany_ids'),{code:'invalid_currentCompany_ids'});
     } else if (currentCompanyIds.length > 0) {
       console.error(`  ✓ 目前就职公司 ID: ${currentCompanyIds.join(', ')}`);
     }
 
     const pastCompanyIds = parseNumericIds(pastCompany);
     if (pastCompany && pastCompanyIds.length === 0) {
-      console.error('  ⚠️  --pastCompany 只接受数字 ID，未提供有效 ID，已忽略');
+      throw Object.assign(new Error('invalid_pastCompany_ids'),{code:'invalid_pastCompany_ids'});
     } else if (pastCompanyIds.length > 0) {
       console.error(`  ✓ 曾经就职公司 ID: ${pastCompanyIds.join(', ')}`);
     }
@@ -1087,15 +971,15 @@ cli({
           unknownLocations.push(item);
         }
       }
-      if (geoIds.length > 0 && !isConsumerTier) console.error(`  📍 已解析地点: ${geoIds.join(', ')}`);
-      if (geoIds.length > 0 && isConsumerTier) console.error(`  📍 地点已加入关键词增强`);
-      if (unknownLocations.length > 0 && !isConsumerTier) console.error(`  ⏳ 地点将走 facet: ${unknownLocations.join(', ')}`);
-      if (unknownLocations.length > 0 && isConsumerTier) console.error(`  📝 未知地点已加入关键词增强: ${unknownLocations.join(', ')}`);
+      if (geoIds.length > 0 && !consumerTier) console.error(`  📍 已解析地点: ${geoIds.join(', ')}`);
+      if (geoIds.length > 0 && consumerTier) console.error(`  📍 地点已加入关键词增强`);
+      if (unknownLocations.length > 0 && !consumerTier) console.error(`  ⏳ 地点将走 facet: ${unknownLocations.join(', ')}`);
+      if (unknownLocations.length > 0 && consumerTier) console.error(`  📝 未知地点已加入关键词增强: ${unknownLocations.join(', ')}`);
     }
 
     const schoolIds = parseNumericIds(school);
     if (school && schoolIds.length === 0) {
-      console.error('  ⚠️  --school 只接受数字 ID，未提供有效 ID，已忽略');
+      throw Object.assign(new Error('invalid_school_ids'),{code:'invalid_school_ids'});
     } else if (schoolIds.length > 0) {
       console.error(`  ✓ 学校 ID: ${schoolIds.join(', ')}`);
     }
@@ -1113,8 +997,8 @@ cli({
           unknownLanguages.push(item);
         }
       }
-      if (languageCodes.length > 0 && !isConsumerTier) console.error(`  🌐 已解析语言: ${languageCodes.join(', ')}`);
-      if (languageCodes.length > 0 && isConsumerTier) console.error(`  🌐 语言已加入关键词增强`);
+      if (languageCodes.length > 0 && !consumerTier) console.error(`  🌐 已解析语言: ${languageCodes.join(', ')}`);
+      if (languageCodes.length > 0 && consumerTier) console.error(`  🌐 语言已加入关键词增强`);
     }
 
     // 行业筛选加入URL
@@ -1135,10 +1019,10 @@ cli({
           unknownIndustries.push(item);
         }
       }
-      if (industryIds.length > 0 && !isConsumerTier) console.error(`  🏭 已解析行业: ${industryIds.join(', ')}`);
-      if (industryIds.length > 0 && isConsumerTier) console.error(`  🏭 行业已加入关键词增强`);
-      if (unknownIndustries.length > 0 && !isConsumerTier) console.error(`  ⏳ 行业将走 facet: ${unknownIndustries.join(', ')}`);
-      if (unknownIndustries.length > 0 && isConsumerTier) console.error(`  📝 未知行业已加入关键词增强: ${unknownIndustries.join(', ')}`);
+      if (industryIds.length > 0 && !consumerTier) console.error(`  🏭 已解析行业: ${industryIds.join(', ')}`);
+      if (industryIds.length > 0 && consumerTier) console.error(`  🏭 行业已加入关键词增强`);
+      if (unknownIndustries.length > 0 && !consumerTier) console.error(`  ⏳ 行业将走 facet: ${unknownIndustries.join(', ')}`);
+      if (unknownIndustries.length > 0 && consumerTier) console.error(`  📝 未知行业已加入关键词增强: ${unknownIndustries.join(', ')}`);
     }
 
     // 构建增强关键词：Free/Consumer 账号下，LinkedIn 的 faceted URL 参数（geoUrn/industry/profileLanguage）
@@ -1155,222 +1039,52 @@ cli({
       currentCompanyIds,
       pastCompanyIds,
       // Consumer 账号下 geo/industry/language 走关键词 fallback，不传 faceted URL 参数
-      geoIds: isConsumerTier ? [] : geoIds,
+      geoIds: consumerTier ? [] : geoIds,
       schoolIds,
-      languageCodes: isConsumerTier ? [] : languageCodes,
-      industryIds: isConsumerTier ? [] : industryIds,
+      languageCodes: consumerTier ? [] : languageCodes,
+      industryIds: consumerTier ? [] : industryIds,
       forceConsumer: true,
     });
     console.error(`\n🔍 搜索URL: ${searchUrl}`);
 
-    await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-
-    // 早期登录态检查：LinkedIn 的 JSESSIONID cookie 是已登录的核心标志
-    // 如果缺失，后续复杂 faceted URL 会被重定向到 premium/sales/jobs 等推广页
-    await sleep(1500);
-    let cookies = [];
-    try {
-      cookies = await page.getCookies({ url: 'https://www.linkedin.com' });
-    } catch (e) {
-      console.error(`  ⚠️  无法读取 LinkedIn cookie: ${e.message}`);
-    }
-    const jsession = cookies.find((c) => c.name === 'JSESSIONID')?.value;
-    if (!jsession) {
-      console.error('❌ 未检测到 LinkedIn 登录态（缺少 JSESSIONID cookie），请先登录 LinkedIn');
-      return { success: false, error: 'not_logged_in' };
-    }
-    console.error('  ✓ 已检测到 LinkedIn 登录态');
-
-    // URL 跳转追踪：高频连续采样，捕获 LinkedIn 的推广重定向
-    console.error('🔍 追踪页面跳转（100ms 采样）...');
-    const urlHistory = [];
-    for (let i = 0; i < 50; i++) {
-      const u = await page.evaluate('window.location.href').catch(() => null);
-      if (u) {
-        const last = urlHistory[urlHistory.length - 1]?.url;
-        if (u !== last) {
-          urlHistory.push({ t: (i * 100) / 1000, url: u });
-          console.error(`   t=${((i * 100) / 1000).toFixed(1)}s url=${u.substring(0, 120)}`);
-        }
-      }
-      await sleep(100);
-    }
-
-    await logPageState(page, 'after-goto');
-
-    const currentUrl = await page.evaluate('window.location.href');
-    const currentTitle = await page.evaluate('document.title');
-    const isPremiumUpsell = currentUrl.includes('linkedin.com/premium') ||
-                            currentUrl.includes('upsellOrderOrigin') ||
-                            currentUrl.includes('guest_login_sales_nav') ||
-                            currentTitle.includes('Subscribe to LinkedIn Premium') ||
-                            currentTitle.includes('Try LinkedIn Premium');
-    if (currentUrl.includes('login') || currentUrl.includes('authwall') || isPremiumUpsell) {
-      if (isPremiumUpsell) {
-        console.error('❌ LinkedIn 把搜索请求重定向到了 Premium/Sales Navigator 推广页，当前浏览器未登录或登录态已失效');
-        console.error(`   url=${currentUrl}`);
-      } else {
-        console.error('❌ 未登录 LinkedIn');
-      }
-      return { success: false, error: 'not_logged_in' };
-    }
-
-    console.error('✓ 页面已加载');
-
-    // 应用页面筛选（consumer tier 下 location/industry/language 已走关键词 fallback，
-    // currentCompany/pastCompany/school 只接受数字 ID，均无需再打开 facet 面板）
-    const hasResolvablePanelFilters = !isConsumerTier && (unknownLocations.length || unknownLanguages.length || unknownIndustries.length);
-    if (hasResolvablePanelFilters) {
-      await applyFilters(page, { unknownLocations, unknownLanguages, unknownIndustries });
-      await logPageState(page, 'after-filters');
-    } else {
-      console.error('  ✓ 所有可解析筛选条件已通过 URL 参数加载，跳过 facet 面板');
-    }
-
-    // 验证筛选后URL是否变化
-    const filteredUrl = await page.evaluate('window.location.href');
-    console.error(`🔍 筛选后URL: ${filteredUrl.substring(0, 120)}...`);
-
-    // 等待搜索结果真正渲染（LinkedIn 是客户端异步加载）
-    console.error('⏳ 等待搜索结果渲染...');
-    let waited = 0;
-    let searchRendered = false;
-    while (waited < 15000) {
-      const probe = await page.evaluate(() => {
-        const url = window.location.href;
-        const bodyText = document.body?.innerText || '';
-        const inLinks = Array.from(document.querySelectorAll('a[href*="/in/"]'));
-        const resultItems = Array.from(document.querySelectorAll('li.reusable-search__result-container, .entity-result__item, [data-test-id="search-result-card"], li.artdeco-list__item, [data-chameleon-result-urn]'));
-        const noResults = bodyText.includes('No results found') ||
-                         bodyText.includes('We couldn’t find') ||
-                         bodyText.includes('没有结果') ||
-                         bodyText.includes('未找到');
-        const signInWall = bodyText.includes('Sign in') ||
-                          bodyText.includes('Join now') ||
-                          bodyText.includes('登录') ||
-                          bodyText.includes('注册');
-        const salesPitch = url.includes('linkedin.com/sales') ||
-                           url.includes('sales.linkedin.com') ||
-                           url.includes('linkedin.com/premium') ||
-                           url.includes('upsellOrderOrigin') ||
-                           url.includes('guest_login_sales_nav') ||
-                           bodyText.includes('Upgrade to search more') ||
-                           bodyText.includes('Unlock more results') ||
-                           url.includes('linkedin.com/talent') ||
-                           url.includes('linkedin.com/jobs');
-        return {
-          url,
-          inLinks: inLinks.length,
-          resultItems: resultItems.length,
-          noResults,
-          signInWall,
-          salesPitch,
-          title: document.title,
-          bodyPreview: bodyText.substring(0, 120).replace(/\s+/g, ' '),
-        };
-      });
-
-      if (probe.salesPitch) {
-        console.error('⚠️ LinkedIn 跳转/插入了 Sales Navigator 推广页');
-        console.error(`   url=${probe.url}`);
-        console.error(`   title=${probe.title}`);
-        console.error(`   preview=${probe.bodyPreview}`);
-        return { success: false, error: 'linkedin_sales_pitch', details: probe };
-      }
-      if (probe.signInWall) {
-        console.error('❌ LinkedIn 要求登录（页面出现 Sign in / 登录提示）');
-        return { success: false, error: 'not_logged_in', details: probe };
-      }
-      if (probe.noResults) {
-        console.error('ℹ️ LinkedIn 返回"无结果"，可能是搜索条件太严格或该关键词在此地点没有结果');
-        return { success: false, error: 'linkedin_no_results', details: probe };
-      }
-      if (probe.inLinks > 0 || probe.resultItems > 0) {
-        searchRendered = true;
-        console.error(`  ✓ 搜索结果已渲染（inLinks=${probe.inLinks}, resultItems=${probe.resultItems}）`);
-        break;
-      }
-
-      await sleep(1000);
-      waited += 1000;
-    }
-    if (!searchRendered) {
-      console.error('❌ 等待 15 秒后仍未检测到搜索结果，可能原因：');
-      console.error('   1. 当前 Chrome 未登录 LinkedIn');
-      console.error('   2. LinkedIn 页面结构变化');
-      console.error('   3. 网络/代理导致搜索结果 API 未返回');
-      return { success: false, error: 'search_not_rendered' };
-    }
-    let allResults = [];
-
-    // 首次提取
-    const firstExtract = await extractPeopleFromPage(page);
-    console.error('  诊断:', JSON.stringify(firstExtract.diagnostics));
-    const firstBatch = firstExtract.results || [];
-    if (firstBatch?.length > 0) {
-      allResults = [...firstBatch];
-      console.error(`📊 首次加载 ${firstBatch.length} 条`);
-    }
-
-    // 滚动加载更多
-    let scrollRounds = 0;
-    if (allResults.length < limit) {
-      for (let i = 0; i < 10 && allResults.length < limit; i++) {
-        await page.evaluate('window.scrollBy(0, 800)');
-        scrollRounds++;
-        await sleep(3000);
-        await logPageState(page, `after-scroll-${i + 1}`);
-
-        const newExtract = await extractPeopleFromPage(page);
-        const newBatch = newExtract.results || [];
-        if (newBatch?.length > 0) {
-          const existingIds = new Set(allResults.map(r => r.profileId));
-          const uniqueNew = newBatch.filter(r => r.profileId && !existingIds.has(r.profileId));
-          allResults.push(...uniqueNew);
-          console.error(`   滚动${i + 1}: +${uniqueNew.length} 条，共 ${allResults.length} 条`);
-
-          if (uniqueNew.length === 0) {
-            console.error('   ⏹️ 没有新结果，停止滚动');
-            break;
-          }
-        }
+    const cookies=await page.getCookies({url:'https://www.linkedin.com'});
+    const binding=sessionBinding(cookies);
+    const requestParams={searchUrl,keyword,location:location??'',connection:connection??'',currentCompany:currentCompany??'',pastCompany:pastCompany??'',school:school??'',industry:industry??'',language:language??''};
+    const requestKey=requestFingerprint(requestParams);
+    const previous=kwargs.cursor?readSearchCursor(kwargs.cursor,{binding,requestKey}):undefined;
+    let baseUrl=previous?.base_url??searchUrl;
+    let uiResolved=previous?.ui_resolved??[];
+    const initialStarted=performance.now();
+    if(!previous){
+      await page.goto(searchUrl,{waitUntil:'domcontentloaded',timeout:60000});
+      const hasResolvablePanelFilters=!consumerTier&&(unknownLocations.length||unknownLanguages.length||unknownIndustries.length);
+      if(hasResolvablePanelFilters){
+        // Existing uncommon facet resolution remains scoped to the original query.
+        const initial=await page.evaluate(inspectOrdinarySearchDOM);
+        if(initial.login||initial.verification||initial.blocked)throw Object.assign(new Error('search_blocked'),{code:'search_blocked'});
+        uiResolved=await applyFilters(page,{unknownLocations,unknownLanguages,unknownIndustries});
+        const required=[...unknownLocations.map(v=>'location='+v),...unknownIndustries.map(v=>'industry='+v),...unknownLanguages.map(v=>'language='+v)];
+        if(required.some(v=>!uiResolved.includes(v)))throw Object.assign(new Error('filter_not_applied'),{code:'filter_not_applied'});
+        baseUrl=await page.evaluate('window.location.href');
       }
     }
-
-    // 解析 rawName 为结构化数据
-    allResults = allResults.map(r => {
-      const parsed = parseLinkedInNameCard(r.rawName);
-      return {
-        ...r,
-        name: parsed.name,
-        title: parsed.title,
-        location: parsed.location,
-        connectionDegree: parsed.degree,
-        headline: parsed.title
-      };
+    const filterContract=ordinaryFilterContract(kwargs,{consumer:consumerTier,searchUrl:baseUrl,uiResolved});
+    const collection=await collectOrdinarySearch({
+      searchUrl:baseUrl,limit,maxPages:kwargs.maxPages,previous,
+      read:()=>page.evaluate(inspectOrdinarySearchDOM),
+      navigate:url=>page.goto(url,{waitUntil:'domcontentloaded',timeout:60000}),
+      scroll:()=>page.evaluate(scrollOrdinarySearchDOM),
     });
-
-    console.error(`\n📊 共收集 ${allResults.length} 个候选人`);
-
-    // 客户端过滤：仅对走 facet 面板的地点进行兜底过滤（走 URL 的地点的已由 LinkedIn 处理）
-    if (unknownLocations.length > 0 && allResults.length > 0) {
-      const beforeFilter = allResults.length;
-      allResults = allResults.filter(r => {
-        if (!r.location) return true;
-        return unknownLocations.some(loc => r.location.includes(loc));
-      });
-      if (allResults.length < beforeFilter) {
-        console.error(`  🔄 客户端地点过滤(facet兜底): ${beforeFilter} → ${allResults.length} 人`);
-      }
+    collection.timing.operation_ms=performance.now()-initialStarted;
+    collection.timing.initial_setup_ms=collection.timing.operation_ms-collection.timing.total_ms;
+    let cursor=null;
+    if(collection.resume){
+      try{cursor=writeSearchCursor({directory:path.join(CONFIG_DIR,'search-cursors'),binding,requestKey,progress:{...collection.resume,base_url:baseUrl,ui_resolved:uiResolved}});}
+      catch{collection.interruption={code:'checkpoint_write_failed'};collection.stop_reason='checkpoint_write_failed';}
     }
-
-    if (allResults.length === 0) {
-      console.error('⚠️ 未找到候选人，可能原因：');
-      console.error('   1. 搜索条件过于严格');
-      console.error('   2. LinkedIn 页面结构变化');
-      console.error('   3. 需要登录或验证');
-      return { success: false, error: 'no_results' };
-    }
+    let allResults=collection.results.map(r=>{const parsed=parseLinkedInNameCard(r.rawName);return {...r,name:parsed.name,title:parsed.title,location:parsed.location,connectionDegree:parsed.degree,headline:parsed.title};});
+    const beforeClientFilter=allResults.length;
+    if(unknownLocations.length>0)allResults=allResults.filter(r=>!r.location||unknownLocations.some(loc=>r.location.includes(loc)));
 
     // 清理地点噪音
     allResults.forEach(r => {
@@ -1391,13 +1105,29 @@ cli({
     }
 
     // 统一 schema 输出
+    const previousIds=new Set((previous?.results??[]).map(row=>row.profileId));
     const result = {
       meta: buildScoutMeta({
         searchParams: { keyword, location, connection, currentCompany, pastCompany, school, industry, language, limit },
         requestedLimit,
-        pagesViewed: scrollRounds + 1,
+        pagesViewed: collection.pages_viewed,
         tier: linkedinTier,
       }),
+      filter_contract:filterContract,
+      filter_observations:collection.filter_observations,
+      page_observations:collection.page_observations,
+      operation:'ordinary-people-search',
+      query_fingerprint:collection.query_fingerprint,
+      returned_count: allResults.length,
+      new_count: allResults.filter(row=>!previousIds.has(row.profileId)).length,
+      completeness: collection.completeness,
+      truncated: collection.truncated,
+      stop_reason: collection.stop_reason,
+      cursor,
+      interruption: collection.interruption,
+      pagination:{pages_viewed:collection.pages_viewed,scroll_rounds:collection.scroll_rounds,total_text:null},
+      timing:collection.timing,
+      list_coverage:{unique_collected:beforeClientFilter,new_unique_collected:collection.new_count,client_filtered_out:beforeClientFilter-allResults.length},
       candidates: allResults.map((c, i) => ({
         rank: i + 1,
         profileId: c.profileId,

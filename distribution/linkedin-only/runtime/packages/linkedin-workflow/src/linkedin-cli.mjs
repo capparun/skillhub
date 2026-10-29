@@ -34,4 +34,4 @@ try {
   else throw new Error('unsupported_command');
  }
  console.log(JSON.stringify({ok:true,data}));
-}catch(e){console.log(JSON.stringify({ok:false,error:{code:e.code??'invalid_input'}}));process.exitCode=2;}
+}catch(e){console.log(JSON.stringify({ok:false,error:{code:e.code??'invalid_input',...(e.stage?{stage:e.stage}:{})}}));process.exitCode=2;}

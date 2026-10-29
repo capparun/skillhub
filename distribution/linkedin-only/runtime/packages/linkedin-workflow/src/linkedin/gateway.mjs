@@ -8,9 +8,10 @@ const exec = promisify(execFile);
 const sn = fileURLToPath(new URL('../cli.mjs', import.meta.url));
 export const operations = {
   salesnav: {'account.inspect':'account-check','capabilities.list':'capabilities','filters.resolve':'filter-options','company.search':'account-search','person.search':'lead-search','search.next':'search-page','company.read':'account-read','person.read':'lead-read','operations.batch':'batch'},
-  linkedin: {'account.inspect':['linkedin','whoami'],'person.search':['hunter-linkedin','scout'],'person.read':['linkedin','profile-read'],'company.read':['linkedin','company'],'person.experience':['linkedin','profile-experience'],'person.projects':['linkedin','profile-projects']},
+  linkedin: {'account.inspect':['linkedin','whoami'],'person.search':['hunter-linkedin','scout'],'search.next':['hunter-linkedin','scout'],'person.read':['linkedin','profile-read'],'company.read':['linkedin','company'],'person.experience':['linkedin','profile-experience'],'person.projects':['linkedin','profile-projects']},
 };
-const allowed = { 'account.inspect':[], 'person.search':['keyword','location','connection','currentCompany','pastCompany','school','industry','language','limit'], 'person.read':['profile_url'], 'company.read':['company'], 'person.experience':['profile_url'], 'person.projects':['profile_url'] };
+const searchParameters=['keyword','location','connection','currentCompany','pastCompany','school','industry','language','limit','max_pages','cursor'];
+const allowed = { 'account.inspect':[], 'person.search':searchParameters,'search.next':searchParameters, 'person.read':['profile_url'], 'company.read':['company'], 'person.experience':['profile_url'], 'person.projects':['profile_url'] };
 function fail(code) { throw Object.assign(new Error(code),{code}); }
 function object(x) { return x && typeof x === 'object' && !Array.isArray(x); }
 export function validateTask(task) {
@@ -34,14 +35,17 @@ export function compile(request, {linkedinEntry} = {}) {
   const args=[linkedinEntry,'--profile',binding.profile,...operations.linkedin[request.operation]];
   for (const [k,v] of Object.entries(request.input)) {
     if (!allowed[request.operation].includes(k) || !['string','number'].includes(typeof v)) fail('unsupported_parameter');
-    if (k==='limit' && (!Number.isInteger(v)||v<1||v>100)) fail('invalid_limit');
+    if (k==='limit' && (!Number.isInteger(v)||v<1||v>2500)) fail('invalid_limit');
+    if (k==='max_pages' && (!Number.isInteger(v)||v<1||v>250)) fail('invalid_page_limit');
+    if (k==='cursor' && (typeof v!=='string'||!isAbsolute(v))) fail('invalid_search_cursor');
     if (k==='profile_url' && !/^https:\/\/(www\.)?linkedin\.com\/in\/[^/?#]+\/?$/.test(v)) fail('invalid_profile_url');
     if(k==='company'){if(!/^(?:[\w-]+|https:\/\/www\.linkedin\.com\/company\/[\w%-]+\/?)$/.test(v))fail('invalid_company');args.push(String(v));}
-    else args.push('--'+(k==='profile_url'?'profile-url':k),String(v));
+    else args.push('--'+(k==='profile_url'?'profile-url':k==='max_pages'?'maxPages':k),String(v));
   }
-  if (request.operation==='person.search'&&!request.input.keyword?.trim()) fail('keyword_required');
+  if (['person.search','search.next'].includes(request.operation)&&!request.input.keyword?.trim()) fail('keyword_required');
   if (['person.read','person.experience','person.projects'].includes(request.operation)&&!request.input.profile_url) fail('profile_url_required');
   if(request.operation==='company.read'&&!request.input.company)fail('company_required');
+  if(request.operation==='search.next'&&!request.input.cursor)fail('search_cursor_required');
   args.push('-f','json','--site-session','persistent');
   return {executable:process.execPath,args,provider:'linkedin'};
 }
@@ -71,8 +75,8 @@ export function normalize(request, raw) {
       d={results:rows.length?[{url:request.input.profile_url,[section]:rows,raw:rows}]:[],returned_count:rows.length?1:0,section_count:rows.length,completeness:'defined_sections_only',raw_response:d};
     }
   }
-  if(raw.ok && request.provider==='linkedin' && ['person.read','person.search'].includes(request.operation)){
-    const rows=Array.isArray(d)?d:Array.isArray(d?.results)?d.results:request.operation==='person.search'&&Array.isArray(d?.candidates)?d.candidates:null;
+  if(raw.ok && request.provider==='linkedin' && ['person.read','person.search','search.next'].includes(request.operation)){
+    const rows=Array.isArray(d)?d:Array.isArray(d?.results)?d.results:['person.search','search.next'].includes(request.operation)&&Array.isArray(d?.candidates)?d.candidates:null;
     if(!rows)fail('unsupported_result_shape');
     const results=rows.map(row=>{
       const original=row.profile_url??row.profileUrl??row.url;
@@ -81,28 +85,28 @@ export function normalize(request, raw) {
       return {...row,id:row.id??row.profileId,url,name:row.name??row.fullName??'',raw:row};
     });
     const missing=request.operation==='person.read'&&rows.some(r=>!r.about&&!r.experience);
-    d={...(object(d)?d:{}),results,returned_count:d?.returned_count??results.length,completeness:missing?'partial':d?.completeness??(request.operation==='person.search'?'partial':'defined_sections_only'),raw_response:raw.data};
+    d={...(object(d)?d:{}),results,returned_count:d?.returned_count??results.length,completeness:missing?'partial':d?.completeness??(['person.search','search.next'].includes(request.operation)?'partial':'defined_sections_only'),raw_response:raw.data};
   }
   if (raw.ok && (!object(d) && !Array.isArray(d))) fail('invalid_response');
   const identityBlocked = request.provider === 'salesnav' && request.operation === 'account.inspect' &&
     (d?.identity_match !== true || d?.account_binding?.status !== 'observed');
   const incomplete = d?.interruption || d?.completeness === 'partial' || d?.truncated === true || Boolean(d?.cursor);
   const status = !raw.ok || identityBlocked ? 'blocked' : incomplete ? 'partial' : 'completed';
-  return {schema_version:1,provider:request.provider,operation:request.operation,status,qualification:'not_evaluated',data:d??null,error:raw.error??(identityBlocked?{code:'identity_unconfirmed'}:null),coverage:{total_text:d?.pagination?.total_text??null,returned_count:d?.returned_count??null,completeness:d?.completeness??'unknown',stop_reason:d?.stop_reason??null},resume:d?.cursor?{provider:request.provider,account:request.account,operation:'search.next',input:{cursor:d.cursor}}:null};
+  return {schema_version:1,provider:request.provider,operation:request.operation,status,qualification:'not_evaluated',data:d??null,error:raw.error??(identityBlocked?{code:'identity_unconfirmed'}:null),coverage:{total_text:d?.pagination?.total_text??null,returned_count:d?.returned_count??null,completeness:d?.completeness??'unknown',stop_reason:d?.stop_reason??null},resume:d?.cursor?{provider:request.provider,account:request.account,operation:'search.next',input:request.provider==='linkedin'?{...request.input,cursor:d.cursor}:{cursor:d.cursor}}:null};
 }
 export async function execute(request, options={}) {
   const plan=compile(request,options),deadline=Date.now()+(options.timeoutMs??300000);
   const runner=options.run??runProcess;
-  const run=p=>{const remaining=deadline-Date.now();if(remaining<=0)fail('execution_outcome_unknown');return runner(p,{timeoutMs:remaining});};
+  const run=async(p,stage)=>{try{const remaining=deadline-Date.now();if(remaining<=0)fail('execution_outcome_unknown');return await runner(p,{timeoutMs:remaining});}catch(error){if(error && typeof error==='object')error.stage=stage;throw error;}};
   const work=async()=>{
     if(request.provider==='linkedin') {
-      const identity=await run(compile({...request,operation:'account.inspect',input:{}},options));
+      const identity=await run(compile({...request,operation:'account.inspect',input:{}},options),'account_check');
       const rows=identity.data;const who=Array.isArray(rows)?rows.length===1?rows[0]:null:rows;
       const slug=request.account.expected_profile_url.split('/').filter(Boolean).at(-1);
       if(identity.ok!==true||who?.logged_in!==true||who?.name!==request.account.expected_identity||who?.public_id!==slug) fail('identity_unconfirmed');
       if(request.operation==='account.inspect')return normalize(request,identity);
     }
-    return normalize(request,await run(plan));
+    return normalize(request,await run(plan,'platform_operation'));
   };
   // SalesNav owns the same lock inside its CLI; nesting would deadlock.
   // Ordinary LinkedIn acquires it here, protecting both provider paths.

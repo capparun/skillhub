@@ -45,7 +45,7 @@ task-status 恢复账本和实体观察；按覆盖决定下一步。用 task-as
 
 ### 完成与预算契约
 
-需要读完已观察查询时显式设置coverage.mode=all_observed_queries；只要求达标数量可用默认target_only，仍披露未读范围。不要把查询窗口完整称市场全量。budgets可用max_operations/max_pages/max_detail_reads/max_elapsed_seconds；页数与详情按请求保守预留，时间自创建计，重放不消耗，失败不返还。普通LI搜索不接受任务页预算；上游success:false即阻塞，linkedin_sales_pitch不能误称账号未订阅或通过其他渠道规避。
+需要读完已观察查询时显式设置coverage.mode=all_observed_queries；只要求达标数量可用默认target_only，仍披露未读范围。不要把查询窗口完整称市场全量。budgets可用max_operations/max_pages/max_detail_reads/max_elapsed_seconds；页数与详情按请求保守预留，时间自创建计，重放不消耗，失败不返还。普通LI分页候选在显式max_pages时接受任务页预算；正式旧版仍不支持；上游success:false即阻塞，linkedin_sales_pitch不能误称账号未订阅或通过其他渠道规避。
 
 ### 既有触达能力的范围说明
 
@@ -99,3 +99,15 @@ task-status 恢复账本和实体观察；按覆盖决定下一步。用 task-as
 ## 安装后调用
 
 从本 Skill 目录运行 `node scripts/opencli.mjs hunter-linkedin --help`，可查看全部命令。该入口使用产品自带的固定运行时；不要改用其他全局安装版本。Sales Navigator 需要当前账号实际具备权限，普通 LinkedIn 不需要订阅 Sales Navigator。
+
+### 普通人员分页候选
+
+优化或使用普通搜索分页前，按需读取 [普通分页与覆盖](references/ordinary-pagination.md)。这是本地候选，正式2.1.1尚未包含；核对运行时help后再调用。
+
+### 用户确认后的自定义列表目标
+
+- 200是用户未指定时的默认去重列表覆盖目标，不是最大可搜索人数，也不是合格人数或详情读取量。用户可指定500、1000等其他正整数。
+- 用户已明确提出数量，就记录该数量及其原文作为本轮数量确认，不重复询问同一个数量。Agent自行建议增加目标时，先说明新目标、已有覆盖、增量与页数/时间预算，获得确认后再扩大；数量确认不自动扩大已批准的时间、页数或调用预算。
+- 将确认后的数量写入任务coverage.min_unique_people；由模型规划每批limit/max_pages，并沿用游标和跨查询去重记录。确认属于Skill任务决策，平台CLI不硬编码业务默认或自行增加读取量。
+- CLI当前累计limit支持1–2500，属于工具边界，不是平台官方额度，也不是任务总量上限。超出工具范围需明确说明并规划符合原条件的分查询任务；不能声称单一查询无限续读，不能为凑量放宽原条件。
+- 实际结果耗尽、平台限制或已确认预算用尽时，报告目标、实际去重数、剩余量、原因和下一步；不静默降量、扩大预算或自动重跑。报告单列列表覆盖、详情、评估和合格人数。

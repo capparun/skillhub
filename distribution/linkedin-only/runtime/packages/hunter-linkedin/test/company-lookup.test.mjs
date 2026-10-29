@@ -1,0 +1,9 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {companySlug,resolveCompanyPage} from '../lib/company-lookup.js';
+const snapshot=(html,url='https://www.linkedin.com/company/fixture/')=>({url,title:'Fixture',html});
+test('lookup validates exact slug or company URL',()=>{assert.equal(companySlug('https://www.linkedin.com/company/fixture/'),'fixture');for(const v of ['Acme Company','https://evil.example/company/fixture/','../feed'])assert.throws(()=>companySlug(v),{code:'invalid_company'});});
+test('ready page returns without fixed wait and prefers target card over related company',async()=>{const r=await resolveCompanyPage({evaluate:async()=>snapshot('<div id="pages.topCard.123"></div> urn:li:company:456')},'fixture',{wait:()=>{throw Error('unnecessary wait');}});assert.equal(r.companyId,'123');assert.equal(r.identity_source,'page_top_card');});
+test('wrong page, auth wall and conflicting target cards cannot report success',async()=>{for(const [value,code] of [[snapshot('urn:li:company:123','https://www.linkedin.com/company/other/'),'company_identity_unconfirmed'],[snapshot('','https://www.linkedin.com/checkpoint/'),'company_access_blocked'],[snapshot('<div id="pages.topCard.123"></div><div id="pages.topCard.456"></div>'),'company_id_ambiguous']])await assert.rejects(resolveCompanyPage({evaluate:async()=>value},'fixture'),{code});});
+test('missing or multiple unrelated identifiers time out explicitly',async()=>{let clock=0;await assert.rejects(resolveCompanyPage({evaluate:async()=>snapshot('urn:li:company:123 urn:li:company:456')},'fixture',{timeoutMs:500,now:()=>clock,wait:async ms=>{clock+=ms;}}),{code:'company_id_unconfirmed'});});
+
+test('observed company home redirect retains the same identity',async()=>{const r=await resolveCompanyPage({evaluate:async()=>snapshot('<div id="pages.topCard.1035"></div>','https://www.linkedin.com/company/fixture/home/')},'fixture');assert.equal(r.companyId,'1035');});

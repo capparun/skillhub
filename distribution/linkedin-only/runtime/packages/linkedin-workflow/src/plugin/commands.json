@@ -268,5 +268,45 @@
     "parameters": "input_path、output_path、format(json/csv/md/html)",
     "optional": false,
     "access": "write"
+  },
+  {
+    "name": "task-continue",
+    "command": "task-continue",
+    "family": "linkedin",
+    "access": "read",
+    "description": "从任务最新进度继续普通 LinkedIn 列表搜索，复用原预算",
+    "parameters": "directory, task_id, operation_id"
+  },
+  {
+    "name": "task-lock-inspect",
+    "command": "task-lock-inspect",
+    "family": "linkedin",
+    "access": "read",
+    "description": "检查任务锁",
+    "parameters": "directory, task_id"
+  },
+  {
+    "name": "task-lock-recover",
+    "command": "task-lock-recover",
+    "family": "linkedin",
+    "access": "write",
+    "description": "保留诊断记录并恢复已退出进程的任务锁；不重跑操作",
+    "parameters": "directory, task_id, revision, execution_stopped_confirmed"
+  },
+  {
+    "name": "profile-lock-inspect",
+    "command": "profile-lock-inspect",
+    "family": "linkedin",
+    "access": "read",
+    "description": "只读核对账号锁持有者；不释放锁、不操作浏览器",
+    "parameters": "profile"
+  },
+  {
+    "name": "profile-lock-recover",
+    "command": "profile-lock-recover",
+    "family": "linkedin",
+    "access": "write",
+    "description": "核验持有者退出与停止确认后归档账号锁；不重跑浏览器操作",
+    "parameters": "profile, revision, execution_stopped_confirmed"
   }
 ]

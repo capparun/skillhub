@@ -8,16 +8,40 @@ import { resolveOpencliInvocation, spawnInvocation, satisfiesOpencliVersion } fr
 import {
   findDanglingPluginRegistrations,
   MINIMUM_NODE_VERSION,
-  resolveInstallTargets,
+  resolveDoctorTargets,
   supportsNodeVersion,
 } from './target-distribution.mjs';
 
 const argv = process.argv.slice(2);
+if (argv.includes('--help') || argv.includes('-h')) {
+  process.stdout.write(`Usage: node doctor.mjs [options]
+
+检查安装依赖及 Skill 目录。请沿用安装回执中的目标路径。
+  --agent <name>       安装所用 Agent
+  --project-dir <path> 项目安装目录
+  --skills-dir <path>  明确指定已安装的 Skills 目录
+  --state-dir <path>   明确指定安装状态目录
+  --json              输出结构化检查结果
+  --linkedin-runtime  额外检查本机浏览器桥接服务与端口
+  --linkedin-whoami   额外访问 LinkedIn 读取登录身份
+  -h, --help          仅显示帮助；不运行诊断、不访问浏览器
+
+退出码：0 表示检查通过，1 表示有检查项失败。
+`);
+  process.exit(0);
+}
 const jsonOutput = argv.includes('--json');
 const distributionRoot = path.dirname(fileURLToPath(import.meta.url));
 const receipt = JSON.parse(fs.readFileSync(path.join(distributionRoot, 'distribution.json'), 'utf8'));
 const runtimeRoot = path.join(distributionRoot, 'runtime');
-const targets = resolveInstallTargets(argv);
+let targets;
+try { targets = resolveDoctorTargets(fileURLToPath(import.meta.url), receipt.product, argv); }
+catch (error) {
+  const failure = { schemaVersion: 1, ok: false, error: { code: error.code ?? 'installation_target_error', message: error.message } };
+  if (jsonOutput) process.stdout.write(JSON.stringify(failure) + '\n');
+  else process.stderr.write(`${failure.error.code}: ${failure.error.message}\n`);
+  process.exit(1);
+}
 const skillsRoots = targets.skillRoots;
 let failures = 0;
 const checks = [];

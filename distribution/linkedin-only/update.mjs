@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {findPackageRoot} from './package-root.mjs';
 // Hunter 客户包更新:比对远端版本 → 授权 → 下载校验 → 备份 → 覆盖安装 → 诊断。
 // 通常从固定位置运行: node ~/.hunter/packages/<product>/update.mjs
 // 也可显式指定: node update.mjs --product <slug>
@@ -46,7 +47,7 @@ const targets = resolveInstallTargets([
   '--agent', record.agent ?? initialTargets.requestedAgent,
   '--project-dir', record.projectDir ?? initialTargets.projectDir,
   ...(record.skillTargets?.[0] ? ['--skills-dir', record.skillTargets[0]] : []),
-  '--state-dir', record.stateTarget ?? initialTargets.stateRoot,
+  '--state-dir', record.stateTarget ?? stateRoot,
 ]);
 if (!record.serverUrl) {
   console.error('安装记录缺少分发站地址,无法检查更新。');
@@ -108,7 +109,7 @@ if (record.updateCredential) {
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hunter-update-'));
 const tgzPath = path.join(tmpDir, 'package.tar.gz');
 console.log('下载新版本...');
-const downloadResponse = await fetch(downloadUrl);
+const downloadResponse = await fetch(downloadUrl, { signal: AbortSignal.timeout(120000) });
 if (!downloadResponse.ok) {
   console.error(`下载失败: HTTP ${downloadResponse.status}`);
   process.exit(1);
@@ -122,10 +123,7 @@ if (actualSha !== String(sha256).toLowerCase()) {
 console.log('SHA-256 校验通过');
 
 runInvocation({ command: 'tar', prefixArgs: [] }, ['-xzf', tgzPath, '-C', tmpDir]);
-const packageDir = fs
-  .readdirSync(tmpDir)
-  .map((name) => path.join(tmpDir, name))
-  .filter((p) => fs.statSync(p).isDirectory() && fs.existsSync(path.join(p, 'install.mjs')))[0];
+const packageDir = findPackageRoot(tmpDir);
 if (!packageDir) {
   console.error('安装包内容不正确,已中止。已安装版本未改动。');
   process.exit(1);
@@ -167,7 +165,7 @@ const nodeInvocation = { command: process.execPath, prefixArgs: [] };
 const installResult = spawnInvocation(nodeInvocation, installArgs, { stdio: 'inherit' });
 const doctorResult = installResult.status === 0
   ? spawnInvocation(nodeInvocation, [
-    path.join(packageDir, 'doctor.mjs'),
+    path.join(targets.stateRoot, 'packages', product, 'doctor.mjs'),
     '--agent', targets.detectedAgent ?? targets.requestedAgent,
     '--project-dir', targets.projectDir,
     '--skills-dir', targets.skillRoots[0],
@@ -184,7 +182,8 @@ if (doctorResult.status !== 0) {
   console.error('已回滚 skills。若插件运行时有异常,请重新安装旧版本包。');
   // 常见根因提示:插件注册指向已清理的临时目录时,本次升级必然失败,
   // 只回滚 skills 不会修复它(2026-09-18 真机故障)。
-  const dangling = findDanglingPluginRegistrations();
+  const isolatedRuntime = fs.existsSync(path.join(targets.stateRoot, 'packages', product, 'runtime', 'opencli.mjs'));
+  const dangling = isolatedRuntime ? [] : findDanglingPluginRegistrations();
   if (dangling.length > 0) {
     console.error('\n检测到悬空/易悬空的插件注册:');
     for (const problem of dangling) {

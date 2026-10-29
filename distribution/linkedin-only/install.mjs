@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {findPackageRoot} from './package-root.mjs';
 // Hunter 客户包装机:插件运行时 + Skills 安装。
 // 本地模式: 解压后在本目录执行  node install.mjs [--force]
 // 远程模式: node install.mjs --from <url> [--sha256 <hex>] [其他参数...]
@@ -133,10 +134,7 @@ if (fromUrl) {
   }
 
   runInvocation({ command: 'tar', prefixArgs: [] }, ['-xzf', tgzPath, '-C', tmpDir]);
-  const packageDir = fs
-    .readdirSync(tmpDir)
-    .map((name) => path.join(tmpDir, name))
-    .filter((p) => fs.statSync(p).isDirectory() && fs.existsSync(path.join(p, 'install.mjs')))[0];
+  const packageDir = findPackageRoot(tmpDir);
   if (!packageDir) throw new Error('安装包内容不正确: 未找到 install.mjs');
 
   const rest = withoutArgs(argv, ['--from', '--sha256']);
@@ -155,7 +153,12 @@ const runtimeRoot = path.join(distributionRoot, 'runtime');
 const plugins = (receipt.requirements?.plugins ?? []).map(({ name }) => name);
 const isolatedRuntime = fs.existsSync(path.join(runtimeRoot, 'opencli.mjs'));
 const skills = (receipt.skills ?? []).map(({ id }) => id);
-const product = getArg('--product');
+const product = getArg('--product') ?? receipt.product;
+const version = getArg('--version') ?? receipt.version;
+if (!/^[a-z0-9][a-z0-9-]*$/.test(product ?? '') || typeof version !== 'string' || !version.trim() || product !== receipt.product || version !== receipt.version) {
+  process.stderr.write('installation_identity_mismatch: product/version must match distribution.json; omit these flags to use the package identity.\n');
+  process.exit(2);
+}
 const targets = resolveInstallTargets(argv);
 const skillsRoots = targets.skillRoots;
 const pluginRegistrations = (isolatedRuntime ? [] : plugins).map((name) => {
@@ -182,12 +185,14 @@ const plan = {
   pluginRegistrations,
   skills,
   skillTargets: skillsRoots,
-  runtimeTarget: runtimeRoot,
+  runtimeTarget: isolatedRuntime ? path.join(targets.stateRoot, 'packages', product, 'runtime') : runtimeRoot,
+  product,
+  version,
   stateTarget: targets.stateRoot,
   actions: [
     ...(plugins.length > 0 ? ['install-runtime', isolatedRuntime ? 'verify-bundled-plugins' : 'install-plugins'] : []),
     'install-skills',
-    ...(getArg('--product') ? ['write-installation-receipt'] : []),
+    'write-installation-receipt',
   ],
   recommendedNextAction: 'node doctor.mjs',
 };
@@ -315,7 +320,7 @@ if (product) {
     : null;
   const record = {
     product,
-    version: getArg('--version'),
+    version,
     serverUrl: (getArg('--server') ?? '').replace(/\/+$/, '') || null,
     updateCredential: getArg('--update-credential'),
     agent: targets.detectedAgent ?? targets.requestedAgent,
@@ -340,6 +345,7 @@ if (product) {
     'update.mjs',
     'process-distribution.mjs',
     'target-distribution.mjs',
+    'package-root.mjs',
     'distribution.json',
   ]) {
     const source = path.join(distributionRoot, file);

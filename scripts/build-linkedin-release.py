@@ -5,7 +5,7 @@ root=Path(__file__).resolve().parents[1]
 src=root/'distribution/linkedin-only'
 d=json.loads((src/'distribution.json').read_text())
 version=d['version']
-if d['product']!='soho-sourcing' or version!='2.1.3':raise ValueError('Unexpected release identity')
+if d['product']!='soho-sourcing' or version!='2.1.4':raise ValueError('Unexpected release identity')
 files=[]
 for p in sorted(src.rglob('*')):
  if 'node_modules' in p.parts:continue
@@ -16,7 +16,7 @@ for p in sorted(src.rglob('*')):
 buffer=io.BytesIO()
 with tarfile.open(fileobj=buffer,mode='w',format=tarfile.USTAR_FORMAT) as archive:
  for p in files:
-  data=p.read_bytes();info=tarfile.TarInfo(p.relative_to(src).as_posix());info.size=len(data);info.mode=0o644;info.mtime=0
+  data=p.read_bytes();info=tarfile.TarInfo('linkedin-package/'+p.relative_to(src).as_posix());info.size=len(data);info.mode=0o644;info.mtime=0
   archive.addfile(info,io.BytesIO(data))
 output=root/'public/download';output.mkdir(parents=True,exist_ok=True)
 name=f'soho-sourcing-v{version}.tar.gz'

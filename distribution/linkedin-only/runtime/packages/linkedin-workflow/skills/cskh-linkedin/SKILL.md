@@ -120,6 +120,10 @@ task-status 恢复账本和实体观察；按覆盖决定下一步。用 task-as
 
 单查询、候选人数目标的任务，使用 `node scripts/opencli.mjs hunter-linkedin task-continue --input continue.json`。输入仅包含 directory、task_id、operation_id；同一次请求重试沿用 operation_id。程序选择最新进度并沿用原预算，不手动搬运游标。多查询返回 multiple_queries_require_selection；中断返回 diagnosis_required；预算耗尽停止。此能力不等于页级崩溃恢复，不能用新操作 ID 绕过中断。task-resume 仍用于补读详情。
 
+### 批量详情读取
+
+一次读取多人主页（≥10 人）用 `node scripts/opencli.mjs hunter-linkedin profile-read-batch --input batch.json`。输入 `profile_urls[]`，可选 `output`（结果目录）、`wait_seconds`（默认 5）、`limit`。单个浏览器会话内顺序导航，每人一条写入 `checkpoint.jsonl`；中断后用同一输出目录重跑即可跳过已读人员，不要更换目录或重复读取失败项。返回逐人主页字段；失败项记入检查点，登录/验证类错误会停止整批。
+
 ### 匿名结果与分页策略
 
 普通列表搜索按“结果卡”分类，不看整页文本（共同联系人里也可能出现 LinkedIn Member）。回执 `identity_summary` 的卡片计数只统计本次运行：`cards_inspected`（读取卡片）、`named_cards`（具名卡）、`visibility_limited_cards`（明确不可见）、`unresolved_cards`（未解析）；`collected_total` 是含游标历史、按 profileId 跨页去重后的已返回具名人数。`page_observations` 逐页记录同一口径。

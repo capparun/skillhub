@@ -1078,8 +1078,6 @@ cli({
       read:()=>page.evaluate(inspectOrdinarySearchDOM),
       navigate:url=>page.goto(url,{waitUntil:'domcontentloaded',timeout:60000}),
       scroll:()=>page.evaluate(scrollOrdinarySearchDOM),
-      // Turn pages like a person: 2–6 s jittered gap instead of back-to-back navigation.
-      pageGapMs:[2000,6000],
     });
     collection.timing.operation_ms=performance.now()-initialStarted;
     collection.timing.initial_setup_ms=collection.timing.operation_ms-collection.timing.total_ms;

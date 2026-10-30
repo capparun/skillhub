@@ -4,7 +4,6 @@ import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { isAbsolute } from 'node:path';
 import { withProfileLock } from '../profile-lock.mjs';
-import { PROFILE_URL_PATTERN, canonicalProfileUrl, profileSlug } from './profile-url.mjs';
 const exec = promisify(execFile);
 const sn = fileURLToPath(new URL('../cli.mjs', import.meta.url));
 export const operations = {
@@ -27,7 +26,7 @@ export function compile(request, {linkedinEntry} = {}) {
   const binding=request.account;
   if (object(binding) && Object.keys(binding).some(k=>!['profile','expected_identity','expected_profile_url'].includes(k))) fail('unsupported_account_field');
   if (!object(binding)|| !/^[\w-]{1,80}$/.test(binding.profile??'') || typeof binding.expected_identity!=='string'|| !binding.expected_identity.trim()) fail('account_required');
-  if (!PROFILE_URL_PATTERN.test(binding.expected_profile_url??'')) fail('profile_url_required');
+  if (!/^https:\/\/www\.linkedin\.com\/in\/[\w%-]+\/$/.test(binding.expected_profile_url??'')) fail('profile_url_required');
   if (request.provider==='salesnav') {
     if (Object.keys(request.input).some(k=>['profile','expected_identity','expected_profile_url'].includes(k))) fail('binding_override');
     return {executable:process.execPath,args:[sn,operations.salesnav[request.operation],JSON.stringify({...request.input,...binding})],provider:'salesnav'};
@@ -99,7 +98,8 @@ export function normalize(request, raw) {
       return {...row,id:row.id??row.profileId,url,name:row.name??row.fullName??'',raw:row};
     });
     if(request.operation==='person.read'&&request.input?.profile_url){
-      if(results.some(row=>typeof row.url!=='string'||canonicalProfileUrl(row.url)!==canonicalProfileUrl(request.input.profile_url)))fail('profile_identity_mismatch');
+      const canonical=url=>url.replace('://linkedin.com','://www.linkedin.com').replace(/\/$/,'');
+      if(results.some(row=>typeof row.url!=='string'||canonical(row.url)!==canonical(request.input.profile_url)))fail('profile_identity_mismatch');
     }
     const missing=request.operation==='person.read'&&rows.some(r=>!r.about&&!r.experience);
     d={...(object(d)?d:{}),results,returned_count:d?.returned_count??results.length,completeness:missing?'partial':d?.completeness??(['person.search','search.next'].includes(request.operation)?'partial':'defined_sections_only'),raw_response:raw.data};
@@ -125,7 +125,7 @@ export async function execute(request, options={}) {
       }
       const identity=await run(identityPlan,'account_check');
       const rows=identity.data;const who=Array.isArray(rows)?rows.length===1?rows[0]:null:rows;
-      const slug=profileSlug(request.account.expected_profile_url);
+      const slug=request.account.expected_profile_url.split('/').filter(Boolean).at(-1);
       if(identity.ok!==true||who?.logged_in!==true||who?.name!==request.account.expected_identity||who?.public_id!==slug) fail('identity_unconfirmed');
       if(request.operation==='account.inspect')return normalize(request,identity);
     }

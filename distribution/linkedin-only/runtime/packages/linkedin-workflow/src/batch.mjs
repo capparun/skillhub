@@ -3,7 +3,6 @@ import { accountRead, normalizeCompany } from './account-read.mjs';
 import { leadRead } from './lead-read.mjs';
 import { accountSearch } from './account-search.mjs';
 import { leadSearch } from './lead-search.mjs';
-import { PROFILE_URL_PATTERN } from './linkedin/profile-url.mjs';
 const operations = { 'account-read': accountRead, 'lead-read': leadRead, 'account-search': accountSearch, 'lead-search': leadSearch };
 const fail = code => { throw Object.assign(new Error(code), { code }); };
 // A bounded process-scoped workflow, not a persistent browser daemon.
@@ -15,7 +14,7 @@ export async function batch(input, transport, options = {}) {
         || !step.input || typeof step.input !== 'object' || Array.isArray(step.input)
         || Object.keys(step.input).some(k => ['profile','expected_identity','expected_profile_url','execution_context','request_budget'].includes(k))) fail('invalid_input');
   }
-  if (typeof input.expected_profile_url !== 'string' || !PROFILE_URL_PATTERN.test(input.expected_profile_url)) fail('invalid_input');
+  if (typeof input.expected_profile_url !== 'string' || !/^https:\/\/www\.linkedin\.com\/in\/[a-zA-Z0-9_%\-]+\/$/.test(input.expected_profile_url)) fail('invalid_input');
   const binding = Object.fromEntries(['profile','expected_identity','expected_profile_url'].map(k => [k,input[k]]));
   const batchIdentity = {};
   let contextSnapshot = options.contextSnapshot;

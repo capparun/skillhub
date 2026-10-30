@@ -8,6 +8,7 @@ import {
   experienceText,
   normalizeEducationRows,
 } from './lib/anchor-sections.js';
+import { createPacer } from './lib/pacing.js';
 
 const fail = (code, message) => { throw Object.assign(new Error(message ?? code), { code }); };
 
@@ -165,7 +166,7 @@ export async function readProfileFromPage(page, url, waitSeconds, { getCommand }
   };
 }
 
-export async function runProfileBatch({ page, urls, outputDir, resumeFile, waitSeconds = 8, limit, readProfile } = {}) {
+export async function runProfileBatch({ page, urls, outputDir, resumeFile, waitSeconds = 8, limit, readProfile, pacer = null, sleep = sleepMs } = {}) {
   if (!readProfile && !page) fail('browser_session_required');
   if (!Array.isArray(urls) || !urls.length) fail('profile_urls_required');
   const selected = [...new Set(urls.map(normalizeProfileUrl))].slice(0, Number.isInteger(limit) ? limit : undefined);
@@ -176,15 +177,17 @@ export async function runProfileBatch({ page, urls, outputDir, resumeFile, waitS
   const rows = [];
   let stopped = null;
   const readOne = readProfile ?? (url => readProfileFromPage(page, url, waitSeconds));
-  for (const url of pending) {
+  for (const [index, url] of pending.entries()) {
+    const wait = pacer ? pacer.delayBefore(index) : { ms: 0, kind: 'none' };
+    if (wait.ms > 0) await sleep(wait.ms);
     const started = Date.now();
     try {
       rows.push(await readOne(url));
-      fs.appendFileSync(checkpoint, JSON.stringify({ profile_url: url, status: 'ok', duration_ms: Date.now() - started }) + '\n');
+      fs.appendFileSync(checkpoint, JSON.stringify({ profile_url: url, status: 'ok', wait_ms: wait.ms, wait_kind: wait.kind, duration_ms: Date.now() - started }) + '\n');
     } catch (error) {
       const code = error?.code ?? 'profile_read_failed';
-      fs.appendFileSync(checkpoint, JSON.stringify({ profile_url: url, status: 'failed', error: code, duration_ms: Date.now() - started }) + '\n');
-      if (['not_logged_in', 'verification_required'].includes(code) || /not logged in|authwall|checkpoint|login/i.test(error?.message ?? '')) {
+      fs.appendFileSync(checkpoint, JSON.stringify({ profile_url: url, status: 'failed', error: code, wait_ms: wait.ms, wait_kind: wait.kind, duration_ms: Date.now() - started }) + '\n');
+      if (['not_logged_in', 'verification_required', 'AUTH_REQUIRED'].includes(code) || /not logged in|authwall|checkpoint|login|AUTH_REQUIRED/i.test(error?.message ?? '')) {
         stopped = code === 'profile_read_failed' ? 'not_logged_in' : code;
         break;
       }
@@ -228,6 +231,7 @@ cli({
     { name: 'resume', type: 'string', required: false, help: '已有检查点文件；默认输出目录下的 checkpoint.jsonl' },
     { name: 'wait', type: 'number', required: false, help: '页面就绪硬上限秒数，默认 8；就绪后立即读取' },
     { name: 'limit', type: 'number', required: false, help: '本次最多读取人数' },
+    { name: 'pacing', type: 'string', required: false, help: '读取节奏：steady（稳健，默认 25–45 秒）/ conservative（45–90 秒）/ standard（15–25 秒）/ none' },
   ],
   func: async (page, args) => {
     if (!page) fail('browser_session_required');
@@ -239,6 +243,8 @@ cli({
     // /details/education/ for the structured lists (no main-page scrolling).
     const { getRegistry } = await import('@jackwener/opencli/registry');
     const waitSeconds = args.wait ?? input.wait_seconds ?? 8;
+    const preset = String(args.pacing ?? input.pacing ?? 'steady');
+    const pacer = preset === 'none' ? null : createPacer({ preset });
     const readProfile = async url => normalizeRow(
       await readProfileFromPage(page, url, waitSeconds, { getCommand: name => getRegistry().get(name) }),
       url,
@@ -251,6 +257,7 @@ cli({
       waitSeconds,
       limit: args.limit ?? input.limit,
       readProfile,
+      pacer,
     });
     return result.rows;
   },

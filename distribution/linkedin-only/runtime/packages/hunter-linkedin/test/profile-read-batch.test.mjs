@@ -5,6 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {runProfileBatch, readProfileFromPage} from '../profile-read-batch.js';
 import {anchorSectionUrl, experienceText, normalizeEducationRows} from '../lib/anchor-sections.js';
+import {PACING_PRESETS, createPacer} from '../lib/pacing.js';
 
 const url=id=>`https://www.linkedin.com/in/${id}/`;
 const row=id=>({profile_url:url(id),name:`Person ${id}`,headline:'Teacher',location:'Sichuan, China',about:'About text',experience:'Experience text',education:'Education text',services:'',featured:''});
@@ -101,6 +102,37 @@ test('experience is read through the bundled profile-experience command',async()
  assert.deepEqual(seen,[url('a')]);
  assert.equal(result.experience,'Teacher @ Springfield School (2015 – 2020)');
  assert.equal(result.experience_items[0].company,'Springfield School');
+});
+test('pacing inserts jittered gaps, group pauses and rests',()=>{
+ const steady=PACING_PRESETS.steady;
+ const pacer=createPacer({preset:'steady',random:()=>0.5});
+ const kinds=[];
+ for(let index=1;index<=30;index++){
+  const wait=pacer.delayBefore(index);kinds.push(wait.kind);
+  assert.ok(wait.ms>=steady.gapMs[0]);
+ }
+ assert.equal(pacer.delayBefore(0).ms,0);
+ assert.equal(kinds.filter(kind=>kind==='gap').length>0,true);
+ assert.equal(kinds.includes('group_pause'),true);
+ assert.equal(kinds.includes('rest'),true);
+});
+test('AUTH_REQUIRED stops the batch immediately',async t=>{
+ const dir=mkdtempSync(join(tmpdir(),'profile-batch-auth-'));
+ t.after(()=>rmSync(dir,{recursive:true,force:true}));
+ const calls=[];
+ const readProfile=async target=>{calls.push(target);if(target===url('b'))throw Object.assign(new Error('AUTH_REQUIRED'),{code:'AUTH_REQUIRED'});return readRow(target);};
+ const {summary}=await runProfileBatch({urls:[url('a'),url('b'),url('c')],outputDir:dir,readProfile});
+ assert.equal(summary.stopped,'AUTH_REQUIRED');
+ assert.deepEqual(calls,[url('a'),url('b')]);
+});
+test('the batch waits between profiles according to the pacer',async t=>{
+ const dir=mkdtempSync(join(tmpdir(),'profile-batch-pacing-'));
+ t.after(()=>rmSync(dir,{recursive:true,force:true}));
+ const waits=[];
+ const pacer={delayBefore:index=>index===0?{ms:0,kind:'none'}:(index===3?{ms:120000,kind:'rest'}:{ms:30000+index,kind:'gap'})};
+ const {rows}=await runProfileBatch({urls:['a','b','c','d'].map(url),outputDir:dir,readProfile:readRow,pacer,sleep:async ms=>{waits.push(ms);}});
+ assert.equal(rows.length,4);
+ assert.deepEqual(waits,[30001,30002,120000]);
 });
 test('education anchors and rows are normalized without scrolling',()=>{
  assert.equal(anchorSectionUrl(url('a'),'education'),'https://www.linkedin.com/in/a/details/education/');

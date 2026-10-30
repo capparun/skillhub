@@ -14,6 +14,13 @@ test('200 distinct people are collected across 20 actual pages in one invocation
  const r=await collectOrdinarySearch(f.config);
  assert.equal(r.returned_count,200);assert.equal(r.pages_viewed,20);assert.equal(r.scroll_rounds,0);assert.equal(r.completeness,'complete');assert.equal(f.calls.navigate.length,19);assert.equal(f.calls.sleep.length,0);
 });
+test('page turns wait a jittered gap before loading the next page',async()=>{
+ const f=fixture(Array.from({length:3},(_,i)=>[row(i)]));
+ const r=await collectOrdinarySearch({...f.config,pageGapMs:[2000,6000],random:()=>0.5});
+ assert.equal(r.pages_viewed,3);
+ assert.equal(f.calls.navigate.length,2);
+ assert.deepEqual(f.calls.sleep.filter(ms=>ms>=2000&&ms<=6000),[4000,4000]);
+});
 test('deduplicates overlap across pages and reports true exhaustion',async()=>{
  const f=fixture([[row(1),row(2)],[row(2),row(3)]]);const r=await collectOrdinarySearch(f.config);
  assert.equal(r.returned_count,3);assert.equal(r.pages_viewed,2);assert.equal(r.stop_reason,'results_exhausted');

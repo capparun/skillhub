@@ -123,6 +123,19 @@ function fatalCode(pageState) {
   return null;
 }
 
+function readProfileRows(file) {
+  if (!fs.existsSync(file)) return [];
+  const rows = [];
+  for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
+    if (!line.trim()) continue;
+    try {
+      const row = JSON.parse(line);
+      if (row?.profile_url) rows.push(row);
+    } catch { /* ignore a truncated trailing line */ }
+  }
+  return rows;
+}
+
 function readCheckpoint(file) {
   if (!fs.existsSync(file)) return new Map();
   const done = new Map();
@@ -179,6 +192,8 @@ export async function runProfileBatch({ page, urls, outputDir, resumeFile, waitS
   const selected = [...new Set(urls.map(normalizeProfileUrl))].slice(0, Number.isInteger(limit) ? limit : undefined);
   fs.mkdirSync(outputDir, { recursive: true });
   const checkpoint = resumeFile ?? path.join(outputDir, 'checkpoint.jsonl');
+  // Append as we go so a kill, auth wall or budget stop never loses already-read bodies.
+  const rowsFile = path.join(outputDir, 'profiles.jsonl');
   const done = readCheckpoint(checkpoint);
   const pending = selected.filter(url => !done.has(url));
   const rows = [];
@@ -198,7 +213,9 @@ export async function runProfileBatch({ page, urls, outputDir, resumeFile, waitS
     processed += 1;
     const started = Date.now();
     try {
-      rows.push(await readOne(url));
+      const row = await readOne(url);
+      rows.push(row);
+      fs.appendFileSync(rowsFile, JSON.stringify(row) + '\n');
       fs.appendFileSync(checkpoint, JSON.stringify({ profile_url: url, status: 'ok', wait_ms: wait.ms, wait_kind: wait.kind, duration_ms: Date.now() - started }) + '\n');
     } catch (error) {
       const code = error?.code ?? 'profile_read_failed';
@@ -218,6 +235,9 @@ export async function runProfileBatch({ page, urls, outputDir, resumeFile, waitS
     } catch { return []; }
   })();
   const merged = new Map(existing.map(row => [row.profile_url, row]));
+  // The append log is authoritative: it also holds rows from runs that were killed
+  // before profiles.json was rewritten.
+  for (const row of readProfileRows(rowsFile)) merged.set(row.profile_url, row);
   for (const row of rows) merged.set(row.profile_url, row);
   fs.writeFileSync(resultsFile, JSON.stringify([...merged.values()], null, 2) + '\n');
   const summary = {
@@ -230,6 +250,7 @@ export async function runProfileBatch({ page, urls, outputDir, resumeFile, waitS
     remaining_after_run: pending.length - processed,
     elapsed_ms: now() - runStarted,
     checkpoint,
+    rows_log: rowsFile,
     output_dir: outputDir,
   };
   fs.writeFileSync(path.join(outputDir, 'summary.json'), JSON.stringify(summary, null, 2) + '\n');

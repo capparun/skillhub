@@ -135,6 +135,29 @@ test('the batch waits between profiles according to the pacer',async t=>{
  assert.equal(rows.length,4);
  assert.deepEqual(waits,[30001,30002,120000]);
 });
+test('each profile is appended to profiles.jsonl before the run can be interrupted',async t=>{
+ const dir=mkdtempSync(join(tmpdir(),'profile-batch-jsonl-'));
+ t.after(()=>rmSync(dir,{recursive:true,force:true}));
+ const readProfile=async target=>{if(target===url('c'))throw Object.assign(new Error('AUTH_REQUIRED'),{code:'AUTH_REQUIRED'});return readRow(target);};
+ const {summary}=await runProfileBatch({urls:['a','b','c'].map(url),outputDir:dir,readProfile});
+ assert.equal(summary.stopped,'AUTH_REQUIRED');
+ const lines=readFileSync(join(dir,'profiles.jsonl'),'utf8').trim().split('\n').map(JSON.parse);
+ assert.deepEqual(lines.map(r=>r.name),['Person a','Person b']);
+ assert.equal(summary.rows_log,join(dir,'profiles.jsonl'));
+ assert.deepEqual(JSON.parse(readFileSync(join(dir,'profiles.json'),'utf8')).map(r=>r.name),['Person a','Person b']);
+});
+test('rows logged before a killed run are merged back on resume',async t=>{
+ const dir=mkdtempSync(join(tmpdir(),'profile-batch-jsonl-resume-'));
+ t.after(()=>rmSync(dir,{recursive:true,force:true}));
+ // A killed run logged "a" but never rewrote profiles.json; "b" only survives in
+ // profiles.json because its checkpoint line predates the append log.
+ writeFileSync(join(dir,'profiles.jsonl'),JSON.stringify(row('a'))+'\n');
+ writeFileSync(join(dir,'profiles.json'),JSON.stringify([row('b')],null,2)+'\n');
+ writeFileSync(join(dir,'checkpoint.jsonl'),JSON.stringify({profile_url:url('b'),status:'ok'})+'\n');
+ const result=await runProfileBatch({urls:['a','b','c'].map(url),outputDir:dir,readProfile:readRow});
+ assert.deepEqual(result.profiles.map(r=>r.name).sort(),['Person a','Person b','Person c']);
+ assert.equal(result.summary.resumed_from_checkpoint,1);
+});
 test('the time budget stops before a pause that would overrun the command timeout',async t=>{
  const dir=mkdtempSync(join(tmpdir(),'profile-batch-budget-'));
  t.after(()=>rmSync(dir,{recursive:true,force:true}));

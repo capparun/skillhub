@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { readOwnProfile, readSubscription } from './identity.mjs';
+import { PROFILE_URL_PATTERN, canonicalProfileUrl } from './linkedin/profile-url.mjs';
 
 // In-memory lease only; never serialized or accepted as CLI input.
 const batchIdentities = new WeakMap();
@@ -72,11 +73,11 @@ export async function accountCheck(input, transport, { attempts = 8, delay = 100
     throw new Error('profile and exact expected_identity are required');
   }
   if (Object.keys(input).some(k => !['profile', 'expected_identity', 'expected_profile_url'].includes(k))) throw new Error('Unknown input field');
-  if (input.expected_profile_url !== undefined && !/^https:\/\/www\.linkedin\.com\/in\/[a-zA-Z0-9_%\-]+\/$/.test(input.expected_profile_url)) throw new Error('Invalid expected_profile_url');
+  if (input.expected_profile_url !== undefined && !PROFILE_URL_PATTERN.test(input.expected_profile_url)) throw new Error('Invalid expected_profile_url');
   if (contextSnapshot) {
     const snapshot = contextSnapshot.report;
     if (Date.now() >= contextSnapshot.expires_at) throw Object.assign(new Error('context_expired'), { code: 'context_expired' });
-    if (snapshot?.profile !== input.profile || normalize(snapshot.observed_identity) !== normalize(input.expected_identity) || snapshot.account_binding?.profile_url !== input.expected_profile_url) throw Object.assign(new Error('identity_mismatch'), { code: 'identity_mismatch' });
+    if (snapshot?.profile !== input.profile || normalize(snapshot.observed_identity) !== normalize(input.expected_identity) || canonicalProfileUrl(snapshot.account_binding?.profile_url) !== canonicalProfileUrl(input.expected_profile_url)) throw Object.assign(new Error('identity_mismatch'), { code: 'identity_mismatch' });
     const profiles = await transport.profiles();
     if (profiles.profiles?.filter(p => p.contextId === input.profile && p.connected).length !== 1) throw Object.assign(new Error('account_unconfirmed'), { code: 'account_unconfirmed' });
     if (!transport.connectionState) throw Object.assign(new Error('context_invalidated'), { code: 'context_invalidated' });
@@ -103,7 +104,7 @@ export async function accountCheck(input, transport, { attempts = 8, delay = 100
         break;
       }
       selfUrl = readOwnProfile(ownPage);
-      if (selfUrl && selfUrl !== input.expected_profile_url) throw Object.assign(new Error('identity_mismatch'), { code: 'identity_mismatch' });
+      if (selfUrl && canonicalProfileUrl(selfUrl) !== canonicalProfileUrl(input.expected_profile_url)) throw Object.assign(new Error('identity_mismatch'), { code: 'identity_mismatch' });
       if (selfUrl) break;
       if (attempt + 1 < attempts) await sleep(delay);
     }
@@ -198,7 +199,7 @@ export async function accountCheck(input, transport, { attempts = 8, delay = 100
       }
       report.account_binding = { status: ownUrl ? 'observed' : 'unknown', profile_url: ownUrl, immutable_id: null };
       report.evidence.push({ capability: 'account_binding', page: 'https://www.linkedin.com/feed/', marker: ownUrl ? 'sidebar_self_profile' : 'self_profile_unconfirmed', checked_at: new Date().toISOString() });
-      if (input.expected_profile_url && ownUrl !== input.expected_profile_url) {
+      if (input.expected_profile_url && ownUrl !== input.expected_profile_url && canonicalProfileUrl(ownUrl) !== canonicalProfileUrl(input.expected_profile_url)) {
         report.identity_match = ownUrl ? false : null;
         for (const key of Object.keys(PAGES)) report[key] = unknown('profile_url_mismatch');
         report.next_action = 'select_expected_account';
@@ -235,7 +236,7 @@ export async function accountCheck(input, transport, { attempts = 8, delay = 100
           && /interactive: 0 \| iframes: 0/.test(settingsPage.snapshot ?? '')
           && !/<(?:main|button|input|a)(?:[ >])/.test(settingsPage.snapshot ?? '');
         let rebound = null;
-        if (blankSettings && input.expected_profile_url && ownUrl === input.expected_profile_url) {
+        if (blankSettings && input.expected_profile_url && canonicalProfileUrl(ownUrl) === canonicalProfileUrl(input.expected_profile_url)) {
           await transport.open('https://www.linkedin.com/feed/', context);
           for (let i = 0; i < attempts; i++) {
             rebound = readOwnProfile(await transport.state(context));
@@ -243,7 +244,7 @@ export async function accountCheck(input, transport, { attempts = 8, delay = 100
             if (i + 1 < attempts) await sleep(delay);
           }
         }
-        if (rebound !== input.expected_profile_url || !rebound) {
+        if (!rebound || canonicalProfileUrl(rebound) !== canonicalProfileUrl(input.expected_profile_url)) {
           report.identity_match = rebound ? false : null;
           report.account_binding.status = 'unknown';
           for (const key of Object.keys(PAGES)) report[key] = unknown(rebound ? 'profile_url_mismatch' : 'session_identity_unconfirmed');

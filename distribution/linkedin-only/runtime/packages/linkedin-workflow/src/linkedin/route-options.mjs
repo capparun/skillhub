@@ -1,4 +1,5 @@
 import {compile} from './gateway.mjs';
+import {canonicalProfileUrl} from './profile-url.mjs';
 const fail=code=>{throw Object.assign(new Error(code),{code});};
 // Local preflight only. Never infer an entitlement from a product label or dispatch a fallback.
 export function routeOptions(input, options={}) {
@@ -8,7 +9,7 @@ export function routeOptions(input, options={}) {
   let reason=null;
   try{compile(request,options);}catch(e){reason=e.code??'invalid_request';}
   if(reason)return {provider:request?.provider,operation:request?.operation,status:'unsupported',reason};
-  const observations=input.observations.filter(o=>o.provider===request.provider&&o.operation===request.operation&&o.profile===request.account.profile&&o.identity_url===request.account.expected_profile_url);
+  const observations=input.observations.filter(o=>o.provider===request.provider&&o.operation===request.operation&&o.profile===request.account.profile&&canonicalProfileUrl(o.identity_url)===canonicalProfileUrl(request.account.expected_profile_url));
   const latest=observations.sort((a,b)=>Date.parse(b.observed_at)-Date.parse(a.observed_at))[0];
   if(!latest)return {provider:request.provider,operation:request.operation,status:'needs_check',reason:'operation_evidence_missing'};
   const start=Date.parse(latest.observed_at),end=Date.parse(latest.expires_at);

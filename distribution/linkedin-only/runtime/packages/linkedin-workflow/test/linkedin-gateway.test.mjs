@@ -78,3 +78,19 @@ test('failed account check and platform operation retain the failing stage',asyn
  // The first run intentionally retains an unknown-outcome lock; use a distinct profile for the next stage.
  await assert.rejects(execute({...req,account:{...account,profile:'synthetic-platform-stage'}},opts({run:async()=>{if(++count===1)return {ok:true,data:{logged_in:true,name:'Test User',public_id:'test-user'}};throw Object.assign(new Error('failed'),{code:'attach_failed'});}})),{code:'attach_failed',stage:'platform_operation'});
 });
+test('non-ASCII profile bindings compile in raw and percent-encoded form',()=>{
+ const binding={...account,expected_profile_url:'https://www.linkedin.com/in/妍-王-a52634337/'};
+ assert.ok(compile({...request,account:binding},{linkedinEntry:'/tmp/launcher.mjs'}));
+ assert.ok(compile({...request,account:{...binding,expected_profile_url:'https://www.linkedin.com/in/%E5%A6%8D-%E7%8E%8B-a52634337/'}},{linkedinEntry:'/tmp/launcher.mjs'}));
+});
+test('percent-encoded binding confirms the raw non-ASCII public id',async()=>{
+ const binding={profile:'synthetic-unicode-binding',expected_identity:'Jazmín Wang',expected_profile_url:'https://www.linkedin.com/in/%E5%A6%8D-%E7%8E%8B-a52634337/'};
+ let calls=0;
+ const r=await execute({provider:'linkedin',operation:'person.search',account:binding,input:{keyword:'engineer'}},opts({run:async()=>++calls===1?{ok:true,data:[{logged_in:true,name:'Jazmín Wang',public_id:'妍-王-a52634337'}]}:{ok:true,data:{candidates:[]}}}));
+ assert.equal(calls,2);
+ assert.equal(r.provider,'linkedin');
+});
+test('person.read accepts an encoded row for a raw non-ASCII profile url',()=>{
+ const r=normalize({...request,provider:'linkedin',operation:'person.read',input:{profile_url:'https://www.linkedin.com/in/妍-王-a52634337/'}},{ok:true,data:[{name:'Jazmín Wang',profile_url:'https://www.linkedin.com/in/%E5%A6%8D-%E7%8E%8B-a52634337/',about:'bio'}]});
+ assert.equal(r.data.results.length,1);
+});

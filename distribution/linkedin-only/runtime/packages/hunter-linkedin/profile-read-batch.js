@@ -42,7 +42,14 @@ function buildProfileExtractionScript() {
       || /^\d[\d,]*\s+(followers|connections)/i.test(line)
       || line === '·';
     const headline = compact(lines.find((line) => !skipIntro(line) && line.length > 20) || '');
-    const locationText = lines.find((line) => /(area|india|jaipur|bangalore|bengaluru|delhi|mumbai|hyderabad|pune)/i.test(line) && line.length < 120) || '';
+    // Location is the "City, Region, Country" line right below the headline; do not
+    // rely on a hard-coded city list.
+    const headlineIndex = lines.findIndex((line) => compact(line) === headline);
+    const looksLikeLocation = (line) => line.length >= 2 && line.length < 120
+      && /[,，]/.test(line)
+      && !/^(contact info|message|follow|connect|more|open to|show all)/i.test(line);
+    const locationText = (headlineIndex >= 0 ? lines.slice(headlineIndex + 1) : [])
+      .find((line) => looksLikeLocation(line)) || '';
     const about = readSection(/^About$/i);
     const experience = readSection(/^Experience$/i);
     const education = readSection(/^Education$/i);

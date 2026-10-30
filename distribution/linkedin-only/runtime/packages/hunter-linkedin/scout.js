@@ -396,8 +396,8 @@ function cleanTitleNoise(title) {
 
 // 有渲染行结构时按行解析：第 1 行是姓名+度数，随后是职位行与地点行。
 // 早先按关键词回退吞并（LOCATION_URN_MAP + 向前扩展）会把紧邻城市的职位并入地点。
-function parseCardLines(lines) {
-  const cleaned = cleanLinkedInCardText(lines[0]);
+function parseCardLines(headerLine, bodyLines) {
+  const cleaned = cleanLinkedInCardText(headerLine);
   let name = '';
   const dotIdx = cleaned.indexOf('•');
   if (dotIdx > 0) name = cleaned.substring(0, dotIdx).trim();
@@ -416,7 +416,7 @@ function parseCardLines(lines) {
     degree = cleaned.includes('度') ? `${num}度` : `${num}${['st','nd','rd'][Math.min(parseInt(num)-1,2)] || 'th'}`;
     if (cleaned.includes(`${num}rd+`) || cleaned.includes(`${num}度+`)) degree += '+';
   }
-  const rest = lines.slice(1).map(line => line.replace(/^Current:\s*/i, '').trim()).filter(Boolean);
+  const rest = bodyLines.map(line => line.replace(/^Current:\s*/i, '').trim()).filter(Boolean);
   // 地点行通常是 "City, Region, Country" 形状的短行；取不到就退回第二行。
   const locationLine = rest.find(line => line.length <= 80 && /^[^,]{1,40}(?:,\s*[^,]{1,30}){1,2}$/.test(line)) ?? rest[1] ?? '';
   const headlineLine = rest.find(line => line !== locationLine) ?? '';
@@ -428,7 +428,13 @@ function parseLinkedInNameCard(nameText) {
   if (!nameText) return { name: '', title: '', degree: '', location: '' };
 
   const cardLines = String(nameText).split('\n').map(line => line.replace(/\s+/g, ' ').trim()).filter(Boolean);
-  if (cardLines.length >= 3 && cardLines[0].includes('•')) return parseCardLines(cardLines);
+  // innerText sometimes breaks the degree onto its own line ("Name" / "• 1st"), so
+  // fold that line into the header before deciding whether the card is line-structured.
+  const degreeLine = /^[•·]/.test(cardLines[1] ?? '') ? cardLines[1] : '';
+  const headerLine = degreeLine ? `${cardLines[0]} ${degreeLine}` : (cardLines[0] ?? '');
+  const bodyLines = degreeLine ? cardLines.slice(2) : cardLines.slice(1);
+  const readableHeader = headerLine.includes('•') || /\d+\s*(?:度|st|nd|rd)\+?/i.test(headerLine);
+  if (bodyLines.length && cardLines.length >= 3 && readableHeader) return parseCardLines(headerLine, bodyLines);
 
   const cleaned = cleanLinkedInCardText(nameText);
 

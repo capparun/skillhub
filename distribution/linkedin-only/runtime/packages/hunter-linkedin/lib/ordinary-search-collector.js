@@ -95,7 +95,7 @@ export function inspectOrdinarySearchDOM(){
 // Run a whole bounded search in one authenticated adapter invocation. No new
 // identity navigation per page. Account checks remain in the ordinary gateway.
 const anonymousPolicies=['stop','continue'];
-export async function collectOrdinarySearch({read,navigate,scroll,searchUrl,limit,maxPages,previous,onCheckpoint,anonymousPolicy='stop',sleep=ms=>new Promise(r=>setTimeout(r,ms)),clock=()=>performance.now(),waitMs=15000}){
+export async function collectOrdinarySearch({read,navigate,scroll,searchUrl,limit,maxPages,previous,onCheckpoint,anonymousPolicy='stop',sleep=ms=>new Promise(r=>setTimeout(r,ms)),clock=()=>performance.now(),waitMs=15000,pageGapMs=[0,0],random=Math.random}){
   if(!Number.isInteger(limit)||limit<1||limit>2500||maxPages!==undefined&&(!Number.isInteger(maxPages)||maxPages<1||maxPages>250))fail('invalid_search_limit');
   if(!anonymousPolicies.includes(anonymousPolicy))fail('invalid_anonymous_policy');
   const fingerprint=queryKey(searchUrl);
@@ -154,7 +154,12 @@ export async function collectOrdinarySearch({read,navigate,scroll,searchUrl,limi
       await sleep(250);
     }
   }finally{timing.readiness_ms+=clock()-start;}}
-  async function go(){const start=clock();try{await navigate(pageURL(searchUrl,page));timing.navigations++;}finally{timing.navigation_ms+=clock()-start;}}
+  // Page turns are paced with a jittered gap so pagination does not fire back-to-back.
+  async function go(){
+    const [gapLow=0,gapHigh=0]=pageGapMs;
+    if(gapHigh>0){const gap=gapLow+Math.floor(random()*(gapHigh-gapLow+1));if(gap>0)await sleep(gap);}
+    const start=clock();try{await navigate(pageURL(searchUrl,page));timing.navigations++;}finally{timing.navigation_ms+=clock()-start;}
+  }
   try{
     // A resume starts at its stored page; the initial caller already navigated.
     if(previous)await go();

@@ -1,7 +1,8 @@
 const fail=code=>{throw Object.assign(Error(code),{code});};
 export function validateIdentityTarget(value){
  let url;try{url=new URL(value);}catch{fail('invalid_identity_target');}
- if(url.origin!=='https://www.linkedin.com'||url.username||url.password||url.search||url.hash||!/^\/(?:in\/[\w%-]+\/|company\/[\w%-]+\/|search\/results\/people\/)$/.test(url.pathname))fail('invalid_identity_target');
+ // Profile slugs may be non-ASCII (e.g. /in/妍-王-a52634337/) or percent-encoded.
+ if(url.origin!=='https://www.linkedin.com'||url.username||url.password||url.search||url.hash||!/^\/(?:in\/[^/?#]+\/|company\/[^/?#]+\/|search\/results\/people\/)$/.test(url.pathname))fail('invalid_identity_target');
  return url.href;
 }
 export async function probeIdentity(page,target){

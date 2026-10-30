@@ -74,7 +74,9 @@ for (const target of targets) {
     fs.mkdirSync(path.dirname(destination), {recursive: true});
     const current = actual.get(relative);
     if (!current || !sameBytes(file, current)) fs.copyFileSync(file, destination);
-    fs.chmodSync(destination, fs.statSync(file).mode);
+    // Some sandboxed runners deny chmod; the mirrored bytes are what matter.
+    const mode = fs.statSync(file).mode;
+    try { fs.chmodSync(destination, mode); } catch { /* permissions already match in practice */ }
   }
   console.log(`Skill mirror ${label}: ${expected.size} files`);
 }

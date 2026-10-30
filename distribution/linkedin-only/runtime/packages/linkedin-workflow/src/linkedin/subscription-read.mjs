@@ -3,6 +3,7 @@ import {createTransport} from '../opencli.mjs';
 import {managedSessionTransport} from '../session-lifecycle.mjs';
 import {withProfileLock} from '../profile-lock.mjs';
 import {readSubscription} from '../identity.mjs';
+import {profileSlug} from './profile-url.mjs';
 const url='https://www.linkedin.com/premium/my-premium/';
 const unknown=reason=>({status:'unknown',reason});
 export function parsePremiumPage(data){
@@ -19,7 +20,7 @@ export async function readAccountSubscription(account,options={}){
  const run=options.run??runProcess;
  const owned=managedSessionTransport(options.transport??createTransport(),account.profile);
  const context={profile:account.profile,session:'subscription-read'};
- const verify=async()=>{const raw=await run(plan);const who=Array.isArray(raw.data)?raw.data.length===1?raw.data[0]:null:raw.data;if(raw.ok!==true||who?.logged_in!==true||who.name!==account.expected_identity||who.public_id!==account.expected_profile_url.split('/').filter(Boolean).at(-1))throw Object.assign(new Error('identity_unconfirmed'),{code:'identity_unconfirmed'});};
+ const verify=async()=>{const raw=await run(plan);const who=Array.isArray(raw.data)?raw.data.length===1?raw.data[0]:null:raw.data;if(raw.ok!==true||who?.logged_in!==true||who.name!==account.expected_identity||who.public_id!==profileSlug(account.expected_profile_url))throw Object.assign(new Error('identity_unconfirmed'),{code:'identity_unconfirmed'});};
  return withProfileLock(account.profile,async()=>{
   let result;
   try{

@@ -2,6 +2,13 @@ import { cli, Strategy } from '@jackwener/opencli/registry';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import {
+  anchorSectionUrl,
+  buildEducationExtractionScript,
+  experienceText,
+  normalizeEducationRows,
+} from './lib/anchor-sections.js';
+import { createPacer } from './lib/pacing.js';
 
 const fail = (code, message) => { throw Object.assign(new Error(message ?? code), { code }); };
 
@@ -35,7 +42,14 @@ function buildProfileExtractionScript() {
       || /^\d[\d,]*\s+(followers|connections)/i.test(line)
       || line === '·';
     const headline = compact(lines.find((line) => !skipIntro(line) && line.length > 20) || '');
-    const locationText = lines.find((line) => /(area|india|jaipur|bangalore|bengaluru|delhi|mumbai|hyderabad|pune)/i.test(line) && line.length < 120) || '';
+    // Location is the "City, Region, Country" line right below the headline; do not
+    // rely on a hard-coded city list.
+    const headlineIndex = lines.findIndex((line) => compact(line) === headline);
+    const looksLikeLocation = (line) => line.length >= 2 && line.length < 120
+      && /[,，]/.test(line)
+      && !/^(contact info|message|follow|connect|more|open to|show all)/i.test(line);
+    const locationText = (headlineIndex >= 0 ? lines.slice(headlineIndex + 1) : [])
+      .find((line) => looksLikeLocation(line)) || '';
     const about = readSection(/^About$/i);
     const experience = readSection(/^Experience$/i);
     const education = readSection(/^Education$/i);
@@ -95,6 +109,8 @@ function normalizeRow(row, expectedUrl) {
     about: clean(row.about),
     experience: clean(row.experience),
     education: clean(row.education),
+    experience_items: Array.isArray(row.experience_items) ? row.experience_items : [],
+    education_items: Array.isArray(row.education_items) ? row.education_items : [],
     services: clean(row.services),
     featured: clean(row.featured),
   };
@@ -105,6 +121,19 @@ function fatalCode(pageState) {
   if (/\/checkpoint/i.test(target)) return 'verification_required';
   if (/\/login|\/authwall|\/uas\/login|LinkedIn Login/i.test(target)) return 'not_logged_in';
   return null;
+}
+
+function readProfileRows(file) {
+  if (!fs.existsSync(file)) return [];
+  const rows = [];
+  for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
+    if (!line.trim()) continue;
+    try {
+      const row = JSON.parse(line);
+      if (row?.profile_url) rows.push(row);
+    } catch { /* ignore a truncated trailing line */ }
+  }
+  return rows;
 }
 
 function readCheckpoint(file) {
@@ -120,37 +149,79 @@ function readCheckpoint(file) {
   return done;
 }
 
-async function readProfileFromPage(page, url, waitSeconds) {
-  await page.goto(url);
+async function assertNoFatal(page) {
   const state = await page.evaluate('({url: location.href, title: document.title})');
   const fatal = fatalCode(state);
   if (fatal) fail(fatal);
-  await waitForProfile(page, waitSeconds);
-  await page.autoScroll({ times: 2, delayMs: 700 });
-  await page.wait(0.5);
-  return normalizeRow(await page.evaluate(buildProfileExtractionScript()), url);
 }
 
-export async function runProfileBatch({ page, urls, outputDir, resumeFile, waitSeconds = 8, limit, readProfile } = {}) {
+// Detail reading follows the profile's own anchor pages instead of scrolling the
+// main profile: basics come from /in/<handle>/, the structured lists come from
+// /details/experience/ (bundled command) and /details/education/.
+export async function readProfileFromPage(page, url, waitSeconds, { getCommand } = {}) {
+  await page.goto(url);
+  await assertNoFatal(page);
+  await waitForProfile(page, waitSeconds);
+  const basics = await page.evaluate(buildProfileExtractionScript());
+
+  let experienceItems = [];
+  const experienceCommand = getCommand?.('linkedin/profile-experience');
+  if (experienceCommand?.func) {
+    const result = await experienceCommand.func(page, { 'profile-url': url });
+    experienceItems = Array.isArray(result) ? result : result ? [result] : [];
+    await assertNoFatal(page);
+  }
+
+  await page.goto(anchorSectionUrl(url, 'education'));
+  await assertNoFatal(page);
+  try { await page.wait({ text: 'Education', timeout: 5000 }); } catch { /* a profile may have no education section */ }
+  const education = normalizeEducationRows(await page.evaluate(buildEducationExtractionScript()));
+
+  return {
+    ...basics,
+    experience: experienceText(experienceItems) || clean(basics.experience),
+    education: education.text || clean(basics.education),
+    experience_items: experienceItems,
+    education_items: education.items,
+  };
+}
+
+export async function runProfileBatch({ page, urls, outputDir, resumeFile, waitSeconds = 8, limit, readProfile, pacer = null, sleep = sleepMs, budgetMs = 0, now = Date.now } = {}) {
   if (!readProfile && !page) fail('browser_session_required');
   if (!Array.isArray(urls) || !urls.length) fail('profile_urls_required');
   const selected = [...new Set(urls.map(normalizeProfileUrl))].slice(0, Number.isInteger(limit) ? limit : undefined);
   fs.mkdirSync(outputDir, { recursive: true });
   const checkpoint = resumeFile ?? path.join(outputDir, 'checkpoint.jsonl');
+  // Append as we go so a kill, auth wall or budget stop never loses already-read bodies.
+  const rowsFile = path.join(outputDir, 'profiles.jsonl');
   const done = readCheckpoint(checkpoint);
   const pending = selected.filter(url => !done.has(url));
   const rows = [];
   let stopped = null;
+  let processed = 0;
+  const runStarted = now();
   const readOne = readProfile ?? (url => readProfileFromPage(page, url, waitSeconds));
-  for (const url of pending) {
+  for (const [index, url] of pending.entries()) {
+    const wait = pacer ? pacer.delayBefore(index) : { ms: 0, kind: 'none' };
+    // Stop before burning a pacing pause that would overrun the command budget:
+    // the caller resumes from the checkpoint in a fresh process.
+    if (budgetMs > 0 && index > 0 && now() - runStarted + Math.max(0, wait.ms) >= budgetMs) {
+      stopped = 'time_budget';
+      break;
+    }
+    if (wait.ms > 0) await sleep(wait.ms);
+    processed += 1;
     const started = Date.now();
     try {
-      rows.push(await readOne(url));
-      fs.appendFileSync(checkpoint, JSON.stringify({ profile_url: url, status: 'ok', duration_ms: Date.now() - started }) + '\n');
+      const row = await readOne(url);
+      rows.push(row);
+      fs.appendFileSync(rowsFile, JSON.stringify(row) + '\n');
+      fs.appendFileSync(checkpoint, JSON.stringify({ profile_url: url, status: 'ok', wait_ms: wait.ms, wait_kind: wait.kind, duration_ms: Date.now() - started }) + '\n');
     } catch (error) {
       const code = error?.code ?? 'profile_read_failed';
-      fs.appendFileSync(checkpoint, JSON.stringify({ profile_url: url, status: 'failed', error: code, duration_ms: Date.now() - started }) + '\n');
-      if (['not_logged_in', 'verification_required'].includes(code) || /not logged in|authwall|checkpoint|login/i.test(error?.message ?? '')) {
+      const errorMessage = String(error?.message ?? '').slice(0, 200);
+      fs.appendFileSync(checkpoint, JSON.stringify({ profile_url: url, status: 'failed', error: code, error_message: errorMessage, wait_ms: wait.ms, wait_kind: wait.kind, duration_ms: Date.now() - started }) + '\n');
+      if (['not_logged_in', 'verification_required', 'AUTH_REQUIRED'].includes(code) || /not logged in|authwall|checkpoint|login|AUTH_REQUIRED/i.test(error?.message ?? '')) {
         stopped = code === 'profile_read_failed' ? 'not_logged_in' : code;
         break;
       }
@@ -164,6 +235,9 @@ export async function runProfileBatch({ page, urls, outputDir, resumeFile, waitS
     } catch { return []; }
   })();
   const merged = new Map(existing.map(row => [row.profile_url, row]));
+  // The append log is authoritative: it also holds rows from runs that were killed
+  // before profiles.json was rewritten.
+  for (const row of readProfileRows(rowsFile)) merged.set(row.profile_url, row);
   for (const row of rows) merged.set(row.profile_url, row);
   fs.writeFileSync(resultsFile, JSON.stringify([...merged.values()], null, 2) + '\n');
   const summary = {
@@ -173,7 +247,10 @@ export async function runProfileBatch({ page, urls, outputDir, resumeFile, waitS
     read_ok: rows.length,
     results_total: merged.size,
     stopped: stopped,
+    remaining_after_run: pending.length - processed,
+    elapsed_ms: now() - runStarted,
     checkpoint,
+    rows_log: rowsFile,
     output_dir: outputDir,
   };
   fs.writeFileSync(path.join(outputDir, 'summary.json'), JSON.stringify(summary, null, 2) + '\n');
@@ -194,6 +271,9 @@ cli({
     { name: 'resume', type: 'string', required: false, help: '已有检查点文件；默认输出目录下的 checkpoint.jsonl' },
     { name: 'wait', type: 'number', required: false, help: '页面就绪硬上限秒数，默认 8；就绪后立即读取' },
     { name: 'limit', type: 'number', required: false, help: '本次最多读取人数' },
+    { name: 'pacing', type: 'string', required: false, help: '读取节奏：steady（稳健，默认 25–45 秒）/ conservative（45–90 秒）/ standard（15–25 秒）/ none' },
+    { name: 'budget', type: 'int', required: false, help: '本次命令内部时间预算秒数，到点停止并保留检查点供续读；默认 240' },
+    { name: 'timeout', type: 'int', default: 300, help: '浏览器命令超时秒数；节奏等待计入该预算，默认 300' },
   ],
   func: async (page, args) => {
     if (!page) fail('browser_session_required');
@@ -201,23 +281,28 @@ cli({
     if (!fs.existsSync(file)) fail('input_file_missing');
     const input = JSON.parse(fs.readFileSync(file, 'utf8'));
     const outputDir = path.resolve(args.output ?? input.output ?? path.join(process.env.HUNTER_DATA_DIR || path.join(os.homedir(), '.hunter'), 'channels', 'linkedin', 'profile-batch'));
-    // Read each profile through the installed linkedin profile-read command so the
-    // batch keeps the command's section evidence instead of re-implementing scrolling.
+    // Detail reading is anchor-based: main page for basics, /details/experience/ and
+    // /details/education/ for the structured lists (no main-page scrolling).
     const { getRegistry } = await import('@jackwener/opencli/registry');
-    const readProfile = async url => {
-      const command = getRegistry().get('linkedin/profile-read');
-      if (!command?.func) fail('profile_read_command_missing');
-      const result = await command.func(page, { 'profile-url': url });
-      return normalizeRow(Array.isArray(result) ? result[0] : result, url);
-    };
+    const waitSeconds = args.wait ?? input.wait_seconds ?? 8;
+    const preset = String(args.pacing ?? input.pacing ?? 'steady');
+    const pacer = preset === 'none' ? null : createPacer({ preset });
+    const budgetSeconds = Number(args.budget ?? input.budget_seconds ?? 240);
+    if (!Number.isInteger(budgetSeconds) || budgetSeconds < 1) fail('invalid_budget');
+    const readProfile = async url => normalizeRow(
+      await readProfileFromPage(page, url, waitSeconds, { getCommand: name => getRegistry().get(name) }),
+      url,
+    );
     const result = await runProfileBatch({
       page,
       urls: input.profile_urls,
       outputDir,
       resumeFile: args.resume ? path.resolve(args.resume) : input.resume ? path.resolve(input.resume) : undefined,
-      waitSeconds: args.wait ?? input.wait_seconds ?? 8,
+      waitSeconds,
       limit: args.limit ?? input.limit,
       readProfile,
+      pacer,
+      budgetMs: budgetSeconds * 1000,
     });
     return result.rows;
   },

@@ -81,6 +81,7 @@ test('a failed profile is recorded without dropping the rest of the batch',async
  const lines=readFileSync(join(dir,'checkpoint.jsonl'),'utf8').trim().split('\n').map(JSON.parse);
  assert.deepEqual(lines.map(l=>l.status),['ok','failed','ok']);
  assert.equal(lines[1].error,'profile_unreadable');
+ assert.equal(lines[1].error_message,'profile_unreadable');
 });
 test('login failures stop the batch instead of retrying',async t=>{
  const dir=mkdtempSync(join(tmpdir(),'profile-batch-login-'));
@@ -133,6 +134,19 @@ test('the batch waits between profiles according to the pacer',async t=>{
  const {rows}=await runProfileBatch({urls:['a','b','c','d'].map(url),outputDir:dir,readProfile:readRow,pacer,sleep:async ms=>{waits.push(ms);}});
  assert.equal(rows.length,4);
  assert.deepEqual(waits,[30001,30002,120000]);
+});
+test('the time budget stops before a pause that would overrun the command timeout',async t=>{
+ const dir=mkdtempSync(join(tmpdir(),'profile-batch-budget-'));
+ t.after(()=>rmSync(dir,{recursive:true,force:true}));
+ let clock=0;
+ const pacer={delayBefore:index=>index===0?{ms:0,kind:'none'}:{ms:40000,kind:'gap'}};
+ const readProfile=async target=>{clock+=35000;return readRow(target);};
+ const {rows,summary}=await runProfileBatch({urls:['a','b','c','d'].map(url),outputDir:dir,readProfile,pacer,sleep:async ms=>{clock+=ms;},budgetMs:150000,now:()=>clock});
+ assert.deepEqual(rows.map(r=>r.name),['Person a','Person b']);
+ assert.equal(summary.stopped,'time_budget');
+ assert.equal(summary.remaining_after_run,2);
+ const lines=readFileSync(join(dir,'checkpoint.jsonl'),'utf8').trim().split('\n').map(JSON.parse);
+ assert.deepEqual(lines.map(l=>l.status),['ok','ok']);
 });
 test('education anchors and rows are normalized without scrolling',()=>{
  assert.equal(anchorSectionUrl(url('a'),'education'),'https://www.linkedin.com/in/a/details/education/');

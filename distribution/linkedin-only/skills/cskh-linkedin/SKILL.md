@@ -122,7 +122,7 @@ task-status 恢复账本和实体观察；按覆盖决定下一步。用 task-as
 
 ### 批量详情读取
 
-一次读取多人主页（≥10 人）用 `node scripts/opencli.mjs hunter-linkedin profile-read-batch --input batch.json`。输入 `profile_urls[]`，可选 `output`（结果目录）、`wait_seconds`（页面就绪硬上限，默认 8；就绪即返回）、`limit`。每人按锚点页读取：主页取 name/headline/location/about，经历走内置 `linkedin profile-experience`（`/details/experience/`），教育走 `hunter-linkedin profile-education`（`/details/education/`）。不要再自行滚动主页拼字段；单人教育经历用 `profile-education --profile-url`。单个浏览器会话内顺序导航，每人一条写入 `checkpoint.jsonl`；中断后用同一输出目录重跑即可跳过已读人员，并保留已有 `profiles.json`（按 profile_url 合并），不要更换目录或重复读取失败项。失败项记入检查点，`AUTH_REQUIRED`/验证类错误会立即停止整批，不重试。节奏默认 `--pacing steady`（25–45 秒间隔，每 6–10 人停顿 90–150 秒，每 25–30 人休息 5–8 分钟）；刚经历风控或账号受限时用 `conservative`（45–90 秒），不要用固定短间隔连发。搜索翻页间隔为 2–6 秒随机，不要改成连发。
+一次读取多人主页用 `node scripts/opencli.mjs hunter-linkedin profile-read-batch --input batch.json`；稳态节奏下每次传 3–5 人，目标 ≥10 人时用同一 `output` 目录连续续读，不要把所有 URL 塞进一次命令。输入 `profile_urls[]`，可选 `output`（结果目录）、`wait_seconds`（页面就绪硬上限，默认 8；就绪即返回）、`limit`。每人按锚点页读取：主页取 name/headline/location/about，经历走内置 `linkedin profile-experience`（`/details/experience/`），教育走 `hunter-linkedin profile-education`（`/details/education/`）。不要再自行滚动主页拼字段；单人教育经历用 `profile-education --profile-url`。单个浏览器会话内顺序导航，每人一条写入 `checkpoint.jsonl`；中断后用同一输出目录重跑即可跳过已读人员，并保留已有 `profiles.json`（按 profile_url 合并），不要更换目录或重复读取失败项。失败项记入检查点，`AUTH_REQUIRED`/验证类错误会立即停止整批，不重试。节奏默认 `--pacing steady`（25–45 秒间隔，每 6–10 人停顿 90–150 秒，每 25–30 人休息 5–8 分钟）；刚经历风控或账号受限时用 `conservative`（45–90 秒），不要用固定短间隔连发。每条命令有内部时间预算 `--budget`（默认 240 秒），到点前会主动停下并返回 `stopped=time_budget`，剩余人员留在检查点里；看到该停止原因就用同一 `--output` 目录再跑一次续读，不要换目录、不要重复已读人员，也不要靠加大 `--timeout`（默认 300 秒）硬扛——节奏等待计入同一预算，硬扛只会让命令层先超时、后台仍在跑。搜索翻页间隔为 2–6 秒随机，不要改成连发。
 
 ### 匿名结果与分页策略
 

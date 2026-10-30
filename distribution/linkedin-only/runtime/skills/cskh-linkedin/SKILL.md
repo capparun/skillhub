@@ -122,7 +122,7 @@ task-status 恢复账本和实体观察；按覆盖决定下一步。用 task-as
 
 ### 批量详情读取
 
-一次读取多人主页（≥10 人）用 `node scripts/opencli.mjs hunter-linkedin profile-read-batch --input batch.json`。输入 `profile_urls[]`，可选 `output`（结果目录）、`wait_seconds`（页面就绪硬上限，默认 8；就绪即返回）、`limit`。单个浏览器会话内顺序导航，每人一条写入 `checkpoint.jsonl`；中断后用同一输出目录重跑即可跳过已读人员，不要更换目录或重复读取失败项。返回逐人主页字段；失败项记入检查点，登录/验证类错误会停止整批。
+一次读取多人主页（≥10 人）用 `node scripts/opencli.mjs hunter-linkedin profile-read-batch --input batch.json`。输入 `profile_urls[]`，可选 `output`（结果目录）、`wait_seconds`（页面就绪硬上限，默认 8；就绪即返回）、`limit`。每人的主页字段由产品内置的 `linkedin profile-read` 命令读取（含 About/Experience/Education 区块证据），不要再自行滚动页面拼字段。单个浏览器会话内顺序导航，每人一条写入 `checkpoint.jsonl`；中断后用同一输出目录重跑即可跳过已读人员，并保留已有 `profiles.json`（按 profile_url 合并），不要更换目录或重复读取失败项。失败项记入检查点，登录/验证类错误会停止整批。
 
 ### 匿名结果与分页策略
 

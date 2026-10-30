@@ -1,4 +1,4 @@
-# LinkedIn 能力全景（85 个已注册命令）
+# LinkedIn 能力全景（86 个已注册命令）
 
 安装后先读这一页，再决定用哪个命令；不要凭文件名猜测，也不要把"已注册"当成"当前账号可用"。
 
@@ -6,7 +6,7 @@
 
 | 你要的东西 | 用什么 |
 | --- | --- |
-| 全部命令的一句话清单（85 行） | `node scripts/opencli.mjs hunter-linkedin capability-catalog --summary -f json` |
+| 全部命令的一句话清单（86 行） | `node scripts/opencli.mjs hunter-linkedin capability-catalog --summary -f json` |
 | 某个命令的参数与契约 | `node scripts/opencli.mjs hunter-linkedin capability-catalog --command "linkedin profile-read" -f json` |
 | 统一网关支持哪些操作 | `node scripts/opencli.mjs hunter-linkedin capabilities -f json` |
 | 本页判断"能不能做/该用哪个"，不做参数校验 | 直接看下面分组表 |
@@ -68,12 +68,13 @@
 | `hunter-linkedin capability-probe` | 在精确主页上探测可见动作（Connect/Message） | 1 次导航；需精确姓名匹配 | 只读，不点发送 |
 | `linkedin timeline` | 读取首页时间线动态 | 1 次导航 | 信息流样本，不代表全部 |
 
-## E. 公司与组织（5）
+## E. 公司与组织（6）
 
 | 命令 | 用途 | 前置 / 成本 | 备注 |
 | --- | --- | --- | --- |
 | `linkedin company` | 读公司主页资料（行业、规模、总部、网站、关注者） | 1 次导航 | 公司画像 |
 | `hunter-linkedin company-id-lookup` | 公司 slug/URL → 数字 ID | 1 次导航 | 高级筛选前必须先拿 ID |
+| `hunter-linkedin school-id-lookup` | 学校 slug/URL → 数字 ID | 1 次导航 | `--school` 只收数字 ID，先用它解析 |
 | `hunter-linkedin company` | 按公司搜员工（可按关键词/地点筛） | 消耗 CUL；会本地打标签 | 员工清单，不改平台 |
 | `hunter-linkedin salesnav-account-search` | SalesNav 公司搜索 | 需 SalesNav | 支持公司侧筛选 |
 | `hunter-linkedin salesnav-account-read` | SalesNav 公司详情 | 需 SalesNav | 与 builtin `company` 口径不同 |
@@ -165,6 +166,6 @@
 ## 使用纪律
 
 - 未在"选择关系"表里确认前，不要同时用两个同类命令（如 scout + people-search 同查询）。
-- 全表 85 个命令都只证明"已注册"；`verification.live_execution` 一律从 `not_checked` 开始。
+- 全表 86 个命令都只证明"已注册"；`verification.live_execution` 一律从 `not_checked` 开始。
 - 需要写入、发送或关闭账号的动作，先经人工审批并写入台账；不要用 `linkedin connect` / `linkedin safe-send` 绕过闸门。
 - 额度：CUL 只被 `people-search` / `scout` / `company` 等搜索类命令消耗；读主页不消耗 CUL，但计入浏览行为。

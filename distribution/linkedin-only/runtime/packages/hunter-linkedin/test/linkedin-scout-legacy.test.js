@@ -70,3 +70,19 @@ const cardParse = __test__.parseLinkedInNameCard;
   assert.strictEqual(flat.degree, '2nd');
 }
 console.log('Multi-line card parsing OK');
+
+console.log('Testing degree rendered on its own line...');
+{
+  const split = cardParse('Andy Jun Bautista\n• 1st\nTEFL Teacher\nChengdu, Sichuan, China');
+  assert.strictEqual(split.name, 'Andy Jun Bautista');
+  assert.strictEqual(split.degree, '1st');
+  assert.strictEqual(split.title, 'TEFL Teacher');
+  assert.strictEqual(split.location, 'Chengdu, Sichuan, China');
+
+  const splitNoDegreeBody = cardParse('Tyler Wright, DET\n• 2nd\nScience Teacher\nShanghai, China');
+  assert.strictEqual(splitNoDegreeBody.name, 'Tyler Wright, DET');
+  assert.strictEqual(splitNoDegreeBody.degree, '2nd');
+  assert.strictEqual(splitNoDegreeBody.title, 'Science Teacher');
+  assert.strictEqual(splitNoDegreeBody.location, 'Shanghai, China');
+}
+console.log('Split degree line OK');

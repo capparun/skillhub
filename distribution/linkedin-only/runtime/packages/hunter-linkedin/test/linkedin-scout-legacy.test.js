@@ -48,3 +48,25 @@ assert.strictEqual(
 );
 
 console.log('All linkedin-scout unit tests passed!');
+
+console.log('Testing multi-line card parsing keeps headline and location apart...');
+const cardParse = __test__.parseLinkedInNameCard;
+{
+  // Rendered lines: name+degree / headline / location. The headline sits right next
+  // to the city, which used to make the keyword expansion swallow it into location.
+  const parsed = cardParse('Adam Rooney • 1st\nIB Schools Academic Data Coordinator\nDoha, Qatar');
+  assert.strictEqual(parsed.name, 'Adam Rooney');
+  assert.strictEqual(parsed.degree, '1st');
+  assert.strictEqual(parsed.title, 'IB Schools Academic Data Coordinator');
+  assert.strictEqual(parsed.location, 'Doha, Qatar');
+
+  const withRegion = cardParse('Natalie King • 1st\nSenior Teacher at Eton House International Pre School\nSuzhou, Jiangsu, China');
+  assert.strictEqual(withRegion.title, 'Senior Teacher at Eton House International Pre School');
+  assert.strictEqual(withRegion.location, 'Suzhou, Jiangsu, China');
+
+  // Single-line cards keep the previous heuristic.
+  const flat = cardParse('Fixture Person • 2nd Engineer Singapore');
+  assert.strictEqual(flat.name, 'Fixture Person');
+  assert.strictEqual(flat.degree, '2nd');
+}
+console.log('Multi-line card parsing OK');

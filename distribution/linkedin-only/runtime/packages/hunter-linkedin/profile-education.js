@@ -29,7 +29,14 @@ cli({
     if (/\/checkpoint/i.test(marker)) fail('verification_required');
     if (/\/login|\/authwall|LinkedIn Login/i.test(marker)) fail('not_logged_in');
     try { await page.wait({ text: 'Education', timeout: 8000 }); } catch { /* a profile may have no education section */ }
-    const { items } = normalizeEducationRows(await page.evaluate(buildEducationExtractionScript()));
+    const { items, diagnostics } = normalizeEducationRows(await page.evaluate(buildEducationExtractionScript()));
+    // When the anchor page yields nothing, keep a local diagnostic so an empty result
+    // can be told apart from a parser miss without another page load.
+    const debugFile = process.env.HUNTER_ANCHOR_DEBUG_FILE;
+    if (debugFile) {
+      const fs = await import('node:fs');
+      fs.writeFileSync(debugFile, JSON.stringify({ profile_url: profileUrl, items_count: items.length, diagnostics }, null, 2) + '\n');
+    }
     return items.map(item => ({ ...item, profile_url: profileUrl }));
   },
 });

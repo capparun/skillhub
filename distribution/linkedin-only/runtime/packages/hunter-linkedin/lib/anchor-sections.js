@@ -21,9 +21,12 @@ export function buildEducationExtractionScript() {
     const DATE_RANGE = /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)?\s*\d{4}\s*[–-]\s*(?:present|\d{4}|[a-z]{3,9}\s+\d{4})\b/i;
     const DEGREE = /\b(bachelor|master|mba|ph\.?d|doctor|associate|diploma|certificate|b\.?a|b\.?s|m\.?s|b\.?sc|m\.?sc|degree)\b/i;
     const main = document.querySelector('main') || document.body;
-    const heading = Array.from(main.querySelectorAll('h2, h3'))
-      .find((node) => /^education$/i.test(clean(node.textContent || '')));
-    const section = heading ? heading.closest('section') : main;
+    // The details page does not always use an <h2> for the section title, so pick the
+    // smallest node whose whole text is "Education".
+    const heading = Array.from(main.querySelectorAll('h1, h2, h3, h4, span, div'))
+      .filter((node) => /^education$/i.test(clean(node.textContent || '')))
+      .sort((a, b) => (a.textContent || '').length - (b.textContent || '').length)[0];
+    const section = heading ? (heading.closest('section') || heading.parentElement?.parentElement || main) : main;
     const linesOf = (node) => (node.innerText || node.textContent || '')
       .split(/\n+/).map(clean).filter(Boolean).filter((line) => !CHROME.test(line));
     const items = Array.from(section.querySelectorAll('li, [role="listitem"]'))
@@ -56,9 +59,41 @@ export function buildEducationExtractionScript() {
         raw_text: lines.join(' | '),
       });
     }
+    // Some layouts render education rows without <li> containers; group lines as
+    // school / degree / date range and stop at the next non-education block.
+    if (rows.length === 0) {
+      const stop = /^(profile language|who your viewers also viewed|interests|people you may know|recommendations|about)$/i;
+      const scoped = [];
+      for (const line of linesOf(section)) {
+        if (stop.test(line)) break;
+        scoped.push(line);
+      }
+      for (let i = 2; i < scoped.length; i++) {
+        if (!DATE_RANGE.test(scoped[i])) continue;
+        const school = scoped[i - 2];
+        const degree = scoped[i - 1];
+        if (!school || !degree) continue;
+        const dateLine = scoped[i];
+        const dateRange = dateLine.match(DATE_RANGE)?.[0] || dateLine;
+        const [startDate = '', endDate = ''] = dateRange.split(/\s*[–-]\s*/).map(clean);
+        rows.push({
+          rank: rows.length + 1,
+          school,
+          degree,
+          date_range: dateRange,
+          start_date: startDate,
+          end_date: endDate,
+          description: '',
+          raw_text: [school, degree, dateLine].join(' | '),
+        });
+      }
+    }
     return {
       education_rows: rows.map((row) => ({ ...row, total_count: rows.length })),
       section_text: linesOf(section).join(' | '),
+      heading_found: Boolean(heading),
+      candidate_count: items.length,
+      section_text_length: linesOf(section).join(' ').length,
       page_href: location.href,
     };
   })()`;
@@ -76,7 +111,17 @@ export function normalizeEducationRows(payload) {
     description: clean(row?.description),
     raw_text: clean(row?.raw_text),
   })).filter(row => row.school);
-  return { items, text: clean(payload?.section_text) || items.map(row => row.raw_text).join(' | ') };
+  return {
+    items,
+    text: clean(payload?.section_text) || items.map(row => row.raw_text).join(' | '),
+    diagnostics: {
+      heading_found: Boolean(payload?.heading_found),
+      candidate_count: Number(payload?.candidate_count) || 0,
+      section_text_length: Number(payload?.section_text_length) || 0,
+      section_text: clean(payload?.section_text).slice(0, 400),
+      page_href: clean(payload?.page_href),
+    },
+  };
 }
 
 export function experienceText(items) {

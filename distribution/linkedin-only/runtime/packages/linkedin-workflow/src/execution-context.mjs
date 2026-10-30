@@ -4,6 +4,7 @@ import { mkdir, lstat, open, writeFile, unlink, readdir } from 'node:fs/promises
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { VERSION } from './version.mjs';
+import { canonicalProfileUrl } from './linkedin/profile-url.mjs';
 const fail = code => { throw Object.assign(new Error(code), { code }); };
 const validId = id => typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(id);
 const digest = payload => createHash('sha256').update(JSON.stringify(payload)).digest('hex');
@@ -44,7 +45,7 @@ export async function readExecutionContext(id, binding, { root, now = Date.now }
   if (now() >= payload.expires_at) fail('context_expired');
   const report = payload.report;
   if (report?.connection_binding?.status !== 'observed' || report.identity_match !== true || report.salesnav_access?.status !== 'available' || report.account_binding?.status !== 'observed') fail('invalid_execution_context');
-  if (report.profile !== binding.profile || normalized(report.observed_identity) !== normalized(binding.expected_identity) || !binding.expected_profile_url || report.account_binding.profile_url !== binding.expected_profile_url) fail('identity_mismatch');
+  if (report.profile !== binding.profile || normalized(report.observed_identity) !== normalized(binding.expected_identity) || !binding.expected_profile_url || canonicalProfileUrl(report.account_binding.profile_url) !== canonicalProfileUrl(binding.expected_profile_url)) fail('identity_mismatch');
   return payload;
 }
 export async function invalidateExecutionContext(id, { root } = {}) {

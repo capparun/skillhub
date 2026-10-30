@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {mkdtempSync, readFileSync, writeFileSync, existsSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {runProfileBatch} from '../profile-read-batch.js';
+import {runProfileBatch, readProfileFromPage} from '../profile-read-batch.js';
+import {anchorSectionUrl, experienceText, normalizeEducationRows} from '../lib/anchor-sections.js';
 
 const url=id=>`https://www.linkedin.com/in/${id}/`;
 const row=id=>({profile_url:url(id),name:`Person ${id}`,headline:'Teacher',location:'Sichuan, China',about:'About text',experience:'Experience text',education:'Education text',services:'',featured:''});
@@ -12,9 +13,14 @@ const readRow=async value=>row(value.split('/in/')[1].replace(/\//g,''));
 function fakePage({fatalAt}={}){
  const calls={goto:[],wait:[],scroll:[],evaluate:[]};
  return {calls,goto:async u=>{calls.goto.push(u);},wait:async s=>{calls.wait.push(s);},autoScroll:async o=>{calls.scroll.push(o);},
-  evaluate:async script=>{calls.evaluate.push(script);
-   const current=calls.goto.at(-1);
+  evaluate:async script=>{
+   calls.evaluate.push(script);
+   const current=calls.goto.at(-1)??'';
    if(String(script).includes('nameReady'))return {nameReady:true,sections:'111',loading:false};
+   if(String(script).includes('education_rows')){
+    const id=current.match(/\/in\/([^/]+)\//)?.[1]??'';
+    return {education_rows:[{rank:1,school:`School ${id}`,degree:'MA',date_range:'2010 – 2012',start_date:'2010',end_date:'2012',description:'',raw_text:`School ${id} | MA`}],section_text:`School ${id} | MA`};
+   }
    if(String(script).includes('document.title'))return fatalAt&&current.endsWith(`/in/${fatalAt}/`)?{url:`${current}login`,title:'LinkedIn Login'}:{url:current,title:'LinkedIn'};
    const id=current.match(/\/in\/([^/]+)\//)?.[1];
    return row(id);
@@ -25,16 +31,18 @@ test('reads several profiles sequentially through one page session and writes a 
  t.after(()=>rmSync(dir,{recursive:true,force:true}));
  const page=fakePage();
  const {rows,summary}=await runProfileBatch({page,urls:[url('a'),url('b'),url('c')],outputDir:dir,waitSeconds:0});
- assert.deepEqual(page.calls.goto,[url('a'),url('b'),url('c')]);
+ const edu=id=>`https://www.linkedin.com/in/${id}/details/education/`;
+ assert.deepEqual(page.calls.goto,[url('a'),edu('a'),url('b'),edu('b'),url('c'),edu('c')]);
  assert.equal(rows.length,3);
  assert.equal(rows[1].name,'Person b');
+ assert.equal(rows[1].education,'School b | MA');
+ assert.equal(rows[1].education_items[0].school,'School b');
  assert.equal(summary.read_ok,3);
  assert.equal(summary.results_total,3);
  const lines=readFileSync(join(dir,'checkpoint.jsonl'),'utf8').trim().split('\n').map(JSON.parse);
  assert.deepEqual(lines.map(l=>l.status),['ok','ok','ok']);
  assert.equal(existsSync(join(dir,'summary.json')),true);
- assert.deepEqual(page.calls.wait,[0.5,0.5,0.5]);
- assert.equal(page.calls.scroll[0].times,2);
+ assert.equal(page.calls.scroll.length,0);
 });
 test('the installed profile-read command is used when provided',async t=>{
  const dir=mkdtempSync(join(tmpdir(),'profile-batch-command-'));
@@ -85,4 +93,24 @@ test('login failures stop the batch instead of retrying',async t=>{
 });
 test('non profile URLs are rejected before any navigation',async()=>{
  await assert.rejects(runProfileBatch({page:fakePage(),urls:['https://www.linkedin.com/feed/'],outputDir:tmpdir(),waitSeconds:0}),{code:'invalid_profile_url'});
+});
+test('experience is read through the bundled profile-experience command',async()=>{
+ const seen=[];
+ const command={func:async(page,args)=>{seen.push(args['profile-url']);return [{title:'Teacher',company:'Springfield School',date_range:'2015 – 2020',location:'Chengdu'}];}};
+ const result=await readProfileFromPage(fakePage(),url('a'),0,{getCommand:name=>name==='linkedin/profile-experience'?command:undefined});
+ assert.deepEqual(seen,[url('a')]);
+ assert.equal(result.experience,'Teacher @ Springfield School (2015 – 2020)');
+ assert.equal(result.experience_items[0].company,'Springfield School');
+});
+test('education anchors and rows are normalized without scrolling',()=>{
+ assert.equal(anchorSectionUrl(url('a'),'education'),'https://www.linkedin.com/in/a/details/education/');
+ assert.throws(()=>anchorSectionUrl('https://www.linkedin.com/in/me/','education'),{code:'anchor_requires_profile_url'});
+ const parsed=normalizeEducationRows({education_rows:[
+  {rank:1,school:' Sichuan University ',degree:'MA',date_range:'2010 – 2012',description:'Thesis'},
+  {rank:2,school:'',degree:'BA'},
+ ],section_text:'Sichuan University | MA'});
+ assert.equal(parsed.items.length,1);
+ assert.equal(parsed.items[0].school,'Sichuan University');
+ assert.equal(parsed.text,'Sichuan University | MA');
+ assert.equal(experienceText([{title:'Teacher',company:'School',date_range:'2015 – 2020'}]),'Teacher @ School (2015 – 2020)');
 });

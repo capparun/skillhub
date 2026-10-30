@@ -2,6 +2,12 @@ import { cli, Strategy } from '@jackwener/opencli/registry';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import {
+  anchorSectionUrl,
+  buildEducationExtractionScript,
+  experienceText,
+  normalizeEducationRows,
+} from './lib/anchor-sections.js';
 
 const fail = (code, message) => { throw Object.assign(new Error(message ?? code), { code }); };
 
@@ -95,6 +101,8 @@ function normalizeRow(row, expectedUrl) {
     about: clean(row.about),
     experience: clean(row.experience),
     education: clean(row.education),
+    experience_items: Array.isArray(row.experience_items) ? row.experience_items : [],
+    education_items: Array.isArray(row.education_items) ? row.education_items : [],
     services: clean(row.services),
     featured: clean(row.featured),
   };
@@ -120,15 +128,41 @@ function readCheckpoint(file) {
   return done;
 }
 
-async function readProfileFromPage(page, url, waitSeconds) {
-  await page.goto(url);
+async function assertNoFatal(page) {
   const state = await page.evaluate('({url: location.href, title: document.title})');
   const fatal = fatalCode(state);
   if (fatal) fail(fatal);
+}
+
+// Detail reading follows the profile's own anchor pages instead of scrolling the
+// main profile: basics come from /in/<handle>/, the structured lists come from
+// /details/experience/ (bundled command) and /details/education/.
+export async function readProfileFromPage(page, url, waitSeconds, { getCommand } = {}) {
+  await page.goto(url);
+  await assertNoFatal(page);
   await waitForProfile(page, waitSeconds);
-  await page.autoScroll({ times: 2, delayMs: 700 });
-  await page.wait(0.5);
-  return normalizeRow(await page.evaluate(buildProfileExtractionScript()), url);
+  const basics = await page.evaluate(buildProfileExtractionScript());
+
+  let experienceItems = [];
+  const experienceCommand = getCommand?.('linkedin/profile-experience');
+  if (experienceCommand?.func) {
+    const result = await experienceCommand.func(page, { 'profile-url': url });
+    experienceItems = Array.isArray(result) ? result : result ? [result] : [];
+    await assertNoFatal(page);
+  }
+
+  await page.goto(anchorSectionUrl(url, 'education'));
+  await assertNoFatal(page);
+  try { await page.wait({ text: 'Education', timeout: 5000 }); } catch { /* a profile may have no education section */ }
+  const education = normalizeEducationRows(await page.evaluate(buildEducationExtractionScript()));
+
+  return {
+    ...basics,
+    experience: experienceText(experienceItems) || clean(basics.experience),
+    education: education.text || clean(basics.education),
+    experience_items: experienceItems,
+    education_items: education.items,
+  };
 }
 
 export async function runProfileBatch({ page, urls, outputDir, resumeFile, waitSeconds = 8, limit, readProfile } = {}) {
@@ -201,21 +235,20 @@ cli({
     if (!fs.existsSync(file)) fail('input_file_missing');
     const input = JSON.parse(fs.readFileSync(file, 'utf8'));
     const outputDir = path.resolve(args.output ?? input.output ?? path.join(process.env.HUNTER_DATA_DIR || path.join(os.homedir(), '.hunter'), 'channels', 'linkedin', 'profile-batch'));
-    // Read each profile through the installed linkedin profile-read command so the
-    // batch keeps the command's section evidence instead of re-implementing scrolling.
+    // Detail reading is anchor-based: main page for basics, /details/experience/ and
+    // /details/education/ for the structured lists (no main-page scrolling).
     const { getRegistry } = await import('@jackwener/opencli/registry');
-    const readProfile = async url => {
-      const command = getRegistry().get('linkedin/profile-read');
-      if (!command?.func) fail('profile_read_command_missing');
-      const result = await command.func(page, { 'profile-url': url });
-      return normalizeRow(Array.isArray(result) ? result[0] : result, url);
-    };
+    const waitSeconds = args.wait ?? input.wait_seconds ?? 8;
+    const readProfile = async url => normalizeRow(
+      await readProfileFromPage(page, url, waitSeconds, { getCommand: name => getRegistry().get(name) }),
+      url,
+    );
     const result = await runProfileBatch({
       page,
       urls: input.profile_urls,
       outputDir,
       resumeFile: args.resume ? path.resolve(args.resume) : input.resume ? path.resolve(input.resume) : undefined,
-      waitSeconds: args.wait ?? input.wait_seconds ?? 8,
+      waitSeconds,
       limit: args.limit ?? input.limit,
       readProfile,
     });

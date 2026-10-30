@@ -51,20 +51,24 @@ export function inspectOrdinarySearchDOM(){
   const results=[],seen=new Set();
   const identities={identified:0,visibility_limited:0,unresolved:0,cards:items.length,source:items.length?'result_cards':'link_fallback'};
   // 1 = added, 0 = valid duplicate card, -1 = link outside the profile URL contract.
-  const add=(link,rawName)=>{
+  // textContent concatenates card lines without separators, so "headline" and "location"
+  // cannot be told apart afterwards. innerText keeps the rendered line breaks; card
+  // parsing uses it when the browser provides it.
+  const cardLines=element=>String(element.innerText??'').split('\n').map(s=>s.replace(/\s+/g,' ').trim()).filter(Boolean);
+  const add=(link,rawName,rawLines=[])=>{
     try{const u=new URL(link.href);if(!/^(www\.)?linkedin\.com$/.test(u.hostname)||!/^\/in\/[^/]+\/?$/.test(u.pathname))return -1;
       u.hostname='www.linkedin.com';u.search='';u.hash='';u.pathname=u.pathname.replace(/\/$/,'')+'/';
-      const id=u.pathname.split('/')[2];if(seen.has(id))return 0;seen.add(id);results.push({profileId:id,profileUrl:u.href,rawName:rawName.replace(/\s+/g,' ').trim()});return 1;
+      const id=u.pathname.split('/')[2];if(seen.has(id))return 0;seen.add(id);results.push({profileId:id,profileUrl:u.href,rawName:rawName.replace(/\s+/g,' ').trim(),rawLines:rawLines.slice(0,8)});return 1;
     }catch{return -1;}
   };
   for(const item of items){
     const link=item.querySelector('a[href*="/in/"]');
     if(!link){identities[anonymousName.test(item.textContent||'')?'visibility_limited':'unresolved']++;continue;}
-    const state=add(link,item.textContent||link.textContent||'');
+    const state=add(link,item.textContent||link.textContent||'',cardLines(item));
     identities[state<0?'unresolved':'identified']++;
   }
   if(!items.length){for(const link of root.querySelectorAll('a[href*="/in/"]')){
-    const text=link.textContent?.trim()??'';if(text.length>=30&&/(?:•\s*(?:1st|2nd|3rd)|Connect|Follow|Message|加为好友|发消息)/i.test(text))add(link,text);
+    const text=link.textContent?.trim()??'';if(text.length>=30&&/(?:•\s*(?:1st|2nd|3rd)|Connect|Follow|Message|加为好友|发消息)/i.test(text))add(link,text,cardLines(link));
   }identities.identified=results.length;identities.cards=results.length;}
   const resultCardSignature=items.slice(0,40).map(item=>{
     const link=item.querySelector('a[href*="/in/"]');

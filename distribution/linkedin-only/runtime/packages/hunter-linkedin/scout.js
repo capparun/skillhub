@@ -394,9 +394,41 @@ function cleanTitleNoise(title) {
   return out;
 }
 
+// 有渲染行结构时按行解析：第 1 行是姓名+度数，随后是职位行与地点行。
+// 早先按关键词回退吞并（LOCATION_URN_MAP + 向前扩展）会把紧邻城市的职位并入地点。
+function parseCardLines(lines) {
+  const cleaned = cleanLinkedInCardText(lines[0]);
+  let name = '';
+  const dotIdx = cleaned.indexOf('•');
+  if (dotIdx > 0) name = cleaned.substring(0, dotIdx).trim();
+  if (name) {
+    const halfLen = Math.floor(name.length / 2);
+    const firstHalf = name.substring(0, halfLen).trim();
+    const secondHalf = name.substring(halfLen).trim();
+    if (firstHalf && secondHalf.includes(firstHalf) || firstHalf.includes(secondHalf)) {
+      name = firstHalf.length >= secondHalf.length ? firstHalf : secondHalf;
+    }
+  }
+  let degree = '';
+  const degreeMatch = cleaned.match(/(\d+)\s*(?:度|st|nd|rd)\+?/i);
+  if (degreeMatch) {
+    const num = degreeMatch[1];
+    degree = cleaned.includes('度') ? `${num}度` : `${num}${['st','nd','rd'][Math.min(parseInt(num)-1,2)] || 'th'}`;
+    if (cleaned.includes(`${num}rd+`) || cleaned.includes(`${num}度+`)) degree += '+';
+  }
+  const rest = lines.slice(1).map(line => line.replace(/^Current:\s*/i, '').trim()).filter(Boolean);
+  // 地点行通常是 "City, Region, Country" 形状的短行；取不到就退回第二行。
+  const locationLine = rest.find(line => line.length <= 80 && /^[^,]{1,40}(?:,\s*[^,]{1,30}){1,2}$/.test(line)) ?? rest[1] ?? '';
+  const headlineLine = rest.find(line => line !== locationLine) ?? '';
+  return { name, title: cleanTitleNoise(headlineLine), degree: normalizeDegree(degree), location: locationLine };
+}
+
 // 解析LinkedIn姓名卡片文本（适配2024+新DOM结构，支持中英文界面）
 function parseLinkedInNameCard(nameText) {
   if (!nameText) return { name: '', title: '', degree: '', location: '' };
+
+  const cardLines = String(nameText).split('\n').map(line => line.replace(/\s+/g, ' ').trim()).filter(Boolean);
+  if (cardLines.length >= 3 && cardLines[0].includes('•')) return parseCardLines(cardLines);
 
   const cleaned = cleanLinkedInCardText(nameText);
 
@@ -1088,7 +1120,7 @@ cli({
       try{cursor=writeSearchCursor({directory:path.join(CONFIG_DIR,'search-cursors'),binding,requestKey,progress:{...collection.resume,base_url:baseUrl,ui_resolved:uiResolved}});}
       catch{collection.interruption={code:'checkpoint_write_failed'};collection.stop_reason='checkpoint_write_failed';}
     }
-    let allResults=collection.results.map(r=>{const parsed=parseLinkedInNameCard(r.rawName);return {...r,name:parsed.name,title:parsed.title,location:parsed.location,connectionDegree:parsed.degree,headline:parsed.title};});
+    let allResults=collection.results.map(r=>{const parsed=parseLinkedInNameCard(r.rawLines?.length?r.rawLines.join('\n'):r.rawName);delete r.rawLines;return {...r,name:parsed.name,title:parsed.title,location:parsed.location,connectionDegree:parsed.degree,headline:parsed.title};});
     const beforeClientFilter=allResults.length;
     if(unknownLocations.length>0)allResults=allResults.filter(r=>!r.location||unknownLocations.some(loc=>r.location.includes(loc)));
 

@@ -13,7 +13,9 @@ function layerOf(c,{platformContract,definition}){
  if(LOCAL_SUPPORT.has(c.name))return 'local_support';
  if(c.name.startsWith('profile-lock-'))return 'execution_support';
  if(c.name.startsWith('task-'))return 'task_support';
- if(c.name.startsWith('salesnav-'))return 'gateway_or_support';
+ // Only the hunter-linkedin salesnav-* entries are local gateway wrappers; the
+ // builtin linkedin salesnav-* commands really talk to the platform.
+ if(c.site==='hunter-linkedin'&&c.name.startsWith('salesnav-'))return 'gateway_or_support';
  if(definition)return 'gateway_or_support';
  return 'platform_adapter';
 }

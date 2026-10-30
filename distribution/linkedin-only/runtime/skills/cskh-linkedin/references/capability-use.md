@@ -8,15 +8,17 @@ Skill：理解需求、选择顺序、决定是否补读、判断匹配、解释
 
 ## 安装后发现
 
-从本 Skill 目录运行：
+先读 [能力全景](capabilities-map.md)：85 个已注册命令按业务目的分组，标明用途、前置条件、副作用与同类命令的选择关系。
+
+再按需取机读清单，从本 Skill 目录运行：
 
 ```sh
-node scripts/opencli.mjs hunter-linkedin capability-catalog -f json
-node scripts/opencli.mjs hunter-linkedin --help -f json
+node scripts/opencli.mjs hunter-linkedin capability-catalog --summary -f json
+node scripts/opencli.mjs hunter-linkedin capability-catalog --command "linkedin profile-read" -f json
 node scripts/opencli.mjs hunter-linkedin capabilities -f json
 ```
 
-capability-catalog 从当前注册表读取命令及参数，标明历史输出字段与未验证状态；--help 为命令帮助；capabilities 只列统一网关支持的操作，不能当成全产品目录。均不证明账号和浏览器可用。
+`--summary` 只给命令、用途、层级与读写属性（约 15KB，适合先整体判断）；带 `--command` 才返回参数、网关契约与历史输出字段；不带参数的全量目录约 125KB，除非需要审计否则不要一次拉取。`capabilities` 只列统一网关支持的操作，不能当成全产品目录。三者均不证明账号和浏览器可用。
 目录的 `direct_command_contract` 描述直接 CLI 的原始返回、前置条件、影响、错误和验证范围；`gateway_contracts` 描述统一网关的请求及封装，二者不可混用。`platform_contract` 为已补齐的 SalesNav 契约。空值表示契约尚未补齐，不代表命令不存在，也不允许自行猜测输入输出。`verification.live_execution: not_checked` 表示本次目录发现没有执行浏览器；契约内的历史实测记录不等于本次连接可用。
 
 按需只查一个命令，避免每步加载全目录：

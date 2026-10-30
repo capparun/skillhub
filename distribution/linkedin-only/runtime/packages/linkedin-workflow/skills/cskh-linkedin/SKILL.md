@@ -5,9 +5,9 @@ description: 统一编排普通 LinkedIn 与 Sales Navigator 的公司和人员�
 
 # LinkedIn 统一入口
 
-安装后第一件事：读 [LinkedIn 能力全景](references/capabilities-map.md)（85 个已注册命令的分组、用途、前置条件、副作用与"该用哪个"的选择关系），再按 [能力发现与自由编排](references/capability-use.md) 选择独立操作或任务编排。不要凭命令名猜测用途，也不要把"命令存在"当成"当前账号可用"。
+安装后第一件事：读 [LinkedIn 能力全景](references/capabilities-map.md)（86 个已注册命令的分组、用途、前置条件、副作用与"该用哪个"的选择关系），再按 [能力发现与自由编排](references/capability-use.md) 选择独立操作或任务编排。不要凭命令名猜测用途，也不要把"命令存在"当成"当前账号可用"。
 
-需要参数时只查单条：`node scripts/opencli.mjs hunter-linkedin capability-catalog --command "linkedin profile-read" -f json`；需要全量精简清单用 `--summary -f json`（85 行、约 15KB，含层级与读写属性），不要一次拉全量契约。以下任务流程适用于需要记录和恢复的多步任务，不是单个操作的强制前置。
+需要参数时只查单条：`node scripts/opencli.mjs hunter-linkedin capability-catalog --command "linkedin profile-read" -f json`；需要全量精简清单用 `--summary -f json`（86 行、约 15KB，含层级与读写属性），不要一次拉全量契约。以下任务流程适用于需要记录和恢复的多步任务，不是单个操作的强制前置。
 
 从此 Skill 目录运行 `node scripts/opencli.mjs hunter-linkedin capabilities -f json`。命令输入使用本地 JSON 文件，详细契约见 ../../docs/LINKEDIN_GATEWAY.md。
 

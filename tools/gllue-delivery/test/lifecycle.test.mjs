@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { install, check, locate, preflight, hash, copyTree } from '../template/lifecycle.mjs';
 import { newer, acquire } from '../template/remote.mjs';
 import http from 'node:http';
+import { spawnSync } from 'node:child_process';
 const base = fs.mkdtempSync(path.join(os.tmpdir(), 'gllue-lifecycle-tests-'));
 const template = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../template');
 const put = (p, v) => { fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, typeof v === 'string' ? v : JSON.stringify(v)); };
@@ -68,4 +69,20 @@ test('tree copy preserves Unicode destination and file bytes', () => {
  put(path.join(source, '子目录', '配置.json'), '{"tenant":"测试"}');
  copyTree(source, destination);
  assert.equal(fs.readFileSync(path.join(destination, '子目录', '配置.json'), 'utf8'), '{"tenant":"测试"}');
+});
+
+test('valid remote archive extracts inside a Unicode persistent state path', async () => {
+ const source = pkg();
+ const archive = path.join(base, 'valid-archive.tar.gz');
+ const tar = spawnSync('tar', ['-czf', archive, '-C', path.dirname(source), path.basename(source)], {encoding:'utf8', env:{...process.env,COPYFILE_DISABLE:'1'}});
+ assert.equal(tar.status, 0, tar.stderr);
+ const bytes = fs.readFileSync(archive);
+ const server = http.createServer((q,r) => r.end(bytes));
+ await new Promise(r => server.listen(0,'127.0.0.1',r));
+ try {
+  const state = path.join(base,'中文 更新暂存');
+  const result = await acquire('http://127.0.0.1:'+server.address().port,hash(bytes),state);
+  assert.ok(result.source.startsWith(state+path.sep));
+  assert.equal(JSON.parse(fs.readFileSync(path.join(result.source,'distribution.json'))).version,'1.3.2-rc.3');
+ } finally { server.close(); }
 });

@@ -55,9 +55,10 @@ export async function acquire(url, sha, stateRoot) {
         phase = 'archive-preflight';
         start = Date.now();
         emit({ event: 'start' });
-        const tar = a => { const x = spawnSync('tar', a, { encoding: 'utf8', shell: false, timeout: 60000, maxBuffer: 8 * 1024 * 1024 }); if (x.status !== 0)
-            throw new Failure('ARCHIVE', 'tar检查/解压失败'); return x.stdout; };
-        const names = tar(['-tzf', archive]).trim().split('\n');
+        // Windows tar can lose Unicode command arguments; keep paths relative to the persistent staging cwd.
+        const tar = a => { const x = spawnSync('tar', a, { cwd: work, encoding: 'utf8', shell: false, timeout: 60000, maxBuffer: 8 * 1024 * 1024 }); if (x.status !== 0)
+            throw new Failure('ARCHIVE', 'tar检查/解压失败', [{args: a, exitCode: x.status, code: x.error?.code, stderr: x.stderr?.slice(-4000)}]); return x.stdout; };
+        const names = tar(['-tzf', 'package.tar.gz']).trim().split('\n');
         const roots = new Set();
         for (const raw of names) {
             const n = raw.replace(/^\.\//, '');
@@ -69,14 +70,14 @@ export async function acquire(url, sha, stateRoot) {
         }
         if (roots.size !== 1)
             throw new Failure('ARCHIVE_ROOT', '归档必须只有一个产品根目录');
-        const listing = tar(['-tvzf', archive]);
+        const listing = tar(['-tvzf', 'package.tar.gz']);
         if (listing.split('\n').filter(Boolean).some(line => !['-', 'd'].includes(line[0])))
             throw new Failure('ARCHIVE_LINK', '归档不得包含软链接、硬链接或特殊文件');
         emit({ event: 'end', durationMs: Date.now() - start });
         phase = 'extract';
         start = Date.now();
         emit({ event: 'start' });
-        tar(['-xzf', archive, '-C', work]);
+        tar(['-xzf', 'package.tar.gz', '-C', '.']);
         const source = path.join(work, [...roots][0]);
         inspectPackage(source);
         emit({ event: 'end', durationMs: Date.now() - start });
@@ -132,6 +133,6 @@ export async function update(o = {}) {
     }
     catch (e) {
         emit({ event: 'error', durationMs: Date.now() - start, code: e.code ?? 'UPDATE', message: e.message });
-        return { ok: false, error: { code: e.code ?? 'UPDATE', message: e.message, phase: e.phase ?? 'update' }, logPath: e.logPath ?? logPath, updateLog: logPath, currentInstallation: 'not_modified', nextAction: '查看日志，修正明确错误后重新运行官方update入口' };
+        return { ok: false, error: { code: e.code ?? 'UPDATE', message: e.message, details: e.details, phase: e.phase ?? 'update' }, logPath: e.logPath ?? logPath, updateLog: logPath, currentInstallation: 'not_modified', nextAction: '查看日志，修正明确错误后重新运行官方update入口' };
     }
 }

@@ -31,8 +31,8 @@ jobs:
         shell: powershell
         run: |
           $probe = Join-Path $env:RUNNER_TEMP 'gllue-online-smoke.mjs'
-          Invoke-WebRequest -UseBasicParsing 'https://hunterskill.zeabur.app/download/testing/gllue-rc5-online-smoke.mjs' -OutFile $probe
-          $expected = 'a0118eb97df1eec337cab2a6801405edf67aac6ea312b5004cb54718a1d861ad'
+          Invoke-WebRequest -UseBasicParsing 'https://hunterskill.zeabur.app/download/testing/gllue-rc6-online-smoke.mjs' -OutFile $probe
+          $expected = 'e0761f686ca1900c9af12c7dec6d54d28a7b2b847fe0613e1f354f77b8601edf'
           if ((Get-FileHash $probe -Algorithm SHA256).Hash.ToLower() -ne $expected) { throw 'Probe SHA mismatch' }
           $testRoot = Join-Path $env:RUNNER_TEMP 'gllue-online-${{ matrix.shell }}'
           node $probe $testRoot
@@ -42,8 +42,8 @@ jobs:
         shell: pwsh
         run: |
           $probe = Join-Path $env:RUNNER_TEMP 'gllue-online-smoke.mjs'
-          Invoke-WebRequest -UseBasicParsing 'https://hunterskill.zeabur.app/download/testing/gllue-rc5-online-smoke.mjs' -OutFile $probe
-          $expected = 'a0118eb97df1eec337cab2a6801405edf67aac6ea312b5004cb54718a1d861ad'
+          Invoke-WebRequest -UseBasicParsing 'https://hunterskill.zeabur.app/download/testing/gllue-rc6-online-smoke.mjs' -OutFile $probe
+          $expected = 'e0761f686ca1900c9af12c7dec6d54d28a7b2b847fe0613e1f354f77b8601edf'
           if ((Get-FileHash $probe -Algorithm SHA256).Hash.ToLower() -ne $expected) { throw 'Probe SHA mismatch' }
           $testRoot = Join-Path $env:RUNNER_TEMP 'gllue-online-${{ matrix.shell }}'
           node $probe $testRoot
@@ -61,10 +61,12 @@ jobs:
           where.exe tar
           Get-ChildItem $root -Recurse -Filter package.tar.gz | ForEach-Object {
             Write-Output "Full Unicode path: $($_.FullName)"
-            & tar -tzf $_.FullName 2>&1 | Select-Object -First 5
+            $listing = & tar -tzf $_.FullName 2>&1
+            $listing | Select-Object -First 5
             Write-Output "fullPathExit=$LASTEXITCODE"
             Push-Location $_.DirectoryName
-            & tar -tzf package.tar.gz 2>&1 | Select-Object -First 5
+            $listing = & tar -tzf package.tar.gz 2>&1
+            $listing | Select-Object -First 5
             Write-Output "relativeExit=$LASTEXITCODE"
             Pop-Location
           }

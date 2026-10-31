@@ -40,6 +40,16 @@ jobs:
           $testRoot = Join-Path $env:RUNNER_TEMP 'gllue-online-${{ matrix.shell }}'
           node $probe $testRoot
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Inspect failed staging without modifying installation
+        if: failure()
+        shell: pwsh
+        run: |
+          $root = Join-Path $env:RUNNER_TEMP 'gllue-online-${{ matrix.shell }}'
+          Get-ChildItem $root -Recurse -Filter distribution.json | ForEach-Object {
+            Write-Output $_.FullName
+            try { $m = Get-Content -LiteralPath $_.FullName -Raw | ConvertFrom-Json; Write-Output $m.version } catch { Write-Output $_ }
+          }
+          Get-ChildItem $root -Directory | ForEach-Object { Write-Output $_.FullName }
       - uses: actions/upload-artifact@v4
         if: always()
         with:

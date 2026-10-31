@@ -18,8 +18,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Download verified probe from official website and test public packages
-        shell: ${{ matrix.shell }}
+      - name: PowerShell 5.1 official site acceptance
+        if: matrix.shell == 'powershell'
+        shell: powershell
+        run: |
+          $probe = Join-Path $env:RUNNER_TEMP 'gllue-online-smoke.mjs'
+          Invoke-WebRequest -UseBasicParsing 'https://hunterskill.zeabur.app/download/testing/gllue-rc3-online-smoke.mjs' -OutFile $probe
+          $expected = '42f938025a5cc0e3cacac2c27ff1e70df109ce0974a46b16633c6c4e5cbf7116'
+          if ((Get-FileHash $probe -Algorithm SHA256).Hash.ToLower() -ne $expected) { throw 'Probe SHA mismatch' }
+          $testRoot = Join-Path $env:RUNNER_TEMP 'gllue-online-${{ matrix.shell }}'
+          node $probe $testRoot
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: PowerShell 7 official site acceptance
+        if: matrix.shell == 'pwsh'
+        shell: pwsh
         run: |
           $probe = Join-Path $env:RUNNER_TEMP 'gllue-online-smoke.mjs'
           Invoke-WebRequest -UseBasicParsing 'https://hunterskill.zeabur.app/download/testing/gllue-rc3-online-smoke.mjs' -OutFile $probe

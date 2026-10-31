@@ -15,16 +15,24 @@ jobs:
       matrix:
         shell: [powershell, pwsh]
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools/gllue-delivery
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Windows lifecycle faults and rollback
+        shell: pwsh
+        run: |
+          node --test tools/gllue-delivery/test/lifecycle.test.mjs | Tee-Object -FilePath "$env:RUNNER_TEMP/gllue-unit.tap"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: PowerShell 5.1 official site acceptance
         if: matrix.shell == 'powershell'
         shell: powershell
         run: |
           $probe = Join-Path $env:RUNNER_TEMP 'gllue-online-smoke.mjs'
-          Invoke-WebRequest -UseBasicParsing 'https://hunterskill.zeabur.app/download/testing/gllue-rc4-online-smoke.mjs' -OutFile $probe
-          $expected = '6d6f2d21a78c3e58c2f36e0cf843add44d5ced4a94c486803a83587d4ba1593f'
+          Invoke-WebRequest -UseBasicParsing 'https://hunterskill.zeabur.app/download/testing/gllue-rc5-online-smoke.mjs' -OutFile $probe
+          $expected = 'a0118eb97df1eec337cab2a6801405edf67aac6ea312b5004cb54718a1d861ad'
           if ((Get-FileHash $probe -Algorithm SHA256).Hash.ToLower() -ne $expected) { throw 'Probe SHA mismatch' }
           $testRoot = Join-Path $env:RUNNER_TEMP 'gllue-online-${{ matrix.shell }}'
           node $probe $testRoot
@@ -34,8 +42,8 @@ jobs:
         shell: pwsh
         run: |
           $probe = Join-Path $env:RUNNER_TEMP 'gllue-online-smoke.mjs'
-          Invoke-WebRequest -UseBasicParsing 'https://hunterskill.zeabur.app/download/testing/gllue-rc4-online-smoke.mjs' -OutFile $probe
-          $expected = '6d6f2d21a78c3e58c2f36e0cf843add44d5ced4a94c486803a83587d4ba1593f'
+          Invoke-WebRequest -UseBasicParsing 'https://hunterskill.zeabur.app/download/testing/gllue-rc5-online-smoke.mjs' -OutFile $probe
+          $expected = 'a0118eb97df1eec337cab2a6801405edf67aac6ea312b5004cb54718a1d861ad'
           if ((Get-FileHash $probe -Algorithm SHA256).Hash.ToLower() -ne $expected) { throw 'Probe SHA mismatch' }
           $testRoot = Join-Path $env:RUNNER_TEMP 'gllue-online-${{ matrix.shell }}'
           node $probe $testRoot
@@ -56,6 +64,7 @@ jobs:
           name: gllue-online-${{ matrix.shell }}
           retention-days: 7
           path: |
+            ${{ runner.temp }}/gllue-unit.tap
             ${{ runner.temp }}/gllue-online-*/report.json
             ${{ runner.temp }}/gllue-online-*/commands.jsonl
             ${{ runner.temp }}/gllue-online-*/guard-loaded.log

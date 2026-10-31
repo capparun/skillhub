@@ -1,4 +1,13 @@
 import { updateTask } from './task-store.js';
+import {createHash} from 'node:crypto';
+
+export function evaluationFingerprint(task,candidate){
+ return createHash('sha256').update(JSON.stringify({criteria:task.requirements.criteria??[],observations:candidate.observations.map(o=>({hash:o.hash,stage:o.stage}))})).digest('hex');
+}
+export function currentEvaluation(task,candidate){
+ const latest=candidate.evaluations?.at(-1);
+ return latest?.evidenceFingerprint===evaluationFingerprint(task,candidate)?latest:null;
+}
 
 const statuses = ['supported', 'contradicted', 'unknown'];
 // These are observations, not a hiring decision. The caller must supply an exact
@@ -46,7 +55,7 @@ export function recordEvaluation(file, input) {
         criterion.kind==='required' && finding.status==='contradicted'?'硬性条件有冲突，需人工复核':null;
     }
     candidate.evaluations ??= [];
-    candidate.evaluations.push({reviewer:input.reviewer, reviewedAt:input.reviewedAt, findings, requiresHumanReview:true});
+    candidate.evaluations.push({reviewer:input.reviewer, reviewedAt:input.reviewedAt, findings, evidenceFingerprint:evaluationFingerprint(task,candidate), requiresHumanReview:true});
     task.events.push({type:'evaluation_recorded', candidateKey:candidate.key, at:new Date().toISOString()});
     return task;
   });

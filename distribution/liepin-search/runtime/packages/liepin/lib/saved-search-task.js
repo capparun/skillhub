@@ -12,8 +12,8 @@ export const savedTaskArgs=[
  {name:'page',type:'string',required:true,help:'connect 返回的搜索页 targetId'},
  {name:'operationId',type:'string',required:true,help:'持久操作标识'},
 ];
-export async function savedSearchTask(action,args,{openDriver=openCurrentSearchDriver,pause=ms=>new Promise(r=>setTimeout(r,ms))}={}) {
- if(!['list','save','apply','delete'].includes(action) || !/^[a-fA-F0-9]{16,128}$/.test(args.page ?? ''))throw new Error('需要有效操作和已绑定搜索页');
+export async function savedSearchTask(action,args,{openDriver=openCurrentSearchDriver,pause=ms=>new Promise(r=>setTimeout(r,ms)),validatePage=page=>/^[a-fA-F0-9]{16,128}$/.test(page ?? ''),execute=executeScopedOperation}={}) {
+ if(!['list','save','apply','delete'].includes(action) || !validatePage(args.page))throw new Error('需要有效操作和已绑定搜索页');
  const name=String(args.name ?? '').trim(),limit=Number(args.limit ?? 10);
  if(action!=='list' && (!name || name.length>10))throw new Error('方案名须为1–10个字符');
  if(action==='apply' && (!Number.isInteger(limit) || limit<1 || limit>30))throw new Error('limit须为1–30');
@@ -23,7 +23,7 @@ export async function savedSearchTask(action,args,{openDriver=openCurrentSearchD
  if(action==='save' && !current)plan(values);
  const kind={list:'inspect',save:'save-search',apply:'apply-search',delete:'delete-search'}[action];
  const payload={action,page:args.page,...(action==='list'?{}:{name}),...(action==='save'?(current?{current:true}:{filters:values}):{}),...(action==='apply'?{limit}:{})};
- const evidence=await executeScopedOperation(args.file,{operationId:args.operationId,kind,payload},async()=>{
+ const evidence=await execute(args.file,{operationId:args.operationId,kind,payload},async()=>{
   const driver=await openDriver(args.page);
   try {
    let result;

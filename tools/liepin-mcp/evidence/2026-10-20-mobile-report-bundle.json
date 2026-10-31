@@ -1,0 +1,76 @@
+{
+  "syntheticOnly": true,
+  "realCandidateDataServed": false,
+  "widths": [
+    {
+      "bodyFont": "15px",
+      "detailsControls": 0,
+      "documentWidth": 320,
+      "links": 24,
+      "rowDisplay": "grid",
+      "rows": 12,
+      "snapshotBeforeHeader": true,
+      "width": 320
+    },
+    {
+      "bodyFont": "15px",
+      "detailsControls": 0,
+      "documentWidth": 390,
+      "links": 24,
+      "rowDisplay": "grid",
+      "rows": 12,
+      "snapshotBeforeHeader": true,
+      "width": 390
+    },
+    {
+      "bodyFont": "15px",
+      "detailsControls": 0,
+      "documentWidth": 1280,
+      "links": 24,
+      "rowDisplay": "table-row",
+      "rows": 12,
+      "snapshotBeforeHeader": true,
+      "width": 1280
+    }
+  ],
+  "actions": [
+    "新建本机合成报告预览标签",
+    "以320像素宽度核对快照、表格及链接",
+    "以390像素宽度核对快照、表格及链接",
+    "以1280像素宽度核对快照、表格及链接",
+    "点击第一位合成人选的已保存详情链接"
+  ],
+  "screenshots": [
+    "/private/tmp/liepin-mobile-synthetic/verified-preview-320.png",
+    "/private/tmp/liepin-mobile-synthetic/verified-preview-390.png",
+    "/private/tmp/liepin-mobile-synthetic/verified-preview-1280.png",
+    "/private/tmp/liepin-mobile-synthetic/verified-preview-detail-390.png"
+  ],
+  "detailNavigation": {
+    "documentWidth": 390,
+    "profiles": 24,
+    "target": "candidate-0",
+    "url": "http://127.0.0.1:8879/report.details.html#candidate-0",
+    "width": 390
+  },
+  "status": "passed",
+  "previewClosed": true,
+  "reportContract": {
+    "files": [
+      "summary.html",
+      "summary.details.html",
+      "summary.records.json"
+    ],
+    "statisticsFirst": true,
+    "mainInlineRawRecords": false,
+    "originalResumeLink": "observed identity-consistent HTTPS only",
+    "localDetails": "same-directory anchor",
+    "permissions": "private files mode 600 on macOS",
+    "realVisualVerified": false
+  },
+  "initialTestFailure": {
+    "reason": "synthetic link selector matched 12 rows",
+    "dispatchedClicks": 0,
+    "fixed": "unique first-row local detail selector"
+  }
+}

@@ -6,6 +6,7 @@ import path from 'node:path';
 import {createTask,readTask} from '../lib/task-store.js';
 import {authorizeTask} from '../lib/operation-gate.js';
 import {createSiteScope,bindSiteScope,executeScopedOperation} from '../lib/site-scope.js';
+import {BlankPageError} from '../lib/page-failure.js';
 
 function fixture(t,maxOperations=3) {
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'liepin-site-scope-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
@@ -18,6 +19,16 @@ function fixture(t,maxOperations=3) {
  return {scope,task};
 }
 const success=async()=>({status:'completed',evidence:{read:true}});
+test('blank navigation retains a sanitized diagnosis in both ledgers without clearing unknown effects',async t=>{
+ const {scope,task}=fixture(t),one=task('one','a'),two=task('two','b');
+ await assert.rejects(executeScopedOperation(one.file,one.request,async()=>{throw new BlankPageError('private data must not persist');}));
+ for(const file of [one.file,scope]) {
+  const saved=readTask(file);assert.equal(saved.status,'paused');assert.equal(saved.operations[0].status,'unknown');
+  assert.deepEqual(saved.operations[0].evidence.connectionFailure,{code:'LIEPIN_UNEXPECTED_BLANK_PAGE',observedUrl:'about:blank',causeConfirmed:false,automaticRetry:false});
+  assert.ok(!JSON.stringify(saved).includes('private data must not persist'));
+ }
+ await assert.rejects(executeScopedOperation(two.file,two.request,async()=>assert.fail('must not replay')),/暂停/);
+});
 test('two tasks share persistent concurrency control; a rejected task never calls its driver',async t=>{
  const {scope,task}=fixture(t),one=task('one','a'),two=task('two','b');let release,calls=0;
  const pending=executeScopedOperation(one.file,one.request,async()=>{calls++;await new Promise(resolve=>{release=resolve;});return success();});
@@ -59,4 +70,12 @@ test('native failure retains action geometry while the task and scope remain pau
  const error=new ActionStoppedError('target_covered','not_started');error.action={actionId:'input-1',purpose:'click',outcome:'not_started',acknowledgedActions:2};error.geometry={x:10,y:20,hitTag:'DIV',hitClass:'sticky-bar'};
  await assert.rejects(executeScopedOperation(one.file,one.request,async()=>{throw error;}));
  const stored=readTask(one.file);assert.equal(stored.status,'paused');assert.equal(readTask(scope).status,'paused');assert.deepEqual(stored.operations[0].evidence.actionFailure.geometry,error.geometry);assert.equal(stored.operations[0].evidence.actionFailure.action.acknowledgedActions,2);
+});
+test('favorite-open is separate from collection but cannot be replayed by changing page or purpose',async t=>{
+ const {scope}=fixture(t,4),dir=path.dirname(scope),now=new Date().toISOString();
+ const make=(name,kind,page,purpose)=>{const file=path.join(dir,name+'.json'),request={operationId:name,kind,payload:{observationId:'same',observationHash:'hash',page,purpose,...(kind==='favorite-open'?{favoriteOperationId:'one-write'}:{})}};createTask(file);bindSiteScope(file,scope);authorizeTask(file,{allowedKinds:[kind],maxOperations:1,confirmedAt:now,scope:'合成收藏访问',allowedRequests:[request]});return {file,request};};
+ const read=make('read-list','detail-open','1','collect'),favorite=make('favorite-list','favorite-open','1','favorite'),replay=make('replay','favorite-open','2','new-purpose');let calls=0;
+ await executeScopedOperation(read.file,read.request,async()=>{calls++;return success();});
+ await executeScopedOperation(favorite.file,favorite.request,async()=>{calls++;return success();});
+ await assert.rejects(executeScopedOperation(replay.file,replay.request,async()=>assert.fail('must not replay')),/相同业务请求/);assert.equal(calls,2);
 });

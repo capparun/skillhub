@@ -1,0 +1,30 @@
+{
+  "sourceCommit": "a6fff0d4",
+  "fingerprint": "c5d975c4a325f926c278dcf673730a482cbe10003dd329d190ebacc9a39ca433",
+  "tests": {
+    "core": 385,
+    "mcp": 194,
+    "macIsolatedInstallChecks": 22
+  },
+  "independentSourceFiles": 281,
+  "independentFormalRebuildMatched": true,
+  "reportRegression": {
+    "sparseMembershipDoesNotReplaceSearchProfile": true,
+    "newSearchMayClearOldCompany": true,
+    "favoritesOnlyProfileSupported": true,
+    "realSavedNameRecovered": true,
+    "candidates": 52,
+    "localProfileAnchorsVerified": 13,
+    "files": 3,
+    "realVisualReview": "pending"
+  },
+  "browserHostChanged": false,
+  "browserHostFingerprint": "9e997157fd22250db76bdecedd0b7711c639ce4f207e96efe393ef2d1fb138db",
+  "archive": {
+    "sha256": "5b385cdce70fdec2ab7e0eddc9f6755da4e7bc0d947fdbe6cb76cb730517c286",
+    "bytes": 206893,
+    "approved": false,
+    "published": false
+  },
+  "privateDataIncluded": false
+}

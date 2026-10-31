@@ -265,7 +265,9 @@ test('paginates across pages with per-row page numbers and one submission', asyn
       return { ...base, target: '#keyword', value: this.value };
     },
   };
-  const result = await run(page, { keyword: '前端', pages: 2, limit: 5 }, { requireFresh: false, pause: async () => {} });
+  const checkpoints=[];
+  const result = await run(page, { keyword: '前端', pages: 2, limit: 5 }, { requireFresh: false, pause: async () => {},onPage:async snapshot=>checkpoints.push(snapshot) });
+  assert.deepEqual(checkpoints.map(p=>[p.currentPage,p.currentRows.length,p.rows.length]),[[1,1,1],[2,1,2]]);
   assert.equal(page.clicks.filter(x => x === '#submit').length, 1);
   assert.deepEqual(page.clicks.filter(x => x === '#next'), ['#next']);
   assert.equal(result.pages, 2);
@@ -382,4 +384,35 @@ test('save stops after one acknowledgment when the success modal does not close'
  const page={evaluate:async()=>{reads++;if(reads===1)return {saveButton:'#save',schemes:[]};if(reads===2)return {dialog:{input:'#name',confirm:'#confirm'},schemes:[]};return {schemes:[{name:'测试'}],saveSuccess:true,acknowledge:'#ack'};},click:async s=>clicks.push(s),fillText:async()=>{}};
  await assert.rejects(saveSearchPlan(page,'测试',{pause:async()=>{}}),/成功弹窗关闭未确认/);
  assert.equal(clicks.filter(s=>s==='#ack').length,1);assert.equal(clicks.filter(s=>s==='#confirm').length,1);
+});
+
+test('keyword suggestions are dismissed before the next autocomplete input',async()=>{
+ let dropdown=false,value='',committed=false;const clicks=[],keys=[];
+ const page={
+  async pressKey(key){keys.push(key);dropdown=false},
+  async click(selector){if(selector==='#title'&&dropdown)throw Error('covered by keyword suggestions');clicks.push(selector);if(selector==='#option'){committed=true;dropdown=false}},
+  async fillText(selector,text){if(selector==='#keyword'){value=text;dropdown=true}},
+  async evaluate(fn,request){const base={url,blank:false,login:false,risk:false};if(request.mode==='controls')return {...base,reset:null};if(!request.key)return base;
+   if(request.key==='keyword')return {...base,target:'#keyword',value,dropdownCount:dropdown?1:0};
+   return {...base,target:'#title',dropdownCount:dropdown?1:0,option:'#option',committed};}
+ };
+ const result=await run(page,{keyword:'嵌入式开发',title:'嵌入式开发'},{submit:false,pause:async()=>{}});
+ assert.deepEqual(keys,['Escape']);assert.ok(clicks.includes('#title'));assert.equal(result.applied.length,2);
+});
+
+test('blurs an observed keyword popup on a safe label before the next input',async()=>{
+ let popup=false,keyword='',committed=false;const clicks=[];
+ const page={async pressKey(){assert.fail('Escape would reopen history')},async click(s){clicks.push(s);if(s==='#safe-label')popup=false;if(s==='#company'&&popup)throw Error('covered');if(s==='#option')committed=true},async fillText(s,v){if(s==='#keyword'){keyword=v;popup=true}},async evaluate(fn,q){const base={url,blank:false,login:false,risk:false};if(q.mode==='controls')return {...base,reset:null};if(!q.key)return base;if(q.key==='title')return {...base,value:''};if(q.key==='keyword')return {...base,target:'#keyword',value:keyword,dropdownCount:popup?1:0};return {...base,target:'#company',dropdownCount:popup?1:0,dropdownDismissTarget:'#safe-label',option:'#option',committed};}};
+ const result=await run(page,{keyword:'工程师',company:'华为'},{submit:false,pause:async()=>{}});
+ assert.ok(clicks.indexOf('#safe-label')<clicks.indexOf('#company'));assert.equal(result.applied.length,2);assert.equal(keyword,'工程师');
+});
+test('final combined readback rejects a later field changing an earlier keyword',async()=>{
+ let value='',selected=false;
+ const page={async click(s){if(s==='#education'){selected=true;value=''}},async fillText(s,v){value=v},async evaluate(fn,q){const base={url,blank:false,login:false,risk:false};if(q.mode==='controls')return {...base,reset:null};if(!q.key)return base;if(q.key==='keyword')return {...base,target:'#keyword',value};if(q.key==='education')return {...base,choice:'#education',selected,choiceEvidence:{hitRelation:'self'}};return {...base,value:''};}};
+ await assert.rejects(run(page,{keyword:'工程师',education:'本科'},{submit:false,pause:async()=>{}}),/关键词 在后续条件设置后发生变化/);
+});
+test('saving keyword-only or uncommitted conditions explains the prerequisite without any click',async()=>{
+ let clicks=0;
+ await assert.rejects(saveSearchPlan({evaluate:async()=>({schemes:[],saveButton:null}),click:async()=>{clicks++;}},'测试',{pause:async()=>{}}),/已提交的非关键词筛选摘要/);
+ assert.equal(clicks,0);
 });

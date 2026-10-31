@@ -27,16 +27,16 @@ export function inspectFavorite({resumeId,group}) {
  };
  const add=popup('请设置收藏','保存'),remove=popup('您确认要取消收藏吗？','确定');
  const radios=add?[...add.querySelectorAll('label,[role=radio]')].filter(e=>visible(e) && (e.matches('[role=radio]') || e.querySelector('input[type=radio]'))):[];
- const match=one(radios.filter(e=>norm(e.textContent)===norm(group)));
+ const match=one(radios.filter(e=>e.textContent.trim()===String(group??'').trim()));
  // Ant radio labels include text outside the actual control. Aim at the
  // observed radio wrapper, whose hit area includes its native input.
  const input=match?.querySelector('input[type=radio]');
  const groupControl=input?.parentElement?.matches('span.ant-radio')?input.parentElement:match;
  const save=add?one(named('保存',add)):null,confirm=remove?one(named('确定',remove)):null;
- return {blocked:false,saved:!!saved,known:!!favorite!==!!saved,button:path(saved || favorite),
+ return {blocked:false,saved:!!saved,known:!!favorite!==!!saved,readyState:document.readyState,visibleTextLength:text.length,favoriteMatches:named('收藏').length,savedMatches:named('已收藏').length,button:path(saved || favorite),
   addDialog:!!add,removeDialog:!!remove,groupSelector:path(groupControl),
   groupSelected:!!match && (match.getAttribute('aria-checked')==='true' || !!match.querySelector('input[type=radio]')?.checked),
-  save:save && !save.disabled?path(save):null,confirm:path(confirm)};
+  save:save && !save.disabled?path(save):null,confirm:path(confirm),groups:radios.map(e=>e.textContent.trim()),groupDialogHtml:add?.outerHTML?.slice(0,24000)??null};
 }
 export async function openFavoriteDriver(pageId,resumeId) {
  checkReadRuntime();
@@ -45,36 +45,38 @@ export async function openFavoriteDriver(pageId,resumeId) {
   const expectedUrl=await readBoundLocation(page,pageId,'/resume/showresumedetail/',{requireConnection:true});
   if(new URL(expectedUrl).searchParams.get('res_id_encode')!==resumeId)throw new Error('当前详情与指定简历不符');
   const actions=createNativeActionSequence(page,{expectedUrl,inspectTarget:inspectActionTarget});let sequence=0;
-  return {inspect:group=>page.evaluate(inspectFavorite,{resumeId,group}),click:selector=>actions.click({actionId:`favorite-${++sequence}`,selector}),close:()=>page.closeWindow()};
+  return {inspect:group=>page.evaluate(inspectFavorite,{resumeId,group}),click:(selector,label)=>actions.click({actionId:`favorite-${++sequence}`,selector,label}),close:()=>page.closeWindow()};
  }catch(error){await page.closeWindow();throw error;}
 }
-export async function setFavorite(args,{openDriver=openFavoriteDriver,pause=ms=>new Promise(r=>setTimeout(r,ms))}={}) {
+export async function setFavorite(args,{openDriver=openFavoriteDriver,pause=ms=>new Promise(r=>setTimeout(r,ms)),validatePage=page=>/^[a-fA-F0-9]{16,128}$/.test(page ?? ''),execute=executeScopedOperation}={}) {
  detailUrl(args.resumeId);
- if(!['add','remove','status'].includes(args.action) || !/^[a-fA-F0-9]{16,128}$/.test(args.page ?? ''))throw new Error('需要 add/remove/status 和已绑定详情 page');
+ if(!['add','remove','status'].includes(args.action) || !validatePage(args.page))throw new Error('需要 add/remove/status 和已绑定详情 page');
  if(args.action==='add' && (typeof args.group!=='string' || !args.group.trim()))throw new Error('收藏需要明确指定分组');
  const kind={add:'favorite',remove:'unfavorite',status:'inspect'}[args.action];
  const payload={resumeId:args.resumeId,page:args.page,action:args.action,...(args.action==='add'?{group:args.group}:{})};
- return executeScopedOperation(args.file,{operationId:args.operationId,kind,payload},async()=>{
-  const driver=await openDriver(args.page,args.resumeId);
+ return execute(args.file,{operationId:args.operationId,kind,payload},async()=>{
+  const driver=await openDriver(args.page,args.resumeId);let dispatched=0,lastInspection;
+  const click=async(...params)=>{dispatched++;return driver.click(...params);};
   try {
-   const read=async()=>{const s=await driver.inspect(args.group);if(s.blocked || !s.known)throw new Error('收藏页面状态未确认');return s;};
+   const read=async()=>{for(let i=0;i<15;i++){const s=await driver.inspect(args.group);lastInspection=s;if(s.blocked)throw new Error('收藏页面状态未确认');if(s.known)return s;if(i<14)await pause(200);}throw new Error('收藏页面状态未确认');};
    const first=await read(),desired=args.action==='add';
-   if(args.action==='status' || first.saved===desired)return {status:'completed',evidence:{saved:first.saved,changed:false,resumeId:args.resumeId}};
+   if(args.action==='status' || first.saved===desired)return {status:'completed',evidence:{saved:first.saved,changed:false,resumeId:args.resumeId,groupVerified:false,requestedGroup:args.group??null}};
    // Reuse the visible dialog after a verified pre-save interruption.
-   if(!(desired?first.addDialog:first.removeDialog))await driver.click(first.button);
+   if(!(desired?first.addDialog:first.removeDialog))await click(first.button,desired?'收藏':'已收藏');
    let state;
    for(let i=0;i<10;i++){state=await read();if(desired?state.addDialog && state.groupSelector:state.removeDialog && state.confirm)break;await pause(200);}
    if(desired){
-    if(!state.addDialog || !state.groupSelector)return {status:'blocked',evidence:{reason:'favorite_group_not_found',resumeId:args.resumeId}};
-    await driver.click(state.groupSelector);state=await read();
-    if(!state.groupSelected || !state.save)return {status:'blocked',evidence:{reason:'favorite_group_not_selected'}};
-    await driver.click(state.save);
+    if(!state.addDialog || !state.groupSelector)return {status:'blocked',evidence:{reason:'favorite_group_not_found',resumeId:args.resumeId,inspection:state}};
+    await click(state.groupSelector,'指定收藏分组');
+    for(let i=0;i<10;i++){state=await read();if(state.groupSelected&&state.save)break;await pause(200);}
+    if(!state.groupSelected || !state.save)return {status:'blocked',evidence:{reason:'favorite_group_not_selected',inspection:state}};
+    await click(state.save,'保存收藏');
    }else{
     if(!state.removeDialog || !state.confirm)return {status:'blocked',evidence:{reason:'unfavorite_confirmation_missing'}};
-    await driver.click(state.confirm);
+    await click(state.confirm,'确认取消收藏');
    }
-   for(let i=0;i<10;i++){state=await read();if(state.saved===desired && !state.addDialog && !state.removeDialog)return {status:'completed',evidence:{saved:desired,changed:true,resumeId:args.resumeId,group:args.group ?? null}};await pause(200);}
+   for(let i=0;i<10;i++){state=await read();if(state.saved===desired && !state.addDialog && !state.removeDialog)return {status:'completed',evidence:{saved:desired,changed:true,resumeId:args.resumeId,group:args.group ?? null,groupSelectedBeforeSave:desired,groupVerified:false,verification:'saved-state-readback'}};await pause(200);}
    return {status:'unknown',evidence:{reason:'favorite_result_not_confirmed',resumeId:args.resumeId}};
-  }finally{await driver.close();}
+  }catch(error){if(dispatched===0)return {status:'blocked',evidence:{reason:'favorite_preflight_unavailable',favoriteActionDispatched:false,resumeId:args.resumeId,inspection:lastInspection??null}};throw error;}finally{await driver.close();}
  });
 }

@@ -103,6 +103,16 @@ export async function run(page, args, { pause = wait, submit = true, capture = f
     await onFilterProgress?.({activeField:step.key,checked:applied.map(item=>({...item}))});
     let actionEvidence = null;
     let state = await read(step);
+    // A keyword suggestion can cover the next field as well as a select.
+    // Dismiss only an observed dropdown, then re-locate before native input.
+    if ((state.dropdownCount ?? 0) > 0 && page.pressKey) {
+      // Escape can replace suggestions with history while retaining focus.
+      // Prefer a verified non-interactive field label to blur the old input.
+      if (state.dropdownDismissTarget) await page.click(state.dropdownDismissTarget);
+      else await page.pressKey('Escape');
+      await pause(400);
+      state = await read(step);
+    }
     if (!state.target && !state.choice && state.expand) {
       state = await locateExpansion(step, state);
       if (page.hover) {
@@ -206,13 +216,6 @@ export async function run(page, args, { pause = wait, submit = true, capture = f
     } else {
       if (!state.target) throw new SearchError('CONTROL', `未找到 ${step.label}`);
       if (step.kind === 'select') {
-        // 上一个下拉若仍开着,点击会被遮罩吞掉(新下拉不展开);先 Escape 收尾再点。
-        if ((state.dropdownCount ?? 0) > 0 && page.pressKey) {
-          await page.pressKey('Escape');
-          await pause(400);
-          state = await read(step);
-          if (!state.target) throw new SearchError('CONTROL', `未找到 ${step.label}`);
-        }
         const selectClipped = ['ancestor','other'].includes(state.targetEvidence?.hitRelation);
         if (selectClipped && state.expand) {
           state = await locateExpansion(step, state);
@@ -331,6 +334,15 @@ export async function run(page, args, { pause = wait, submit = true, capture = f
     applied.push({ field: step.key, value: step.value });
     await onFilterProgress?.({activeField:null,checked:applied.map(item=>({...item}))});
   }
+  // A later field can change an earlier draft. Verify the complete final state,
+  // not only the state immediately after each individual action.
+  for (const step of config.steps.filter(step => !step.implicitClear)) {
+    const state = await read(step);
+    const ok = step.kind === 'choice' ? state.selected
+      : step.kind === 'check' ? state.checked === (step.value === 'true')
+      : ['select','autocomplete'].includes(step.kind) ? state.committed : state.value === step.value;
+    if (!ok) throw new SearchError('VERIFY', `${step.label} 在后续条件设置后发生变化；停止提交`);
+  }
   if (!submit) {
     await read({ mode: 'controls' }); // Recheck page availability without requiring a submit target.
     return { applied, total: null, pageCount: 0, rows: [] };
@@ -410,11 +422,12 @@ export async function run(page, args, { pause = wait, submit = true, capture = f
   // 没有前进就停,保留已读数据并注明原因;不自动重试、不加速。
   while (true) {
     const pageNo = result.pagination?.current ?? pagesRead + 1;
-    rows.push(...(await attachIds(result.rows)).map(row => ({ ...row, page: pageNo })));
+    const currentRows=(await attachIds(result.rows)).map(row => ({ ...row, page: pageNo }));
+    rows.push(...currentRows);
     pagesRead += 1;
     // Save confirmed pages before another browser action. A later disconnect or
     // process crash must not erase already observed candidates.
-    if(onPage)await onPage({rows:structuredClone(rows),pages:pagesRead,total:result.total});
+    if(onPage)await onPage({rows:structuredClone(rows),currentRows:structuredClone(currentRows),currentPage:pageNo,pages:pagesRead,total:result.total});
     if (pagesRead >= config.pages) break;
     if (!result.pagination?.next) {
       if(result.empty || (result.pagination?.totalPages>0 && result.pagination.current>=result.pagination.totalPages))break;

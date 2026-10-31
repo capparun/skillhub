@@ -38,16 +38,19 @@ export function parseDetail(snapshot, resumeId, capturedAt = new Date().toISOStr
   const sections = [];
   // These delimit the end of resume content in the observed detail layout.
   // Keep the full raw text above, but do not attach sidebar/footer text to a section.
-  const endMarkers = new Set(['附件简历','简历备注','简历信息']);
+  const endMarkers = new Set(['附件简历','简历备注','简历信息','本次搜索匹配到的简历不够精准？点击这里进行反馈']);
+  const endsResume = line => endMarkers.has(line.trim()) || /^声明[：:]该人选信息仅供公司招聘使用/.test(line.trim());
   for (let i = 0; i < lines.length; i++) {
-    if (sections.length && endMarkers.has(lines[i].trim())) break;
+    if (sections.length && endsResume(lines[i])) break;
     const heading = sectionHeading(lines[i]);
     if (!heading) continue;
     const start = i + 1;
     let end = start;
-    while (end < lines.length && !sectionHeading(lines[end]) && !endMarkers.has(lines[end].trim())) end++;
-    if (!sections.some(section=>section.heading===heading)) sections.push({ heading, text: lines.slice(start, end).join('\n').trim(), startLine: start + 1, endLine: end });
-    if (end < lines.length && endMarkers.has(lines[end].trim())) break;
+    while (end < lines.length && !sectionHeading(lines[end]) && !endsResume(lines[end])) end++;
+    // Repeated headings may contain distinct visible records; source line ranges
+    // preserve each block without deduplicating content by its label.
+    sections.push({ heading, text: lines.slice(start, end).join('\n').trim(), startLine: start + 1, endLine: end });
+    if (end < lines.length && endsResume(lines[end])) break;
     i = end - 1;
   }
   const contentSections = sections.filter(s => ['工作经历', '教育经历', '项目经历'].includes(s.heading) && s.text);

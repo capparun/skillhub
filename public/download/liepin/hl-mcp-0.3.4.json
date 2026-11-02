@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "product": "liepin-search",
+  "compatibleProductVersions": [
+    "0.3.4",
+    "0.3.5"
+  ],
+  "extensionName": "HL MCP",
+  "extensionVersion": "0.0.22",
+  "expectedExtensionId": "ebhhcfiikojppnmkimkhcajpieelbglb",
+  "file": "hl-mcp-0.3.4.zip",
+  "downloadPath": "/download/liepin/hl-mcp-0.3.4.zip",
+  "sha256": "b340bb3c661870ac66917e848857b2090b7c20bb4dfddbd5c9d212d8d0f851c6",
+  "sizeBytes": 641293,
+  "sourceFingerprint": "2c036f427375ae59c198ab39d742cbec613e60d1814a8c00970db3900305a04f",
+  "folder": "HL-MCP",
+  "files": 12,
+  "note": "独立扩展ZIP不包含本机通信宿主，不能替代完整组件安装。已安装用户优先使用安装回执extensionDirectory。"
+}

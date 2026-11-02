@@ -1,0 +1,28 @@
+name: Liepin onboarding site
+on:
+  pull_request:
+    paths:
+      - 'src/app/skills/liepin-search/**'
+      - 'src/lib/liepin-guide.ts'
+      - 'src/lib/liepin-browser-assets.ts'
+      - 'public/download/liepin/**'
+      - 'tests/liepin-browser-guide.test.ts'
+      - '.github/workflows/liepin-onboarding.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm test
+      - run: npx next typegen
+      - run: npx tsc --noEmit
+      - run: npm run build

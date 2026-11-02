@@ -34,3 +34,5 @@
 .page .copy>span{order:3;margin:0;font-size:13px}.page .copy>span:empty{display:none}
 .page .copy>details{flex-basis:100%}
 @media(max-width:400px){.page .copy>.primary,.page .viewCommand{padding:8px 12px}.page .copy>span{flex-basis:100%}}
+
+.browserSteps{padding-left:22px;margin:16px 0;font-size:14px;line-height:1.9}.browserSteps li{padding:3px 0}.browserSteps code{overflow-wrap:anywhere;font-size:13px}.extensionDownload{margin:18px 0;padding:18px 20px;background:#eef4f0;border:1px solid #d3dfdb;border-radius:6px}.downloadActions{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px}.page .downloadActions .primary{font-size:14px;min-height:40px;padding:8px 14px}.page .extensionDownload p{margin:10px 0 0}.checksum{font-size:12px;line-height:1.8;color:#536b64;overflow-wrap:anywhere}.checksum code{user-select:all;font-size:12px}.step code{word-break:break-word}@media(max-width:600px){.extensionDownload{padding:14px}.downloadActions{align-items:flex-start;gap:10px}.downloadActions>a{font-size:13px}.browserSteps{padding-left:18px}}

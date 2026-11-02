@@ -1,3 +1,4 @@
+import {evaluationFingerprint} from '../lib/evaluation.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -14,6 +15,7 @@ function setup(t,deepReview) {
   createTask(file,{criteria:[{id:'skill'}]});
   updateTask(file,task=>{
     task.candidates=[{key:'liepin:synthetic',observations:[],evaluations:[{findings:[]}]}];
+    task.candidates[0].evaluations[0].evidenceFingerprint=evaluationFingerprint(task,task.candidates[0]);
     return task;
   });
   const entry={candidateKey:'liepin:synthetic',reason:'人工选择补充核实',evidenceGaps:['项目职责']};
@@ -29,7 +31,7 @@ test('list-only final preserves initial snapshot, permits an empty final and bec
   assert.equal(final.entries[0].evidenceLevel,'list_only');
   assert.match(renderShortlist(readTask(file),'html',String),/最终短名单/);
   assert.match(renderShortlist(readTask(file),'markdown',String),/仅依据列表证据/);
-  assert.deepEqual(final.entries[0].initialEvaluation,{findings:[]});
+  assert.deepEqual(final.entries[0].initialEvaluation.findings,[]);
   updateTask(file,task=>{task.candidates[0].observations.push({hash:'new'});return task;});
   assert.equal(currentShortlist(readTask(file)),null);
   assert.match(renderShortlist(readTask(file),'html',String),/短名单已过期/);
@@ -42,15 +44,15 @@ test('deep-review final requires a separate evaluation citing successful detail 
   const {file,base,entry}=setup(t,true);
   const input={...base,stage:'final',entries:[{...entry,changeReason:'详情补充职责证据'}]};
   assert.throws(()=>recordShortlist(file,input),/单独保存复评/);
-  updateTask(file,task=>{task.candidates[0].evaluations.push({findings:[]});return task;});
+  updateTask(file,task=>{task.candidates[0].evaluations.push({findings:[],evidenceFingerprint:evaluationFingerprint(task,task.candidates[0])});return task;});
   assert.throws(()=>recordShortlist(file,input),/详情证据/);
   updateTask(file,task=>{
     const candidate=task.candidates[0];
     candidate.observations.push({hash:'detail',stage:'detail',data:{status:'partial'}});
-    candidate.evaluations.push({findings:[{evidence:[{hash:'detail'}]}]});return task;
+    candidate.evaluations.push({findings:[{evidence:[{hash:'detail'}]}],evidenceFingerprint:evaluationFingerprint(task,candidate)});return task;
   });
   recordShortlist(file,input);
-  assert.deepEqual(currentShortlist(readTask(file)).entries[0].initialEvaluation,{findings:[]});
+  assert.deepEqual(currentShortlist(readTask(file)).entries[0].initialEvaluation.findings,[]);
   assert.equal(currentShortlist(readTask(file)).entries[0].evidenceLevel,'visible_detail');
   assert.equal(readTask(file).shortlists.length,2);
 });

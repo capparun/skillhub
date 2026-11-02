@@ -29,9 +29,9 @@ for (const failure of ['copy','switch','none']) test(`runtime upgrade preserves 
  fs.mkdirSync(source);fs.mkdirSync(destination);
  fs.writeFileSync(path.join(source,'version'),'new');fs.writeFileSync(path.join(destination,'version'),'old');
  const io={...fs,
-  cpSync:(from:string,to:string,options:fs.CopySyncOptions)=>{
-   if(failure==='copy'){fs.mkdirSync(to);fs.writeFileSync(path.join(to,'partial'),'x');throw new Error('copy interrupted');}
-   fs.cpSync(from,to,options);
+  copyFileSync:(from:string,to:string,flags?:number)=>{
+   if(failure==='copy'){fs.writeFileSync(to,'partial');throw new Error('copy interrupted');}
+   fs.copyFileSync(from,to,flags);
   },
   renameSync:(from:string,to:string)=>{
    if(failure==='switch' && from.includes('.install-'))throw new Error('switch failed');

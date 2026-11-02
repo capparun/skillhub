@@ -25,11 +25,28 @@ function readBoundScope(task) {
   if(scope.id!==task.siteScope.id || scope.requirements.kind!=='liepin-site-scope')throw new Error('站点范围被替换，停止执行');
   return scope;
 }
+// Read-only admission check for an entire compound action. Per-operation
+// reservations remain authoritative if another task consumes budget afterward.
+export function preflightOperationBudget(file,count){
+ if(!Number.isSafeInteger(count)||count<1)throw Error('预检需要正整数操作数量');
+ const task=readTask(file),scope=readBoundScope(task);
+ for(const [state,label,max] of [[task,'任务',task.policy?.maxOperations],[scope,'站点共享',scope.requirements.maxOperations]]){
+  if(state.status==='paused'||(state.operations??[]).some(o=>['started','unknown','blocked','failed'].includes(o.status)))throw Error(`${label}存在待核对操作，未开始本批次`);
+  if(!Number.isSafeInteger(max)||max-(state.operations??[]).length<count)throw Error(`${label}剩余额度不足以完成本批次${count}笔操作，未开始浏览器动作`);
+ }
+ return {required:count,taskRemaining:task.policy.maxOperations-(task.operations??[]).length,scopeRemaining:scope.requirements.maxOperations-(scope.operations??[]).length};
+}
+function isAdapterConnect(request) {
+ return request.kind==='inspect' && request.payload?.view==='adapter-search-connect'
+  && request.payload.url==='https://h.liepin.com/search/getConditionItem';
+}
 function reserveSite(task, request) {
   const id=`${task.id}-${request.operationId}`;
   // A new tab is not a new candidate or permission to repeat an action.
-  const businessPayload=request.kind==='detail' ? {resumeId:request.payload.resumeId} : request.kind==='detail-open' ? {observationId:request.payload.observationId,observationHash:request.payload.observationHash} : request.payload;
-  const fingerprint=requestFingerprint({kind:request.kind,payload:businessPayload});
+  const businessPayload=request.kind==='favorite-group-create'?{name:request.payload.name,parent:request.payload.parent}:request.kind==='detail' ? {resumeId:request.payload.resumeId} : ['detail-open','favorite-open'].includes(request.kind) ? {observationId:request.payload.observationId,observationHash:request.payload.observationHash,...(request.kind==='favorite-open'?{favoriteOperationId:request.payload.favoriteOperationId,...(request.payload.groupOperationId?{groupOperationId:request.payload.groupOperationId}:{})}:{})} : request.payload;
+  // Opening a task's search workspace is not a repeated account-level search.
+  // Task-level idempotency, shared budgets and unknown-effect locks still apply.
+  const fingerprint=requestFingerprint({kind:request.kind,payload:isAdapterConnect(request)?{...businessPayload,taskId:task.id}:businessPayload});
   updateTask(task.siteScope.file,scope=>{
     if(scope.id!==task.siteScope.id)throw new Error('站点范围已变化');
     scope.operations ??= [];
@@ -71,6 +88,8 @@ export async function executeScopedOperation(file, request, execute) {
     result=executionError instanceof PreparePreflightError && request.kind==='prepare'
       ? {status:'failed',evidence:{reason:'prepare_preflight_failed',businessActionStarted:false}}
       : {status:'unknown',evidence:{reason:'execution_interrupted'}};
+    const connectionFailure=connectionFailureEvidence(executionError);
+    if(connectionFailure)result.evidence.connectionFailure=connectionFailure;
     if(executionError instanceof ActionStoppedError) {
       result.evidence.actionFailure={reason:executionError.reason,outcome:executionError.outcome,
         ...(executionError.action?{action:executionError.action}:{}),
@@ -79,17 +98,18 @@ export async function executeScopedOperation(file, request, execute) {
   }
   // Persist scope first. A crash between the two saves leaves the task pending,
   // rather than exposing a completed task while its shared scope is still open.
-  finishOperation(task.siteScope.file,scopeId,{status:result.status,evidence:{taskId:task.id,operationId:request.operationId,status:result.status}});
+  finishOperation(task.siteScope.file,scopeId,{status:result.status,evidence:{taskId:task.id,operationId:request.operationId,status:result.status,
+    ...(result.evidence.connectionFailure?{connectionFailure:result.evidence.connectionFailure}:{})}});
   finishOperation(file,request.operationId,result);
   if(executionError)throw executionError;
   return result.evidence;
 }
 
-export function authorizeScopedRetry(file,{previousOperationId,operationId,reviewer,confirmedAt,reason,prepareReadback,previousRequest,replacementRequest}) {
+export function authorizeScopedRetry(file,{previousOperationId,operationId,reviewer,confirmedAt,reason,prepareReadback,previousRequest,replacementRequest,retargetReadback}) {
  if(!/^[A-Za-z0-9_-]{1,128}$/.test(operationId??'') || !reviewer?.trim() || !reason?.trim() || !Number.isFinite(Date.parse(confirmedAt)))throw new Error('重试需要新操作ID、核对人、时间和原因');
  if(prepareReadback!==undefined) {
   const age=Date.now()-Date.parse(prepareReadback?.observedAt);
-  if(prepareReadback?.url!=='https://h.liepin.com/search/getConditionItem#session'
+  if(!['https://h.liepin.com/search/getConditionItem','https://h.liepin.com/search/getConditionItem#session'].includes(prepareReadback?.url)
     || !Number.isFinite(age) || age<0 || age>300000
     || !prepareReadback.values || typeof prepareReadback.values!=='object' || Array.isArray(prepareReadback.values)
     || !Object.keys(prepareReadback.values).length
@@ -102,13 +122,22 @@ export function authorizeScopedRetry(file,{previousOperationId,operationId,revie
  let replacementFingerprint,transportRetarget;
  if(previousRequest!==undefined || replacementRequest!==undefined) {
   const before=previousRequest?.payload,after=replacementRequest?.payload;
-  if(prepareReadback || previousRequest?.kind!=='restore-search' || replacementRequest?.kind!=='restore-search'
-   || previous?.kind!=='restore-search' || priorScope?.kind!=='restore-search'
-   || !/^[A-Fa-f0-9]{16,128}$/.test(before?.page??'') || !/^[A-Fa-f0-9]{16,128}$/.test(after?.page??'')
-   || before.page===after.page || requestFingerprint(previousRequest)!==previous.fingerprint
-   || previous.fingerprint!==priorScope.fingerprint)throw new Error('仅允许已核实原请求的搜索恢复更换页面目标');
+  const kind=previousRequest?.kind;
+  const restore=kind==='restore-search'&&/^[A-Fa-f0-9]{16,128}$/.test(before?.page??'')&&/^[A-Fa-f0-9]{16,128}$/.test(after?.page??'');
+  const age=Date.now()-Date.parse(retargetReadback?.observedAt);
+  const favorites=kind==='inspect'&&before?.view==='favorites'&&Number.isInteger(before.limit)&&before.limit>=1&&before.limit<=30
+   &&Object.keys(before).sort().join(',')==='limit,page,view'
+   &&/^[1-9]\d*$/.test(before.page??'')&&/^[1-9]\d*$/.test(after?.page??'')
+   &&Number.isSafeInteger(Number(before.page))&&Number.isSafeInteger(Number(after.page))
+   &&retargetReadback?.oldTabAbsent===true&&retargetReadback?.tabId===after.page
+   &&retargetReadback?.url==='https://h.liepin.com/resumemanage/showmytalentlist'
+   &&Number.isFinite(age)&&age>=0&&age<=300000;
+  if(prepareReadback||(!restore&&!favorites)||replacementRequest?.kind!==kind
+   ||previous?.kind!==kind||priorScope?.kind!==kind||before.page===after.page
+   ||requestFingerprint(previousRequest)!==previous.fingerprint||previous.fingerprint!==priorScope.fingerprint)
+   throw new Error('仅允许已核实原请求的搜索恢复或已关闭收藏只读页更换目标');
   const {page:oldPage,...originalBusiness}=before,{page:newPage,...replacementBusiness}=after;
-  if(requestFingerprint({kind:'restore-search',payload:originalBusiness})!==requestFingerprint({kind:'restore-search',payload:replacementBusiness}))throw new Error('更换页面目标不能改变原搜索恢复条件');
+  if(requestFingerprint({kind,payload:originalBusiness})!==requestFingerprint({kind,payload:replacementBusiness}))throw new Error('更换页面目标不能改变原业务条件');
   replacementFingerprint=requestFingerprint(replacementRequest);
   transportRetarget={from:oldPage,to:newPage};
  }
@@ -123,18 +152,33 @@ export function authorizeScopedRetry(file,{previousOperationId,operationId,revie
   const limit=extension && Number.isSafeInteger(extension.limit) && extension.limit>=100
    && extension.reviewer?.trim() && extension.reason?.trim()
    && Number.isFinite(Date.parse(extension.confirmedAt))?extension.limit:100;
-  if(!Number.isSafeInteger(max) || max>=limit)throw new Error(`累计操作预算超过${limit}`);
+  // An authorized ceiling is not the used count. Reuse free capacity before
+  // increasing the local allowance; unresolved retries reserve their own slots.
+  const pending=(state.retryAuthorizations??[]).filter(g=>!state.operations.some(o=>o.operationId===g.operationId)).length;
+  const required=state.operations.length+pending+1;
+  if(!Number.isSafeInteger(max) || max<1 || max>limit || required>limit)throw new Error(`累计操作预算超过${limit}`);
+  return Math.max(max,required);
  };
- check(task,previous,operationId,task.policy?.maxOperations);check(scope,priorScope,scopeId,scope.requirements.maxOperations);
+ check(task,previous,operationId,task.policy?.maxOperations);
+ const deniedConnect=!priorScope && isAdapterConnect(previous??{})
+  && previous?.resolution?.outcome==='not-executed'
+  && previous.resolution.previous?.evidence?.reason==='site_reservation_denied'
+  && previous.resolution.previous.evidence.browserStarted===false;
+ if(!deniedConnect)check(scope,priorScope,scopeId,scope.requirements.maxOperations);
+ else {
+  if(scope.status==='paused'||scope.operations.some(o=>['started','unknown','blocked','failed'].includes(o.status)))throw Error('站点范围仍有未确认操作');
+  if(scope.operations.length>=scope.requirements.maxOperations)throw Error('站点共用预算已用完');
+ }
  const grant=(state,prior,newId)=>{
   state.retryAuthorizations??=[];
   const entry={operationId:newId,previousOperationId:prior.operationId,fingerprint:replacementFingerprint??prior.fingerprint,reviewer,confirmedAt,reason,
-   ...(transportRetarget?{previousFingerprint:prior.fingerprint,transportRetarget}:{}),...(prepareReadback?{prepareReadback:structuredClone(prepareReadback)}:{})};
+   ...(transportRetarget?{previousFingerprint:prior.fingerprint,transportRetarget,...(retargetReadback?{retargetReadback:structuredClone(retargetReadback)}:{})}:{}),...(prepareReadback?{prepareReadback:structuredClone(prepareReadback)}:{})};
   if(replacementFingerprint && state.policy && !state.policy.requestHashes.includes(replacementFingerprint))state.policy.requestHashes.push(replacementFingerprint);
   state.retryAuthorizations.push(entry);state.events.push({type:'verified_retry_authorized',...entry});return state;
  };
  // Scope first: a crash leaves no task authorization to initiate browser work.
- updateTask(task.siteScope.file,current=>{const prior=current.operations.find(o=>o.operationId===priorScope.operationId);check(current,prior,scopeId,current.requirements.maxOperations);current.requirements.maxOperations++;return grant(current,prior,scopeId);});
- return updateTask(file,current=>{const prior=current.operations.find(o=>o.operationId===previousOperationId);check(current,prior,operationId,current.policy?.maxOperations);current.policy.maxOperations++;return grant(current,prior,operationId);});
+ if(!deniedConnect)updateTask(task.siteScope.file,current=>{const prior=current.operations.find(o=>o.operationId===priorScope.operationId);current.requirements.maxOperations=check(current,prior,scopeId,current.requirements.maxOperations);return grant(current,prior,scopeId);});
+ return updateTask(file,current=>{const prior=current.operations.find(o=>o.operationId===previousOperationId);current.policy.maxOperations=check(current,prior,operationId,current.policy.maxOperations);return grant(current,prior,operationId);});
 }
 import {ActionStoppedError} from './native-actions.js';
+import {connectionFailureEvidence} from './page-failure.js';

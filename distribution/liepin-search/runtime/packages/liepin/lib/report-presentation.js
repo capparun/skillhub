@@ -1,8 +1,11 @@
 /** Project saved facts for readers without guessing identity from page chrome. */
 export function candidatePresentation(row) {
   const observations = row.observations ?? [];
-  const lists = observations.filter(item => item.stage === 'list').map(item => item.data);
-  const latest = lists.at(-1) ?? {};
+  const lists = observations.filter(item => item.stage === 'list' || (!item.stage && row.identityStatus === 'unresolved')).map(item => item.data);
+  // Membership snapshots are intentionally sparse. They prove group placement,
+  // not a replacement recruiting profile. Keep the most recent search profile.
+  const profiles = lists.filter(item => item?.collection !== 'favorites');
+  const latest = profiles.at(-1) ?? lists.at(-1) ?? {};
   const detail = observations.filter(item => item.stage === 'detail' &&
     ['readable', 'partial'].includes(item.data?.status)).at(-1)?.data;
   const text = value => typeof value === 'string' ? value.trim() : '';

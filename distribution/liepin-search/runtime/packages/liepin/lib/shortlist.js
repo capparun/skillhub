@@ -1,3 +1,4 @@
+import {currentEvaluation} from './evaluation.js';
 import {createHash} from 'node:crypto';
 import {updateTask} from './task-store.js';
 import {rankingFingerprint} from './ranking.js';
@@ -8,7 +9,7 @@ const nonempty = value => typeof value === 'string' && Boolean(value.trim());
 export function currentShortlist(task) {
   const record = task.shortlists?.at(-1);
   if (!record || record.criteriaHash !== criteriaHash(task)) return null;
-  if (record.stage === 'final' && record.fingerprint !== rankingFingerprint(task)) return null;
+  if (record.stage === 'final' && (record.fingerprint !== rankingFingerprint(task) || !record.entries.every(entry=>{const candidate=task.candidates.find(c=>c.key===entry.candidateKey);return candidate&&currentEvaluation(task,candidate);}))) return null;
   return record;
 }
 
@@ -34,8 +35,8 @@ export function recordShortlist(file, input) {
       if (!nonempty(entry.reason) || !Array.isArray(entry.evidenceGaps) || entry.evidenceGaps.some(gap => !nonempty(gap))) {
         throw new Error('每位候选人需要理由与待核实项数组');
       }
-      const evaluation = candidate.evaluations?.at(-1);
-      if (!evaluation) throw new Error('短名单条目必须先保存证据评估');
+      const evaluation = currentEvaluation(task,candidate);
+      if (!evaluation) throw new Error('短名单条目必须先保存当前证据评估；旧评估已过期时须复评');
       if (input.stage === 'preliminary' || !preliminary.deepReview) {
         const listHashes = new Set(candidate.observations.filter(observation => observation.stage === 'list').map(observation => observation.hash));
         if (evaluation.findings.some(finding => finding.evidence.some(ref => !listHashes.has(ref.hash)))) {

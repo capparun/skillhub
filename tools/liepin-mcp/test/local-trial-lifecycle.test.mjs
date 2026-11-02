@@ -1,0 +1,41 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
+import {runRound} from '../../../distribution/liepin-search/runtime/packages/liepin/lib/workflow.js';
+import {readTask} from '../../../distribution/liepin-search/runtime/packages/liepin/lib/task-store.js';
+const entry=fileURLToPath(new URL('../local.mjs',import.meta.url));
+test('official Adapter local companion preserves trial revision, human review and full-round evidence gates',async t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'liepin-local-trial-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const file=path.join(dir,'task.json'),scope=path.join(dir,'scope.json'),now=new Date().toISOString();
+ const invoke=(mode,input,extra={},ok=true)=>{
+  const r=spawnSync(process.execPath,[entry,'task','-'],{input:JSON.stringify({file,mode,...(input?{input}:{}),...extra}),encoding:'utf8',env:{...process.env,HUNTER_MCP_COMMAND:'/nonexistent'}});
+  assert.equal(r.status,ok?0:1,r.stderr);return JSON.parse(ok?r.stdout:r.stderr);
+ };
+ const round=(id,phase,keyword)=>({id,phase,filters:{keyword,limit:2}});
+ invoke('init',{title:'合成流程验收，不作为招聘决定',criteria:[{id:'skill',label:'嵌入式项目',kind:'required',category:'skills',weight:1}],rounds:[round('trial-a','trial','合成A'),round('full-a','full','合成B')]});
+ invoke('scope-init',{label:'synthetic-only',maxOperations:5,confirmedAt:now},{file:scope});invoke('scope-bind',{scopeFile:scope});
+ assert.match(invoke('approve',{roundId:'full-a',confirmedAt:now,scope:'synthetic'}, {},false).error,/复核/);
+ invoke('approve',{roundId:'trial-a',confirmedAt:now,scope:'synthetic'});
+ const synthetic=async()=>({status:'completed',rows:[{source:'liepin',resumeId:'fixture',summary:'合成嵌入式项目'}]});
+ await runRound(file,'trial-a',synthetic);
+ assert.equal(invoke('trial-quality').readyForHumanReview,true);
+ invoke('review',{decision:'revise',notes:'合成审阅：调整关键词验证流程',reviewedAt:now});
+ invoke('revise',{rounds:[round('trial-b','trial','合成C'),round('full-b','full','合成D')],reason:'合成条件修订',proposedBy:'合成测试审阅者',proposedAt:now});
+ assert.equal(readTask(file).rounds.find(r=>r.id==='full-a').status,'superseded');
+ assert.match(invoke('approve',{roundId:'full-b',confirmedAt:now,scope:'synthetic'}, {},false).error,/复核/);
+ invoke('approve',{roundId:'trial-b',confirmedAt:now,scope:'synthetic'});await runRound(file,'trial-b',synthetic);
+ invoke('review',{decision:'proceed',notes:'合成审阅，仅验证正式轮次批准门',reviewedAt:now});
+ invoke('approve',{roundId:'full-b',confirmedAt:now,scope:'synthetic'});
+ // New trial evidence must invalidate an already approved full round.
+ invoke('import',[{resumeId:'new-fixture',summary:'合成新增待核实证据'}],{source:'liepin',roundId:'trial-b'});
+ await assert.rejects(runRound(file,'full-b',()=>assert.fail('stale review must stop before driver')),/证据已变化/);
+ invoke('review',{decision:'proceed',notes:'合成再次审阅新增证据',reviewedAt:now});await runRound(file,'full-b',synthetic);
+ const task=readTask(file);assert.equal(task.rounds.find(r=>r.id==='full-b').status,'completed');
+ assert.equal(task.revisions.length,1);assert.equal(task.reviews.length,3);assert.equal(task.operations.length,3);
+ assert.equal(task.candidates.filter(c=>c.key==='liepin:fixture').length,1);
+ assert.ok(task.candidates.find(c=>c.key==='liepin:fixture').observations.some(o=>o.roundId==='full-b'));
+});

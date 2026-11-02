@@ -76,7 +76,7 @@ for(const scenario of ['valid','changed-filters','forged-original','abandoned','
  }
 });
 
-for(const extension of ['absent','authorized','exhausted'])test(`scope retry ceiling: ${extension}`,async t=>{
+for(const extension of ['absent','authorized','exhausted','spare-at-ceiling'])test(`scope retry ceiling: ${extension}`,async t=>{
  const {updateTask}=await import('../lib/task-store.js');
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'liepin-ceiling-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
  const file=path.join(dir,'task.json'),scope=path.join(dir,'scope.json'),now=new Date().toISOString();
@@ -88,9 +88,28 @@ for(const extension of ['absent','authorized','exhausted'])test(`scope retry cei
   resolveOperation(f,{operationId:id,outcome:'not-executed',reviewer:'test',reviewedAt:now,executorStopped:true,evidence:{saved:false}});
   resumeTask(f,{reviewer:'test',confirmedAt:now,reason:'checked'});
  }
- if(extension!=='absent')updateTask(scope,s=>{s.requirements.budgetExtension={limit:120,reviewer:'user',reason:'explicit extension',confirmedAt:now};if(extension==='exhausted')s.requirements.maxOperations=120;return s;});
+ if(extension!=='absent')updateTask(scope,s=>{s.requirements.budgetExtension={limit:120,reviewer:'user',reason:'explicit extension',confirmedAt:now};if(['exhausted','spare-at-ceiling'].includes(extension))s.requirements.maxOperations=120;if(extension==='exhausted')while(s.operations.length<120)s.operations.push({operationId:'synthetic-'+s.operations.length,status:'closed',fingerprint:'synthetic-'+s.operations.length});return s;});
  const input={previousOperationId:'old',operationId:'retry',reviewer:'test',confirmedAt:now,reason:'checked'};
- if(extension!=='authorized'){assert.throws(()=>authorizeScopedRetry(file,input),/预算/);return;}
+ if(extension==='exhausted'){const before=[fs.readFileSync(file,'utf8'),fs.readFileSync(scope,'utf8')];assert.throws(()=>authorizeScopedRetry(file,input),/预算/);assert.deepEqual([fs.readFileSync(file,'utf8'),fs.readFileSync(scope,'utf8')],before);return;}
  authorizeScopedRetry(file,input);const state=readTask(scope);
- assert.equal(state.requirements.maxOperations,101);assert.equal(state.operations.length,1);assert.equal(state.operations[0].resolution.outcome,'not-executed');
+ assert.equal(state.requirements.maxOperations,extension==='spare-at-ceiling'?120:100);assert.equal(state.operations.length,1);assert.equal(state.operations[0].resolution.outcome,'not-executed');
+});
+
+for(const scenario of ['valid','changed-limit','wrong-url','stale','old-present','unknown','forged-original'])test(`read-only favorites target recovery: ${scenario}`,async t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'liepin-read-retarget-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const file=path.join(dir,'task.json'),scope=path.join(dir,'scope.json'),now=new Date().toISOString();
+ createTask(file);createSiteScope(scope,{label:'test',maxOperations:10,confirmedAt:now});bindSiteScope(file,scope);
+ const req={kind:'inspect',payload:{view:'favorites',page:'123',limit:2}};
+ authorizeTask(file,{allowedKinds:['inspect'],allowedRequests:[req],maxOperations:10,confirmedAt:now,scope:'two favorites only'});
+ await executeScopedOperation(file,{...req,operationId:'old'},async()=>({status:'blocked',evidence:{reason:'not_favorites'}}));
+ if(scenario!=='unknown')for(const[f,id]of[[scope,readTask(scope).operations[0].operationId],[file,'old']]){
+  resolveOperation(f,{operationId:id,outcome:'not-executed',reviewer:'test',reviewedAt:now,executorStopped:true,evidence:{rowsRead:false}});resumeTask(f,{reviewer:'test',confirmedAt:now,reason:'inspected'});
+ }
+ const previousRequest=structuredClone(req),replacementRequest={kind:'inspect',payload:{view:'favorites',page:'456',limit:scenario==='changed-limit'?3:2}};
+ if(scenario==='forged-original')previousRequest.payload.page='999';
+ const retargetReadback={observedAt:scenario==='stale'?'2000-01-01':now,oldTabAbsent:scenario!=='old-present',tabId:'456',url:scenario==='wrong-url'?'https://example.com':'https://h.liepin.com/resumemanage/showmytalentlist'};
+ const input={previousOperationId:'old',operationId:'retry',reviewer:'test',confirmedAt:now,reason:'same bounded read on observed replacement tab',previousRequest,replacementRequest,retargetReadback};
+ if(scenario!=='valid'){const before=[fs.readFileSync(file,'utf8'),fs.readFileSync(scope,'utf8')];assert.throws(()=>authorizeScopedRetry(file,input));assert.deepEqual([fs.readFileSync(file,'utf8'),fs.readFileSync(scope,'utf8')],before);return;}
+ authorizeScopedRetry(file,input);let calls=0;const run=()=>executeScopedOperation(file,{...replacementRequest,operationId:'retry'},async()=>{calls++;return {status:'completed',evidence:{rows:[]}};});await run();await run();assert.equal(calls,1);assert.equal(readTask(scope).requirements.maxOperations,10);
+ assert.deepEqual(readTask(file).retryAuthorizations[0].retargetReadback,retargetReadback);
 });

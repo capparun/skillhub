@@ -1,5 +1,9 @@
 # 猎策 Hunter Works
 
+## 猎聘产品开发入口
+
+[猎聘产品总入口](products/liepin/README.md) · [当前版本与验收状态](products/liepin/STATUS.md) · [MCP命令说明](docs/LIEPIN_MCP_COMMANDS.md)。新版MCP为开发主线；旧CLI当前可用性未验证。下文其他应用说明保留各自原有范围。
+
 面向 SOHO 猎头的 Hunter 官方 Skill 展示、安装、授权和更新站点。
 
 ## 当前阶段

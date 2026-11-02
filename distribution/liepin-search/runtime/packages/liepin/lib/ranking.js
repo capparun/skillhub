@@ -1,3 +1,4 @@
+import {currentEvaluation} from './evaluation.js';
 import {createHash} from 'node:crypto';
 import {updateTask} from './task-store.js';
 
@@ -8,7 +9,7 @@ export function rankingFingerprint(task) {
 }
 export function currentRanking(task) {
  const last=task.rankings?.at(-1);
- return last && last.fingerprint===rankingFingerprint(task)?last:null;
+ return last && last.fingerprint===rankingFingerprint(task) && last.entries.every(entry=>{const candidate=task.candidates.find(c=>c.key===entry.candidateKey);return candidate&&currentEvaluation(task,candidate);})?last:null;
 }
 // Records a supplied human review order, never infers suitability or rejection.
 export function recordRanking(file,input) {
@@ -21,8 +22,8 @@ export function recordRanking(file,input) {
    const candidate=task.candidates.find(c=>c.key===entry.candidateKey);
    if(!candidate || seen.has(candidate.key))throw new Error('排序候选人不存在或重复');
    seen.add(candidate.key);
-   const evaluation=candidate.evaluations?.at(-1);
-   if(!evaluation)throw new Error('排序前需要完成证据评估');
+   const evaluation=currentEvaluation(task,candidate);
+   if(!evaluation)throw new Error('排序前需要完成当前证据评估；旧评估已过期时须复评');
    if(typeof entry.reason!=='string' || !entry.reason.trim() || !Array.isArray(entry.criterionIds)
     || !entry.criterionIds.length || new Set(entry.criterionIds).size!==entry.criterionIds.length)
     throw new Error('每个人选需要职位条件依据和人工排序理由');

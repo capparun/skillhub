@@ -32,7 +32,8 @@ const expected = {
   'diagnose': ['probe', 'probeValue'],
   'detail': ['resumeId','page','file','operationId','expand'],
   'task': ['mode','file','input','source','roundId','stage'],
-  'prepare': [...filterKeys,'file','page','operationId'],
+  'prepare': [...filterKeys,'recoverBlank','file','page','operationId'],
+  'recover-prepare': ['file','page','previousOperationId','input','executorStopped'],
   'results': ['file','page','operationId','limit'],
   'save-search': ['name','current', ...filterKeys,'file','page','operationId'],
   'saved-searches': ['file','page','operationId'],
@@ -48,7 +49,7 @@ const positional = new Set(['favorite.action',
   'apply-saved-search.name',
   'delete-saved-search.name',
 ]);
-for(const key of ['cleanup.file','cleanup.page','disconnect.page','restore-search.file','restore-search.roundId','restore-search.page','restore-search.operationId','restore-search.reason'])required.add(key);
+for(const key of ['recover-prepare.file','recover-prepare.page','recover-prepare.previousOperationId','recover-prepare.input','recover-prepare.executorStopped','cleanup.file','cleanup.page','disconnect.page','restore-search.file','restore-search.roundId','restore-search.page','restore-search.operationId','restore-search.reason'])required.add(key);
 
 test('liepin command contract: all public commands registered with correct args', async () => {
   // Discover all registered commands by scanning root .js files for site declarations.

@@ -63,3 +63,20 @@ test('sidebar repeats and attachment/footer text do not become resume sections',
   assert.equal(result.sections.at(-1).text,'合成补充信息');
   assert.equal(result.text,text);assert.equal(result.status,'partial');
 });
+for(const boundary of ['本次搜索匹配到的简历不够精准？点击这里进行反馈','声明：该人选信息仅供公司招聘使用，严禁其他用途。'])test(`platform footer remains raw evidence, not language content: ${boundary.slice(0,4)}`,()=>{
+ const text='工作经历\n合成工作\n语言能力\n普通话\n'+boundary+'\n简历不匹配\n工作经历\n导航文字';
+ const result=parseDetail(snapshot(text),id),language=result.sections.find(s=>s.heading==='语言能力');
+ assert.equal(language.text,'普通话');assert.equal(result.text,text);
+ assert.equal(text.split('\n').slice(language.startLine-1,language.endLine).join('\n'),language.text);
+});
+test('resume prose mentioning feedback or a declaration is preserved',()=>{
+ const text='工作经历\n为客户开发反馈模块\n语言能力\n普通话\n声明：本人可使用英语进行技术交流';
+ assert.equal(parseDetail(snapshot(text),id).sections.at(-1).text,'普通话\n声明：本人可使用英语进行技术交流');
+});
+test('repeated nonempty resume headings retain every visible block and its source lines',()=>{
+ const text='工作经历\n合成公司甲\n项目经历\n合成项目甲\n工作经历\n合成公司乙\n教育经历\n合成学校';
+ const result=parseDetail(snapshot(text),id),work=result.sections.filter(s=>s.heading==='工作经历');
+ assert.equal(work.length,2);assert.deepEqual(work.map(s=>s.text),['合成公司甲','合成公司乙']);
+ for(const section of result.sections)assert.equal(text.split('\n').slice(section.startLine-1,section.endLine).join('\n'),section.text);
+ assert.equal(result.text,text);
+});

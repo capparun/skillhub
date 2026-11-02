@@ -1,0 +1,22 @@
+{
+  "platform": "Windows GitHub runner",
+  "node": "v22.23.3",
+  "diagnosticRun": 39460848225,
+  "diagnosticCommit": "5672fa6a",
+  "failedStage": "extension-copy",
+  "subprocessExitCode": 3221226505,
+  "subprocessExitHex": "0xC0000409",
+  "stderrCheckpoints": [
+    "asset-runtime-verify",
+    "asset-extension-build",
+    "extension-copy"
+  ],
+  "defenderDetectionsRecorded": 0,
+  "nodeCrashEventsRecorded": 0,
+  "causeBoundary": "Native process termination observed inside fs.cpSync; no JavaScript error or evidence establishing security-software causation",
+  "fixCommit": "c61de325",
+  "fix": "explicit directory traversal with lstat, readFile and exclusive write; no fs.cpSync; rejects symlinks and existing destination",
+  "regressionTestsAdded": 3,
+  "fixWindowsAcceptance": "running",
+  "privateDataIncluded": false
+}

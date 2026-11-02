@@ -42,6 +42,9 @@ export function resolveOpencliInvocation(runtimeRoot) {
     return { command: override, prefixArgs: [] };
   }
 
+  const launcher = path.join(runtimeRoot, 'opencli.mjs');
+  if (fs.existsSync(launcher)) return {command:process.execPath,prefixArgs:[launcher]};
+
   const packageFile = path.join(
     runtimeRoot,
     'node_modules',

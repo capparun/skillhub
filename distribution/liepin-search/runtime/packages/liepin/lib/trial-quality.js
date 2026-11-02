@@ -1,4 +1,5 @@
 import {roundCollectionIds} from './round-sources.js';
+import {currentEvaluation} from './evaluation.js';
 // Derived solely from saved evidence. No browser calls, writes, scoring or
 // automatic approval: the review decision remains a separate task operation.
 export function trialQuality(task) {
@@ -15,12 +16,14 @@ export function trialQuality(task) {
    directObservations+=direct.length;
    if(direct.length)keys.add(candidate.key);
   }
-  let readableDetails=0,partialDetails=0,unknownFindings=0;
+  const unresolvedCount=loose.filter(observation=>observation.identityStatus!=='linked').length;
+  let readableDetails=0,partialDetails=0,unknownFindings=unresolvedCount*(task.requirements.criteria??[]).length;
   for(const candidate of (task.candidates??[]).filter(candidate=>keys.has(candidate.key))){
    const details=candidate.observations.filter(observation=>observation.stage==='detail');
-   if(details.some(observation=>observation.data.status==='readable'))readableDetails++;
-   else if(details.some(observation=>observation.data.status==='partial'))partialDetails++;
-   const findings=candidate.evaluations?.at(-1)?.findings??[];
+   const latestDetail=details.at(-1);
+   if(latestDetail?.data.status==='readable')readableDetails++;
+   else if(latestDetail?.data.status==='partial')partialDetails++;
+   const findings=currentEvaluation(task,candidate)?.findings??[];
    unknownFindings+=(task.requirements.criteria??[]).filter(criterion=>{
     const finding=findings.find(finding=>finding.criterionId===criterion.id);
     return !finding||finding.status==='unknown';
@@ -34,5 +37,5 @@ export function trialQuality(task) {
  });
  return {schemaVersion:1,readyForHumanReview:trials.length>0&&trials.every(round=>round.status==='completed')&&unresolvedOperations===0,
   decisionRequired:true,unresolvedOperations,rounds,
-  notice:'仅汇总已保存样本；不代表平台全部结果，partial不等于完整简历，未知不等于不符合。继续/修订/停止需另行记录复核。'};
+  notice:'仅汇总已保存样本；不代表平台全部结果，partial不等于完整简历，未知不等于不符合；未关联观察的条件计为待核实，过期评估不复用。继续/修订/停止需另行记录复核。'};
 }

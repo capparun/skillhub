@@ -9,7 +9,7 @@ const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 export async function saveSearchPlan(page, name, { pause = wait } = {}) {
   let state = await page.evaluate(inspectRecords, { name });
   if (state.schemes.some(item => item.name === name)) throw new Error(`搜索条件方案“${name}”已存在`);
-  if (!state.saveButton) throw new Error('筛选已校验，但页面没有显示可用的“保存条件”按钮');
+  if (!state.saveButton) throw new Error('页面未显示可用的“保存条件”入口：猎聘需要已提交的非关键词筛选摘要；仅关键词或输入草稿不足。请核对已选条件，不自动添加筛选、搜索或点击隐藏按钮');
   await page.click(state.saveButton);
   await pause(700);
   state = await page.evaluate(inspectRecords, { name });

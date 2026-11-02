@@ -27,6 +27,18 @@ export function inspectActionTarget({selector, expectedUrl, expectedUrls=[expect
   const inViewport=x>=0 && y>=0 && x<innerWidth && y<innerHeight;
   if(purpose==='scroll')return {status:'ready',url:location.href,x,y,inViewport};
   if (!inViewport) return {status:'blocked',reason:'target_outside_viewport'};
+  // A center can be inside the browser viewport yet outside a scrolling
+  // ancestor's client area. Classify that separately from a real overlay.
+  for(let parent=element.parentElement;parent;parent=parent.parentElement){
+    const parentStyle=getComputedStyle(parent),box=parent.getBoundingClientRect();
+    const left=box.x+(parent.clientLeft??0),top=box.y+(parent.clientTop??0);
+    const width=parent.clientWidth??box.width,height=parent.clientHeight??box.height;
+    const clips=value=>['auto','scroll','hidden','clip'].includes(value);
+    if((clips(parentStyle.overflowX)&& (x<left||x>=left+width))
+       ||(clips(parentStyle.overflowY)&& (y<top||y>=top+height))) {
+      return {status:'blocked',reason:'target_clipped_by_container'};
+    }
+  }
   const hit=document.elementFromPoint(x,y);
   if (hit?.closest?.('.ant-spin-blur')) return {status:'blocked',reason:'page_loading'};
   if (!hit || !(hit===element || element.contains(hit))) return {status:'blocked',reason:'target_covered',geometry:{
@@ -40,7 +52,7 @@ export function inspectActionTarget({selector, expectedUrl, expectedUrls=[expect
       return {status:'blocked',reason:'unsupported_input'};
     }
     // Password entry is deliberately not part of this search driver.
-    if(document.activeElement!==element)return {status:'blocked',reason:'input_not_focused'};
+    if(document.activeElement!==element)return {status:'blocked',reason:'input_not_focused',documentFocused:document.hasFocus(),activeTag:document.activeElement?.tagName??null};
     return {status:'ready',url:location.href,x,y,value:element.value,inputType:element.type,
       selectionStart:element.selectionStart,selectionEnd:element.selectionEnd};
   }
@@ -57,29 +69,34 @@ export class ActionStoppedError extends Error {
 // Supplied Page must already be bound to an observed target. Callers must own a
 // persistent operation reservation for the whole sequence. This instance's
 // latch is only an additional guard, not a cross-process lock or retry journal.
-export function createNativeActions(page, {expectedUrl}) {
+export function createNativeActions(page, {expectedUrl,onAction}) {
   const url=new URL(expectedUrl);
   if (url.origin !== 'https://h.liepin.com' || url.username || url.password
       || url.pathname !== '/search/getConditionItem') throw new Error('仅允许已打开的猎聘搜索页');
-  return createNativeActionSequence(page,{expectedUrl,expectedUrls:allowedSearchUrls(expectedUrl),inspectTarget:inspectActionTarget});
+  return createNativeActionSequence(page,{expectedUrl,expectedUrls:allowedSearchUrls(expectedUrl),inspectTarget:inspectActionTarget,onAction});
 }
 
 // Injectable mechanics allow browser acceptance on an owned fixture without
 // weakening the production Liepin URL guard above. No CLI accepts an evaluator.
-export function createNativeActionSequence(page,{expectedUrl,expectedUrls=[expectedUrl],inspectTarget,pause=ms=>new Promise(resolve=>setTimeout(resolve,ms))}) {
+export function createNativeActionSequence(page,{expectedUrl,expectedUrls=[expectedUrl],inspectTarget,onAction=event=>process.stderr.write('[liepin-action] '+JSON.stringify(event)+'\n'),pause=ms=>new Promise(resolve=>setTimeout(resolve,ms))}) {
   if (!page || typeof page.evaluate !== 'function' || typeof page.cdp !== 'function') throw new Error('缺少 OpenCLI 页面通道');
   if(typeof inspectTarget!=='function')throw new Error('缺少固定页面检查器');
-  let stopped=false, active=false, acknowledgedActions=0;
+  let stopped=false, active=false, acknowledgedActions=0, lastAction=null;
   const used=new Set();
-  const perform=async({actionId,selector},purpose,execute)=>{
+  const perform=async({actionId,selector,label,description},purpose,execute)=>{
+      const targetName=label || '当前已定位控件';
+      const actionDescription=description || ({click:`将鼠标移到“${targetName}”并单击`,hover:`将鼠标移到“${targetName}”`,fill:`在“${targetName}”中输入内容`,scroll:`将页面滚动到“${targetName}”`}[purpose] ?? '操作当前页面');
+      const emit=(phase,description,extra={})=>onAction({at:new Date().toISOString(),actionId,purpose,phase,description,...extra});
       if (stopped || active) throw new ActionStoppedError('session_stopped_or_busy','not_started');
       if (typeof actionId !== 'string' || !/^[a-zA-Z0-9_-]{1,80}$/.test(actionId)
           || typeof selector !== 'string' || !selector.trim() || selector.length>2000) throw new Error('动作需要明确 ID 和已观察到的选择器');
       if (used.has(actionId)) throw new ActionStoppedError('duplicate_action','not_started');
       used.add(actionId);active=true;
       let dispatched=false;
-      let repositioned=false;
+      let repositioned=false, focused=false;
+      const mayFocus=purpose==='fill' && lastAction?.purpose==='click' && lastAction.selector===selector;
       try {
+        emit('planned',`准备${actionDescription}`);
         // A control the caller already scrolled into view can be pushed back
         // below the fold before this action dispatches (an opening dropdown
         // panel, a re-render, a sticky reflow). Reposition once with the same
@@ -95,12 +112,27 @@ export function createNativeActionSequence(page,{expectedUrl,expectedUrls=[expec
           if(matches?.nodeIds?.length!==1)throw new ActionStoppedError('target_not_unique','not_started');
           await page.cdp('DOM.scrollIntoViewIfNeeded',{nodeId:matches.nodeIds[0]});
           repositioned=true;
+          emit('repositioned',`已请求滚动页面，使“${targetName}”进入可视区域；接下来重新检查位置`);
         };
         const inspect=async()=>{
           let target=await page.evaluate(inspectTarget,{selector,expectedUrl,expectedUrls,purpose});
           if(!dispatched && purpose==='click' && !repositioned
-              && target?.status==='blocked' && target.reason==='target_outside_viewport') {
+              && target?.status==='blocked' && ['target_outside_viewport','target_clipped_by_container'].includes(target.reason)) {
             await reposition();
+            target=await page.evaluate(inspectTarget,{selector,expectedUrl,expectedUrls,purpose});
+          }
+          // A rerender after the acknowledged click may replace the input and
+          // lose focus. Focus only that same unique control, once, before any
+          // editing dispatch; never click again or target another active field.
+          if(!dispatched && mayFocus && !focused && target?.reason==='input_not_focused' && target.documentFocused===true) {
+            focused=true;
+            const doc=await page.cdp('DOM.getDocument',{depth:0});
+            if(!Number.isInteger(doc?.root?.nodeId))throw new ActionStoppedError('document_unavailable','not_started');
+            const matches=await page.cdp('DOM.querySelectorAll',{nodeId:doc.root.nodeId,selector});
+            if(matches?.nodeIds?.length!==1)throw new ActionStoppedError('target_not_unique','not_started');
+            emit('focusing',`准备将输入焦点移到“${targetName}”；不再次点击或输入`);
+            await page.cdp('DOM.focus',{nodeId:matches.nodeIds[0]});
+            emit('focused_request',`已请求将输入焦点移到“${targetName}”；接下来核对焦点`);
             target=await page.evaluate(inspectTarget,{selector,expectedUrl,expectedUrls,purpose});
           }
           // Loading caused by an earlier filter is expected. Observe up to
@@ -124,15 +156,34 @@ export function createNativeActionSequence(page,{expectedUrl,expectedUrls=[expec
         const target=await inspect();
         // Direct public CDP method: no BasePage.click/clickWithQuads fallback,
         // no mutation inside evaluate, and no second attempt on any exception.
-        const dispatch=async(method,params)=>{dispatched=true;return page.cdp(method,params);};
+        const dispatch=async(method,params)=>{
+          const mouseLabel=method==='Input.dispatchMouseEvent' && ({mouseMoved:'移动鼠标',mousePressed:'按下鼠标左键',mouseReleased:'松开鼠标左键',mouseWheel:'滚动鼠标滚轮'}[params.type]);
+          const started=performance.now();
+          if(mouseLabel)emit('input_sending',`准备${mouseLabel}，目标为“${targetName}”`,{inputType:params.type});
+          dispatched=true;
+          try {
+            const result=await page.cdp(method,params);
+            if(mouseLabel)emit('input_acknowledged',`浏览器已返回“${mouseLabel}”指令结果；页面效果待核对`,{inputType:params.type,roundTripMs:performance.now()-started,timingSource:'client-command-roundtrip'});
+            return result;
+          } catch(error) {
+            if(mouseLabel)emit('input_unknown',`“${mouseLabel}”指令未获得成功返回；不重复派发`,{inputType:params.type,roundTripMs:performance.now()-started,timingSource:'client-command-roundtrip'});
+            throw error;
+          }
+        };
         await execute({target,inspect,dispatch});
         acknowledgedActions++;
+        lastAction={purpose,selector};
+        emit(dispatched?'dispatched':'not_needed',dispatched?`已发出操作：${actionDescription}；业务结果待回读确认`:`无需执行：${actionDescription}；控件已处于目标状态`);
         return {status:'dispatched',actionId,requiresBusinessVerification:true};
       } catch(error) {
         stopped=true;
         const failure=error instanceof ActionStoppedError ? error
           : new ActionStoppedError(dispatched?'dispatch_interrupted':'inspection_interrupted',dispatched?'unknown':'not_started');
-        failure.action={actionId,purpose,outcome:failure.outcome,acknowledgedActions};
+        const reasonText={input_not_focused:'输入框未获得焦点',target_covered:'控件被其他内容遮挡',target_clipped_by_container:'控件被滚动容器裁切',target_unavailable:'控件当前不可用',target_outside_viewport:'控件不在可视区域',page_loading:'页面仍在加载',page_changed:'页面地址已变化',risk_signal:'页面出现验证或访问限制提示',login_required:'页面要求登录'}[failure.reason] ?? failure.reason;
+        const userDescription=`${actionDescription}：${failure.outcome==='not_started'?'本动作未发出':'动作结果不确定'}，原因：${reasonText}${repositioned?'；此前已请求滚动定位':''}${focused?'；此前已尝试一次原生焦点定位':''}`;
+        failure.action={actionId,purpose,outcome:failure.outcome,acknowledgedActions,description:userDescription};
+        emit('stopped',userDescription,{reason:failure.reason,outcome:failure.outcome});
+        failure.message+=`；${userDescription}`;
         failure.message+=`（动作 ${actionId}/${purpose}，本动作 ${failure.outcome}，此前已返回 ${acknowledgedActions} 个动作；不代表业务成功）`;
         if(failure.geometry)failure.message+=`；命中位置 ${JSON.stringify(failure.geometry)}`;
         throw failure;
@@ -150,12 +201,12 @@ export function createNativeActionSequence(page,{expectedUrl,expectedUrls=[expec
     hover:args=>perform(args,'hover',async({target,dispatch})=>{
       await dispatch('Input.dispatchMouseEvent',{type:'mouseMoved',x:target.x,y:target.y});
     }),
-    escape:args=>perform({...args,selector:'body'},'page',async({dispatch})=>{
+    escape:args=>perform({...args,selector:'body',description:'按下 Escape 键收起当前弹层'},'page',async({dispatch})=>{
       for(const type of ['keyDown','keyUp'])await dispatch('Input.dispatchKeyEvent',{type,key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
     }),
     scroll:async args=>{
       if(!['up','down'].includes(args.direction) || !Number.isFinite(args.pixels) || args.pixels<1 || args.pixels>1000)throw new Error('滚动方向和距离无效');
-      return perform({...args,selector:'body'},'page',async({target,dispatch})=>{
+      return perform({...args,selector:'body',description:`向${args.direction==='up'?'上':'下'}滚动页面 ${args.pixels} 像素`},'page',async({target,dispatch})=>{
         await dispatch('Input.dispatchMouseEvent',{type:'mouseWheel',x:target.x,y:target.y,deltaX:0,deltaY:args.pixels*(args.direction==='up'?-1:1)});
       });
     },

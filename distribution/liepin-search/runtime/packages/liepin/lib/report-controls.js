@@ -2,6 +2,13 @@ import {createHash} from 'node:crypto';
 
 // Fixed script only: candidate text is rendered as escaped HTML, never executable source.
 export const reportControls = `(()=>{
+document.addEventListener('click',event=>{
+ const link=event.target.closest('a[href^="#candidate-"]');
+ if(!link)return;
+ const article=document.getElementById(link.getAttribute('href').slice(1));
+ const profile=article?.querySelector('details.candidate-profile');
+ if(profile)profile.open=true;
+});
 const rows=Array.from(document.querySelectorAll('[data-candidate-row]'));
 const search=document.getElementById('candidate-search');
 const state=document.getElementById('candidate-state');

@@ -1,4 +1,5 @@
 import {matchesConnection} from './connection.js';
+import {BlankPageError} from './page-failure.js';
 // Listing an existing session must precede evaluate: an absent OpenCLI lease
 // can otherwise resolve an explicit target through an owned blank-tab fallback.
 export async function readBoundLocation(page,pageId,expectedPath,{requireConnection=false}={}) {
@@ -10,6 +11,7 @@ export async function readBoundLocation(page,pageId,expectedPath,{requireConnect
     catch {return false;}
   };
   if(!valid(matches[0].url)) {
+    if(matches[0].url==='about:blank')throw new BlankPageError('已绑定目标为 about:blank；未执行页面代码。先核对当前绑定，不自动重新打开或重试');
     let surface='地址未知';
     try {
       const url=new URL(matches[0].url);
@@ -21,6 +23,7 @@ export async function readBoundLocation(page,pageId,expectedPath,{requireConnect
     throw new Error(`已绑定目标不是预期猎聘页面（${surface}）；未执行页面代码。先核对当前绑定，不自动重新打开或重试`);
   }
   const observed=await page.evaluate(()=>({url:location.href}));
+  if(observed?.url==='about:blank')throw new BlankPageError('读取期间目标变化为 about:blank；停止当前任务，不自动重试');
   if(observed?.url!==matches[0].url || !valid(observed?.url))throw new Error('读取期间目标地址变化，停止当前任务');
   return observed.url;
 }

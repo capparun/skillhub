@@ -65,3 +65,24 @@ test('explicitly resolved abandoned item is retained as skipped while remaining 
  const result=await runDetailBatch({file,id},{pause:async()=>{},readDetail:async args=>{calls.push(args.operationId);return {detail:{status:'partial',resumeId:args.operationId}};}});
  assert.equal(result.items[0].status,'skipped');assert.equal(result.items[0].reason,'abandoned');assert.equal(calls.length,2);
 });
+
+test('bounded invocations complete the original queue without rereading and preserve inter-call spacing',async t=>{
+ const {file,id,batch}=fixture(t),calls=[],waits=[];
+ const deps={pause:async ms=>waits.push(ms),readDetail:async args=>{calls.push(args.operationId);return {detail:{status:'partial',resumeId:args.operationId}};}};
+ for(let i=0;i<3;i++){
+  const result=await runDetailBatch({file,id,maxItems:1},deps);
+  assert.equal(result.status,i===2?'completed':'pending');
+  assert.equal(result.items.filter(item=>item.status==='completed').length,i+1);
+  assert.equal(fs.existsSync(`${file}.detail-batch.lock`),false);
+ }
+ assert.deepEqual(calls,batch.items.map(item=>item.operationId));
+ assert.equal(waits.length,2);assert.ok(waits.every(ms=>ms>0&&ms<=3000));
+ await runDetailBatch({file,id,maxItems:1},deps);assert.equal(calls.length,3);
+});
+test('visible-reading queues follow page order unless a deliberate requested order is provided',t=>{
+ const {file}=fixture(t);updateTask(file,task=>{task.executionPreferences={readingMode:'content-led-visible-review'};return task;});
+ const ids=detailTargets(readTask(file)).map(t=>t.id),page='B'.repeat(32);
+ const ordered=createDetailBatch(file,{id:'page-order',page,observationIds:[...ids].reverse()});assert.deepEqual(ordered.items.map(i=>i.observationId),ids);assert.equal(ordered.order,'page');
+ const requested=createDetailBatch(file,{id:'requested-order',page,observationIds:[...ids].reverse(),order:'requested'});assert.deepEqual(requested.items.map(i=>i.observationId),[...ids].reverse());
+ assert.throws(()=>createDetailBatch(file,{id:'invalid-order',page,observationIds:ids,order:'random'}),/顺序/);
+});

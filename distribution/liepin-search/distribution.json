@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "customer": "liepin-search",
-  "version": "0.2.3",
+  "version": "0.2.3-opencli2",
   "requirements": {
-    "opencli": "1.8.8",
+    "opencli": "2.0.0",
     "plugins": [
       {
         "name": "liepin",
@@ -25,5 +25,7 @@
         "path": "packages/liepin"
       }
     ]
-  }
+  },
+  "channel": "local-candidate",
+  "acceptance": "offline-verified-browser-pending"
 }

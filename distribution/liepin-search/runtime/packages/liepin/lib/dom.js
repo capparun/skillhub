@@ -103,7 +103,21 @@ export function inspect(request = {}) {
         // 姓名节点可能混入"阅""名片简历"等徽标文本,只取节点自身的文本节点
         const nameEl = card.querySelector('.new-resume-personal-name');
         const ownText = nameEl ? [...nameEl.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim() : '';
-        return { detailLinks: [...card.querySelectorAll('a[href]')].filter(visible).map(a=>a.getAttribute('href')), detailTarget: nameEl && visible(nameEl) ? path(nameEl) : null, cardSelector: path(card), name: ownText || read('.new-resume-personal-name'), experience: read('.personal-detail-workyears'), education: read('.personal-detail-edulevel'), city: read('.personal-detail-dq'), expectation: read('.personal-expect-content'), skills: read('.new-resume-personal-skills'), status: read('.new-resume-status'), summary: card.innerText.trim() };
+        // Observed card layout: personal block, then work/education groups.
+        // Read explicit company · title and period spans only from the first
+        // work group. Do not infer employment from the free-form summary.
+        const workGroup = card.querySelector('.new-resume-personal')?.nextElementSibling?.firstElementChild;
+        const workIcon = workGroup?.querySelector('p > span[role="img"] svg path')?.getAttribute('d');
+        const employment = workIcon?.startsWith('M9.883 4.31') ? [...workGroup.querySelectorAll('p')].filter(visible).flatMap(row => {
+          const spans = [...row.children].filter(el => el.tagName === 'SPAN' && el.getAttribute('role') !== 'img' && visible(el));
+          if (spans.length !== 2) return [];
+          const raw = spans[0].textContent.trim(), period = spans[1].textContent.trim();
+          const parts = raw.split(/\s+·\s+/);
+          if (parts.length !== 2 || parts.some(part => !part.trim()) || !/^\d{4}[.\/-]\d{1,2}\s*[-–—~至]\s*(?:至今|\d{4}[.\/-]\d{1,2})/.test(period)) return [];
+          return [{company:parts[0].trim(),title:parts[1].trim(),period,raw}];
+        }) : [];
+        const currentEmployment = employment.filter(item => /[-–—~至]\s*至今(?:\s|[（(]|$)/.test(item.period));
+        return { detailLinks: [...card.querySelectorAll('a[href]')].filter(visible).map(a=>a.getAttribute('href')), detailTarget: nameEl && visible(nameEl) ? path(nameEl) : null, cardSelector: path(card), employment, currentCompany: currentEmployment.length === 1 ? currentEmployment[0].company : null, currentTitle: currentEmployment.length === 1 ? currentEmployment[0].title : null, name: ownText || read('.new-resume-personal-name'), experience: read('.personal-detail-workyears'), education: read('.personal-detail-edulevel'), city: read('.personal-detail-dq'), expectation: read('.personal-expect-content'), skills: read('.new-resume-personal-skills'), status: read('.new-resume-status'), summary: card.innerText.trim() };
       }) };
   }
   if (request.mode === 'controls') {
@@ -182,6 +196,21 @@ export function inspect(request = {}) {
     if (checkboxLabel && visible(checkboxLabel)) target = checkboxLabel;
   }
   const value = norm(request.value);
+  // These controls retain their selection in the selected-condition bar after
+  // losing focus. Use observed field titles, including the school's different
+  // summary label, and require one exact pill instead of matching draft inputs.
+  const summaryFields = {
+    resumeLanguage: ['select', '简历语言'],
+    title: ['autocomplete', '职位名称'], company: ['autocomplete', '公司名称'],
+    school: ['autocomplete', '学校名称'], major: ['autocomplete', '专业名称'],
+  };
+  const summaryField = summaryFields[request.key];
+  const selectedSummary = summaryField?.[0] === request.kind
+    ? [...document.querySelectorAll('.text-choose')].filter(el => visible(el)
+      && norm(el.closest('[title]')?.getAttribute('title')) === summaryField[1])
+    : [];
+  const summaryCommitted = !!value && selectedSummary.length === 1
+    && norm(selectedSummary[0].textContent) === value;
   // 城市级联选中后行内回显只显示城市名(弹层里是"省份·城市"),两种写法都要能命中
   const choiceValues = request.key === 'experience' && Array.isArray(request.choiceValues)
     ? request.choiceValues.map(norm)
@@ -227,6 +256,8 @@ export function inspect(request = {}) {
   const targetHitRelation = !target ? null : !targetRect ? 'none' : !targetHit ? 'none'
     : targetHit === target ? 'self' : target.contains(targetHit) ? 'descendant' : targetHit.contains(target) ? 'ancestor' : 'other';
   // 弹层诊断:记录可见下拉数量与候选文本,便于判断"点击未展开"还是"选项不匹配"。
+  const dismissLabels = [...document.querySelectorAll('.search-item-title')].filter(el => visible(el) && reachable(el) && !el.closest('a,button,label,[role=button]'));
+  const dropdownDismissTarget = path(dismissLabels[0] ?? null);
   const dropdownCount = [...document.querySelectorAll('.ant-select-dropdown')].filter(visible).length;
   const dropdownOptions = [
     ...[...document.querySelectorAll('.ant-select-dropdown .ant-select-item-option')].filter(visible).map(el => optionText(el)),
@@ -252,7 +283,7 @@ export function inspect(request = {}) {
     choice: path(choice), selected, rootPath: path(root),
     choiceMatchCount: exact.length,
     choiceOptions: root ? [...root.querySelectorAll('label, span, button, div')]
-      .filter(el => visible(el) && !el.children.length).map(el => norm(el.textContent))
+      .filter(el => visible(el) && (!el.children.length || el.matches?.('label.tag-item'))).map(el => norm(el.textContent))
       .filter(Boolean).filter((text,index,all)=>all.indexOf(text)===index).slice(0,30) : [],
     cascadeTrigger: path(cascadeBtn),
     cityModal: cityModalEl ? {
@@ -285,7 +316,7 @@ export function inspect(request = {}) {
       .map(el => norm(el.querySelector('.text-choose')?.textContent ?? el.textContent)) : [],
     option: options.length === 1 ? path(options[0]) : null, optionMeta: suggestMeta, pillTexts, confirm: confirm.length === 1 ? path(confirm[0]) : null,
     targetEvidence: target ? { hitRelation: targetHitRelation, hitTag: targetHit?.tagName || null, hitClass: String(targetHit?.className || '') } : null,
-    dropdownCount, dropdownOptions,
+    dropdownCount, dropdownOptions, dropdownDismissTarget,
     optionMatchCount: options.length,
     dropdownOptionsRaw: [...document.querySelectorAll('.ant-select-dropdown .ant-select-item-option')]
       .filter(visible).map(el => el.textContent).slice(0, 20),
@@ -302,14 +333,15 @@ export function inspect(request = {}) {
       .slice(0, 6).map(el => ({ className: String(el.className || '').slice(0, 120), text: norm(el.textContent).slice(0, 80) })),
     suggestHtml: [...document.querySelectorAll('.search-component-suggest')].filter(visible)[0]?.outerHTML.slice(0, 1200) ?? null,
     value: target?.value ?? null, checked: checkboxInput?.checked ?? target?.checked ?? null,
-    committed: !!root && [...root.querySelectorAll('.ant-select-selection-item')].some(el => {
+    summaryCommitted,
+    committed: summaryCommitted || !!root && [...root.querySelectorAll('.ant-select-selection-item')].some(el => {
       const text = norm(el.textContent);
       // 部分控件的选中回显带字段名前缀:跳槽频率(不限) → 跳槽频率(近5年不超过3段)
       return text === value || text === `${label}(${value})` || text === `${label}（${value}）`;
     }) || !!root && [...root.querySelectorAll('span, div')].filter(visible)
       // 联动自动补全(职位名称等)选中后以标签形式回显,不在 .ant-select-selection-item 里;
       // 隐藏镜像(aria-live)被 visible 过滤,下拉候选排除在外。
-      .some(el => !el.children.length && norm(el.textContent) === value && !el.closest('.ant-select-dropdown, .ant-select-selector'))
+      .some(el => !el.children.length && norm(el.textContent) === value && !el.closest('.ant-select-dropdown, .ant-select-selector, [aria-live]'))
       // 职位联想选中后的回显标签是类目名,与调用方回传的 expectedPills 比对。
       || pillTexts.includes(value) || (request.expectedPills ?? []).some(pill => pillTexts.includes(norm(pill))),
     // 选中区实际文本:验证失败时判断是"没选上"还是"显示文案与选项文案不一致"。

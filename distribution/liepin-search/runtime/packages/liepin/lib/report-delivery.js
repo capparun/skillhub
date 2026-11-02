@@ -1,0 +1,36 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {evaluationReportStyles} from './report-theme.js';
+import {reportOutcome} from './report-outcome.js';
+import {sourcingProgress} from './sourcing-outcome.js';
+const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mobileStyles=`
+.linked-evaluation{max-width:1120px;padding:24px 20px 48px}.linked-evaluation header{margin:18px 0;padding:0 0 16px}.linked-evaluation h1{font-size:23px;margin-bottom:8px}.linked-evaluation section{margin:20px 0;padding:18px}.report-snapshot{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:16px;background:#f3f7f4;border:1px solid var(--line)}.report-snapshot div{min-width:0}.report-snapshot strong{display:block;font-size:24px;line-height:1.4}.report-snapshot span{font-size:14px;color:var(--muted)}.snapshot-note{font-size:14px;color:var(--muted);margin:8px 0 16px}.file-nav,.resume-links{display:flex;flex-wrap:wrap;gap:4px 16px}.file-nav a,.resume-links a{display:inline-flex;align-items:center;min-height:44px;font-size:14px}.outcome-table{table-layout:fixed;min-width:0}.outcome-table th:first-child{width:23%}.outcome-table th:nth-child(2){width:12%}.outcome-table th:nth-child(3){width:47%}.outcome-table th:nth-child(4){width:18%}.summary-view section{border:0;padding:0}.summary-view .comparison-scroll{margin-top:12px}.summary-view td p{margin:8px 0}.summary-view footer{margin-top:24px;border-top:1px solid var(--line);padding-top:12px}.detail-view .candidate-profile{scroll-margin-top:16px}.detail-view .profile-facts{table-layout:auto}
+@media(max-width:640px){.linked-evaluation{padding:16px 12px 32px}.linked-evaluation h1{font-size:20px}.report-snapshot{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:12px}.report-snapshot strong{font-size:22px}.summary-view .comparison-scroll{overflow:visible;border:0}.summary-view .outcome-table,.summary-view .outcome-table tbody{display:block;width:100%;min-width:0}.summary-view .outcome-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.summary-view .outcome-table tr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0;margin-bottom:16px;border:1px solid var(--line)}.summary-view .outcome-table tbody th{width:auto;background:#f3f7f4}.summary-view .outcome-table td{min-width:0;padding:10px 12px}.summary-view .outcome-table td:nth-child(3),.summary-view .outcome-table td:nth-child(4){grid-column:1/-1}.summary-view .outcome-table td:nth-child(3)::before{content:'依据与待核实';display:block;font-size:14px;color:var(--muted);margin-bottom:4px}.summary-view .outcome-table td:nth-child(4){font-size:14px;color:var(--muted)}.summary-view .outcome-table td:nth-child(4) p{display:inline;margin-left:8px}.detail-view .profile-facts th{width:auto}.linked-evaluation .file-nav{gap:0 14px}}
+`;
+function page(title,body,kind){return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'none'; base-uri 'none'; form-action 'none'"><title>${escape(title)}</title><style>${evaluationReportStyles}${mobileStyles}</style></head><body class="linked-evaluation ${kind}-view">${body}</body></html>`;}
+export function renderLinkedEvaluation(task,{entries,summary,profiles,requirements,linkedFiles,shortlistHTML='',shortlist,rankingNotice='',detailDocument=false}){
+ const progress=sourcingProgress(task),title=task.requirements.title??'寻访任务';
+ const nav=`<nav class="file-nav" aria-label="独立资料"><a href="${escape(linkedFiles.summaryFile)}">重点摘要</a><a href="${escape(linkedFiles.detailsFile)}">全部已保存详情</a><a href="${escape(linkedFiles.recordsFile)}">原始记录 JSON（独立文件）</a></nav>`;
+ if(detailDocument)return page('已保存简历详情',`${nav}<header><h1>已保存简历详情</h1><p>${escape(title)}</p><p class="note">仅包含本机已保存的账户可见资料。部分可见不等于完整简历；未索要、购买或解锁附件。平台原链接需有相应登录与访问权限。</p></header><main>${profiles}${reportOutcome(task,escape,{includeAll:true})}<section><h2>岗位依据</h2>${requirements}</section></main>`, 'detail');
+ const metrics=[['已识别',summary.candidates],['已评估',summary.evaluated],[task.shortlists?.length?'名单人数':'值得跟进',task.shortlists?.length?(shortlist?.entries.length??'待复核'):(progress.contract?progress.counts.followUp:'未记录')],[progress.contract?.goal==='research'?'收藏范围':'入组已核实',progress.contract?.goal==='research'?'不收藏':progress.contract?progress.counts.favoriteConfirmed:'未记录']];
+ const snapshot=`<div class="report-snapshot" role="group" aria-label="任务统计快照">${metrics.map(([label,value])=>`<div><strong>${value}</strong><span>${label}</span></div>`).join('')}</div><p class="snapshot-note">本机保存数据快照，非平台实时统计；详情可读 ${summary.detailStatuses.readable} 位、部分可见 ${summary.detailStatuses.partial} 位。</p>`;
+ const criteria=(task.requirements.criteria??[]).slice(0,3).map(c=>escape(String(c.label??c.id).slice(0,80))).join(' · ');
+ const anchors=new Map(entries.map((row,index)=>[row.key,index]));
+ return page(title,`${snapshot}<header><h1>${escape(title)}</h1>${criteria?`<p class="note">记录的关键条件：${criteria}。完整条件见详情文件。</p>`:''}<p class="note">辅助寻访判断；收藏表示进入跟进池，不代表全部资格满足或最终录用。</p></header><main>${rankingNotice?`<p class="note">${escape(rankingNotice)}</p>`:''}${shortlistHTML}${!progress.contract?'<p class="note">尚未记录寻访处理依据；请先按岗位条件核对，已保存资料可在独立详情文件查看。</p>':''}${reportOutcome(task,escape,{detailsFile:linkedFiles.detailsFile,profileAnchors:anchors})}<section><h2>覆盖与待办</h2><p>已完成搜索 ${summary.completedRounds} 轮；尚有 ${summary.unresolvedIdentities} 条搜索观察未关联身份，可能跨轮重复，不计作新增人选。待核对操作 ${summary.unresolvedOperations} 项。</p><p class="note">简历姓名下可打开本地已保存详情或平台原简历。未覆盖的轮次、未处理列表及资料缺口仍须继续核实；不因导出报告宣称寻访完成。</p></section></main><footer>${nav}<p class="note">分享或移动报告时请将这3个文件放在同一文件夹。文件含个人资料，仅在已授权范围内使用。</p></footer>`, 'summary');
+}
+/** Sidecars first, entry page last; refuse collisions and clean only owned files. */
+export function exportEvaluationBundle(task,output,{render,summary}){
+ const absolute=path.resolve(output),parsed=path.parse(absolute),details=path.join(parsed.dir,parsed.name+'.details.html'),records=path.join(parsed.dir,parsed.name+'.records.json');
+ const targets=[details,records,absolute];
+ for(const target of targets){try{fs.lstatSync(target);throw Object.assign(Error('EEXIST: 导出文件已存在：'+target),{code:'EEXIST'});}catch(error){if(error.code!=='ENOENT')throw error;}}
+ const linkedFiles={summaryFile:encodeURIComponent(path.basename(absolute)),detailsFile:encodeURIComponent(path.basename(details)),recordsFile:encodeURIComponent(path.basename(records))};
+ const contents=[render({linkedFiles,detailDocument:true}),JSON.stringify({task,summary},null,2)+'\n',render({linkedFiles})],created=[];
+ try{
+  for(let i=0;i<targets.length;i++){
+   const fd=fs.openSync(targets[i],'wx',0o600);const stat=fs.fstatSync(fd);created.push({file:targets[i],ino:stat.ino,dev:stat.dev});
+   try{fs.writeFileSync(fd,contents[i]);fs.fsyncSync(fd);}finally{fs.closeSync(fd);}
+  }
+ }catch(error){for(const owned of created){try{const stat=fs.lstatSync(owned.file);if(!stat.isSymbolicLink()&&stat.ino===owned.ino&&stat.dev===owned.dev)fs.unlinkSync(owned.file);}catch{}}throw error;}
+ return {output,format:'html',summary,files:{summary:output,details,records}};
+}

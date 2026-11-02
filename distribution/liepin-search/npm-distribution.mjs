@@ -8,5 +8,5 @@ export function npmInstallOptions(argv, {configuredRegistry,env=process.env}={})
  try{url=new URL(raw.trim());}catch{throw new Error('npm registry 地址无效');}
  if(url.protocol!=='https:' || url.username || url.password || url.search || url.hash)throw new Error('npm registry 必须为不含凭据、查询参数的 HTTPS 地址');
  const registry=url.href.endsWith('/')?url.href:url.href+'/';
- return {registry,offline:argv.includes('--offline'),args:['install','--omit=dev','--registry',registry,...(argv.includes('--offline')?['--offline']:[])]};
+ return {registry,offline:argv.includes('--offline'),args:['install','--omit=dev','--ignore-scripts','--registry',registry,...(argv.includes('--offline')?['--offline']:[])]};
 }

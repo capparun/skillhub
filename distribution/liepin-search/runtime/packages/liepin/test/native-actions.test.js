@@ -25,7 +25,8 @@ test('failure context distinguishes an initial blocked action from a later block
    cdp:async()=>{dispatches++;}},{expectedUrl});
   if(prior)await actions.click({...action,actionId:'before'});
   await assert.rejects(actions.click(action),error=>{
-   assert.deepEqual(error.action,{actionId:'submit-once',purpose:'click',outcome:'not_started',acknowledgedActions:prior});
+   const {description,...technical}=error.action;assert.match(description,/本动作未发出/);
+   assert.deepEqual(technical,{actionId:'submit-once',purpose:'click',outcome:'not_started',acknowledgedActions:prior});
    assert.match(error.message,/不代表业务成功/);return true;
   });
   assert.equal(dispatches,prior*3);
@@ -59,7 +60,7 @@ function inspect(overrides={}) {
   const element={disabled:false,getAttribute:()=>null,closest:()=>null,
     getBoundingClientRect:()=>({x:100,y:60,width:40,height:40}),contains:()=>false};
   const context={location:{href:expectedUrl,origin:'https://h.liepin.com'},innerWidth:800,innerHeight:600,
-    document:{body:{innerText:'合成搜索页面'},readyState:'complete',querySelectorAll:()=>[element],elementFromPoint:()=>element},
+    document:{hasFocus:()=>true,body:{innerText:'合成搜索页面'},readyState:'complete',querySelectorAll:()=>[element],elementFromPoint:()=>element},
     getComputedStyle:()=>({visibility:'visible',display:'block',opacity:'1'})};
   overrides.modify?.(context,element);
   return vm.runInNewContext(`(${inspectActionTarget.toString()})(${JSON.stringify({selector:'.search-btn',expectedUrl,purpose:overrides.purpose ?? 'click'})})`,context);
@@ -211,7 +212,8 @@ test('target still outside the viewport after reposition fails closed with not_s
   const actions=createNativeActions(page,{expectedUrl});
   await assert.rejects(actions.click(action),error=>{
    assert.equal(error.reason,'target_outside_viewport');
-   assert.deepEqual(error.action,{actionId:'submit-once',purpose:'click',outcome:'not_started',acknowledgedActions:0});
+   const {description,...technical}=error.action;assert.match(description,/本动作未发出/);
+   assert.deepEqual(technical,{actionId:'submit-once',purpose:'click',outcome:'not_started',acknowledgedActions:0});
    assert.match(error.message,/不自动重试/);return true;});
   assert.equal(calls.includes('Input.dispatchMouseEvent'),false,'no mouse event is dispatched for a blocked target');
   await assert.rejects(actions.click({...action,actionId:'next'}),e=>e.reason==='session_stopped_or_busy');
@@ -268,4 +270,86 @@ test('loading after an input dispatch remains unknown and is never waited or rep
  const {createNativeActionSequence}=await import('../lib/native-actions.js');let reads=0,waits=0;
  const actions=createNativeActionSequence({evaluate:async()=>++reads===1?{...ready,value:'old',inputType:'text'}:{status:'blocked',reason:'page_loading'},cdp:async()=>{}},{expectedUrl,inspectTarget:inspectActionTarget,pause:async()=>{waits++;}});
  await assert.rejects(actions.fill({...action,value:'new'}),e=>e.outcome==='unknown');assert.equal(reads,2);assert.equal(waits,0);
+});
+
+test('human action logs distinguish intention, acknowledgment, no-op and blocked input without exposing value',async()=>{
+ const events=[];
+ const actions=createNativeActions({evaluate:async()=>({...ready,value:'secret',inputType:'text'}),cdp:async()=>{}},{expectedUrl,onAction:e=>events.push(e)});
+ await actions.click({...action,label:'关键词输入框'});
+ assert.match(events[0].description,/准备将鼠标移到“关键词输入框”并单击/);
+ assert.match(events.find(e=>e.phase==='dispatched').description,/已发出操作.*业务结果待回读/);
+ await actions.fill({actionId:'same',selector:'#keyword',label:'关键词输入框',value:'secret'});
+ assert.equal(events.at(-1).phase,'not_needed');assert.equal(JSON.stringify(events).includes('secret'),false);
+ const failed=[];
+ const blocked=createNativeActions({evaluate:async()=>({status:'blocked',reason:'input_not_focused'}),cdp:async()=>assert.fail('no dispatch')},{expectedUrl,onAction:e=>failed.push(e)});
+ await assert.rejects(blocked.fill({actionId:'fill',selector:'#keyword',label:'关键词输入框',value:'private'}),/输入框未获得焦点/);
+ assert.match(failed.at(-1).description,/关键词输入框.*本动作未发出.*输入框未获得焦点/);
+});
+
+test('a rerendered input may receive native focus once after its own click, without another click',async()=>{
+ const events=[],calls=[];let focused=false,value='',clicked=false;
+ const actions=createNativeActions({evaluate:async(_fn,args)=>{
+  if(args.purpose==='click')return ready;
+  if(!focused)return {status:'blocked',reason:'input_not_focused',documentFocused:true};
+  return {...ready,value,inputType:'text',selectionStart:0,selectionEnd:value.length};
+ },cdp:async(method,args)=>{
+  calls.push(method);
+  if(method==='Input.dispatchMouseEvent')clicked=true;
+  if(method==='DOM.getDocument')return {root:{nodeId:1}};
+  if(method==='DOM.querySelectorAll')return {nodeIds:[2]};
+  if(method==='DOM.focus'){assert.equal(clicked,true);focused=true;}
+  if(method==='Input.insertText')value=args.text;
+ }},{expectedUrl,onAction:e=>events.push(e)});
+ await actions.click({actionId:'click',selector:'#keyword',label:'关键词输入框'});
+ await actions.fill({actionId:'fill',selector:'#keyword',label:'关键词输入框',value:'synthetic'});
+ assert.equal(value,'synthetic');assert.equal(calls.filter(x=>x==='DOM.focus').length,1);
+ assert.equal(calls.filter(x=>x==='Input.dispatchMouseEvent').length,3);
+ assert.ok(events.some(e=>e.description.includes('输入焦点移到“关键词输入框”')));
+});
+test('focus recovery refuses a different control, background document, and unresolved focus',async()=>{
+ for(const scenario of ['different','background','unresolved']){
+  const calls=[];
+  const actions=createNativeActions({evaluate:async(_fn,args)=>args.purpose==='click'?ready:{status:'blocked',reason:'input_not_focused',documentFocused:scenario!=='background'},cdp:async(method)=>{
+   calls.push(method);if(method==='DOM.getDocument')return {root:{nodeId:1}};if(method==='DOM.querySelectorAll')return {nodeIds:[2]};
+  }},{expectedUrl,onAction:()=>{}});
+  await actions.click({actionId:'click',selector:'#keyword'});
+  await assert.rejects(actions.fill({actionId:'fill',selector:scenario==='different'?'#other':'#keyword',value:'synthetic'}),e=>e.reason==='input_not_focused');
+  assert.equal(calls.filter(x=>x==='DOM.focus').length,scenario==='unresolved'?1:0);
+  assert.ok(!calls.includes('Input.insertText'));
+ }
+});
+
+test('mouse timing logs distinguish sends, acknowledgments and unknown results without replay',async()=>{
+ for(const failedType of [null,'mousePressed']) {
+  const events=[],sent=[];
+  const actions=createNativeActions({evaluate:async()=>ready,cdp:async(_method,args)=>{
+   sent.push(args.type);if(args.type===failedType)throw Error('lost response');
+  }},{expectedUrl,onAction:e=>events.push(e)});
+  const attempt=actions.click({...action,label:'关键词输入框'});
+  if(failedType)await assert.rejects(attempt,e=>e.outcome==='unknown');else await attempt;
+  const expected=failedType?['mouseMoved','mousePressed']:['mouseMoved','mousePressed','mouseReleased'];
+  assert.deepEqual(sent,expected);
+  assert.deepEqual(events.filter(e=>e.phase==='input_sending').map(e=>e.inputType),expected);
+  for(const e of events.filter(e=>['input_acknowledged','input_unknown'].includes(e.phase))) {
+   assert.equal(e.timingSource,'client-command-roundtrip');assert.ok(e.roundTripMs>=0);
+   assert.match(e.description,/鼠标/);
+  }
+  assert.equal(events.filter(e=>e.phase==='input_unknown').length,failedType?1:0);
+ }
+});
+test('inspector distinguishes ancestor clipping from unrelated overlay',()=>{
+ const clipped=inspect({modify:(c,e)=>{
+  e.parentElement={clientLeft:0,clientTop:0,clientWidth:200,clientHeight:50,getBoundingClientRect:()=>({x:0,y:0,width:200,height:50})};
+  c.getComputedStyle=el=>({visibility:'visible',display:'block',opacity:'1',overflowY:el===e?'visible':'auto'});
+ }});assert.equal(clipped.reason,'target_clipped_by_container');
+ assert.equal(inspect({modify:c=>{c.document.elementFromPoint=()=>({});}}).reason,'target_covered');
+});
+for(const recovered of [true,false])test(`clipped click repositions once before dispatch; recovered=${recovered}`,async()=>{
+ let reads=0;const calls=[];
+ const page={evaluate:async()=>++reads>1&&recovered?{status:'ready',url:expectedUrl,x:120,y:200}:{status:'blocked',reason:'target_clipped_by_container'},cdp:async(method,args)=>{calls.push([method,args]);if(method==='DOM.getDocument')return {root:{nodeId:1}};if(method==='DOM.querySelectorAll')return {nodeIds:[2]};}};
+ const actions=createNativeActions(page,{expectedUrl});
+ if(recovered)await actions.click(action);else await assert.rejects(actions.click(action),e=>e.reason==='target_clipped_by_container'&&e.outcome==='not_started');
+ assert.equal(calls.filter(x=>x[0]==='DOM.scrollIntoViewIfNeeded').length,1);
+ assert.equal(calls.filter(x=>x[0]==='Input.dispatchMouseEvent').length,recovered?3:0);
+ assert.equal(reads,2);
 });

@@ -10,12 +10,15 @@ import {readTask,updateTask,mergeObservations} from './task-store.js';
 import {executeScopedOperation} from './site-scope.js';
 import {detailTargets} from './detail-targets.js';
 
-export function inspectSavedCard({cardSelector,detailTarget,summary,includeOrigin=false}) {
+export function inspectSavedCard({cardSelector,detailTarget,summary,includeOrigin=false,diagnostic=false}) {
  const cards=document.querySelectorAll(cardSelector),targets=document.querySelectorAll(detailTarget);
+ // Liepin adds an isolated visible 阅读 marker after opening a card. Only this
+ // observed one-character status line may vary; identity/job content stays exact.
+ const cardText=value=>value.trim().split('\n').filter(line=>line.trim()!=='阅').join('\n').trim();
  const matched=location.origin==='https://h.liepin.com' && location.pathname==='/search/getConditionItem'
   && cards.length===1 && targets.length===1 && cards[0].contains(targets[0])
-  && targets[0].matches('.new-resume-personal-name') && cards[0].innerText.trim()===summary;
- return includeOrigin?{matched,openerTimeOrigin:performance.timeOrigin}:matched;
+  && targets[0].matches('.new-resume-personal-name') && cardText(cards[0].innerText)===cardText(summary);
+ return includeOrigin?{matched,openerTimeOrigin:performance.timeOrigin,...(diagnostic?{cardCount:cards.length,targetCount:targets.length,currentSummary:cards.length===1?cards[0].innerText.trim():null}:{} )}:matched;
 }
 export function inspectDetailClickTarget({detailTarget}) {
  if(location.origin!=='https://h.liepin.com' || location.pathname!=='/search/getConditionItem')return null;
@@ -72,12 +75,12 @@ export async function openListDetailDriver(pageId,{returnToList=false}={}) {
    },close:async()=>{if(detailPage!==page)await detailPage.closeWindow();await page.closeWindow();}};
  }catch(error){if(detailPage!==page)await detailPage.closeWindow();await page.closeWindow();throw error;}
 }
-export async function openListDetail(args,{openDriver=openListDetailDriver,pause=ms=>new Promise(r=>setTimeout(r,ms))}={}) {
- if(!/^[a-fA-F0-9]{16,128}$/.test(args.page ?? ''))throw new Error('需要当前绑定搜索页的 targetId');
+export async function openListDetail(args,{openDriver=openListDetailDriver,pause=ms=>new Promise(r=>setTimeout(r,ms)),validatePage=page=>/^[a-fA-F0-9]{16,128}$/.test(page ?? ''),execute=executeScopedOperation}={}) {
+ if(!validatePage(args.page))throw new Error('需要当前绑定搜索页的 targetId');
  const task=readTask(args.file),record=detailTargets(task).find(o=>o.id===args.observationId);
  if(!record || !record.data.detailTarget || !record.data.cardSelector || !record.data.summary)throw new Error('该列表记录缺少已观察到的详情入口；请使用已有详情读取，不猜测卡片位置');
  const request={operationId:args.operationId,kind:'detail-open',payload:{observationId:record.id,observationHash:record.hash,page:args.page}};
- const evidence=await executeScopedOperation(args.file,request,async()=>{
+ const evidence=await execute(args.file,request,async()=>{
   const driver=await openDriver(args.page,{returnToList:args.returnToList===true});
   try {
    if(!await driver.check(record.data))return {status:'blocked',evidence:{reason:'saved_card_changed'}};

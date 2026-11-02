@@ -1,0 +1,65 @@
+{
+  "sourceCommit": "37f8583f6b3f5e56b368daabea023d6732ed4cab",
+  "sourceFiles": 283,
+  "tests": {
+    "mcp": 200,
+    "core": 386
+  },
+  "candidate": {
+    "root": "/private/tmp/liepin-37f8583f-formal-candidate",
+    "sourceFingerprint": "d8bd7bdc35788ad246f0b99b86d945c8d824c9ec938876b4b453949f82bf752f",
+    "files": 128
+  },
+  "archive": {
+    "product": "liepin-search",
+    "version": "0.3.0",
+    "file": "liepin-search-v0.3.0.tar.gz",
+    "sha256": "671b67ccb3ee904e18c5058f041a05c1856d8f54a533e1c08dcdf61a01582ee7",
+    "sizeBytes": 207701,
+    "sourceFingerprint": "d8bd7bdc35788ad246f0b99b86d945c8d824c9ec938876b4b453949f82bf752f",
+    "transport": "opencli-mcp-site-adapter",
+    "channel": "release-candidate",
+    "approved": false,
+    "published": false
+  },
+  "allSourceFilesMatchGitCommit": true,
+  "macosPlatformReport": "/private/tmp/liepin-directory-fix-macos-network.json",
+  "macosInstallChecks": 22,
+  "liveBrowserHostUnchanged": "2b7808b3",
+  "windowsCI": {
+    "run": 39532561247,
+    "status": "passed",
+    "sourceFiles": 283,
+    "tests": {
+      "mcp": 195,
+      "core": 386
+    },
+    "installChecks": 22,
+    "fingerprint": "f45631e932554cdeadb6cb3cb916ed8e03dc0956726d4e5ead270151f2c0294a",
+    "realChromeVerified": false,
+    "registry": "contract-only-injected-backend"
+  },
+  "macosCloudCI": {
+    "previousRun": 39462777443,
+    "previousConclusion": "cancelled-no-runner-acquired",
+    "annotations": [
+      "The job was not acquired by Runner of type hosted even after multiple attempts",
+      "Due to capacity constraints, jobs targeting macOS arm64 runners may experience longer queue times."
+    ],
+    "replacementRun": 39532561247,
+    "replacementCommit": "0e614b1890cf7066132dd8566e7bdb8d3eae9fcf",
+    "runner": "macos-15-intel",
+    "status": "passed",
+    "localArchitecture": "darwin arm64",
+    "productCodeChanged": false,
+    "coreTests": 386,
+    "mcpTests": 200,
+    "sourceFiles": 283,
+    "installChecks": 22,
+    "fingerprint": "d8bd7bdc35788ad246f0b99b86d945c8d824c9ec938876b4b453949f82bf752f",
+    "matchesLocalFormalCandidate": true
+  },
+  "approved": false,
+  "published": false,
+  "runConclusion": "success"
+}

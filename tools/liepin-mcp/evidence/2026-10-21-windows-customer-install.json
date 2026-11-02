@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-21",
+  "sourceCommit": "37f8583f",
+  "scope": "CI branch only; no release or deployment",
+  "previousWindowsRun": 39461523565,
+  "previousFailurePhase": "customer-install",
+  "change": "Replace customer directory fs.cpSync with explicit transactional tree copy; preserve links and modes, rollback existing tree on switch failure.",
+  "localRegression": {
+    "directoryTests": 7,
+    "passed": true
+  },
+  "macosInstall": {
+    "report": "/private/tmp/liepin-directory-fix-macos-network.json",
+    "checks": 22,
+    "status": "passed",
+    "fingerprint": "d8bd7bdc35788ad246f0b99b86d945c8d824c9ec938876b4b453949f82bf752f"
+  },
+  "windowsCI": {
+    "run": 39462777443,
+    "status": "passed",
+    "sourceFiles": 283,
+    "coreTests": 386,
+    "mcpTests": 195,
+    "installChecks": 22,
+    "fingerprint": "f45631e932554cdeadb6cb3cb916ed8e03dc0956726d4e5ead270151f2c0294a",
+    "browserVerified": false,
+    "registry": "contract-only-injected-backend"
+  },
+  "realWindowsBrowserVerified": false,
+  "sourceByteComparison": {
+    "windowsCheckout": "CRLF",
+    "localCheckout": "LF",
+    "all283WindowsFileHashesMatchCRLFConversionOfCommit": true,
+    "note": "Platform candidate fingerprints differ because checkout bytes differ; do not reuse the old archive hash."
+  }
+}

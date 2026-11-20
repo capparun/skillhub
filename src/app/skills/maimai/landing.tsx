@@ -12,7 +12,7 @@ function Prompt({label,text}:{label:string;text:string}) {
 }
 export function MaimaiLanding(){
   return <main className={styles.page}>
-    <nav className={styles.topbar}><a href="/">猎策</a><a href="#installation">安装指引 ↓</a></nav>
+    <nav className={styles.topbar}><a href="/">猎策</a><a href="#installation">安装指引 ↓</a><a href="/skills/maimai/help.html">完整使用帮助</a></nav>
     <section className={styles.hero}><div className={styles.heroCopy}><p className={styles.eyebrow}>脉脉人才寻访 · Ego Lite 版 1.7.1</p><h1>从脉脉搜索到<br/><em>候选人短名单。</em></h1><p className={styles.intro}>告诉 Codex 想找什么人。它帮你搜索、整理可见履历，你决定谁入选，并把理由和名单保存在本机。</p><a className={styles.primary} href={file} download>下载 1.7.1 安装包 ↓</a><p className={styles.caption}>ZIP 安装包 · 已在 Mac 实测 · 单独安装 Ego Lite</p></div>
     <aside className={styles.flow}><div className={styles.flowHeading}>你会拿到什么</div><ol>{[['搜索结果','按关键词、城市、经历等条件找人，核对页面选中的条件。'],['人工审核页','展开履历，选择入选、淘汰或暂缓，填下理由。'],['可交付的名单','把选中的人导出为 HTML、CSV 或 JSON。']].map(([name,desc],i)=><li key={name}><span className={styles.number}>0{i+1}</span><div><strong>{name}</strong><p>{desc}</p></div></li>)}</ol></aside></section>
     <section className={styles.preparation}><header><h2>开始前，你需要什么？</h2></header><dl><div><dt>电脑与助手</dt><dd>以下步骤适用于 Mac 上的 Codex 项目，需要 Node.js 20.18.1 或以上。Linux 尚未实机复验，Windows 仅支持处理已有本地结果。</dd></div><div><dt>Ego Lite 浏览器</dt><dd>在线找人需要单独安装 Ego Lite。若尚未安装，请向交付方获取 Mac 安装包，打开 App 完成首次设置。整理已有名单可以离线进行。</dd></div><div><dt>脉脉账号</dt><dd>准备能进入脉脉招聘端的账号，在 Ego Lite 窗口亲自登录。</dd></div></dl></section>
